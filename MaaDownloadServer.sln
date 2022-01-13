@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer", "src\MaaDownloadServer\MaaDownloadServer.csproj", "{D38E94E1-32EA-4B55-803C-7ADD569CFEA5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer", "MaaDownloadServer\MaaDownloadServer.csproj", "{D38E94E1-32EA-4B55-803C-7ADD569CFEA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
