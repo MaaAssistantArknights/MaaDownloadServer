@@ -3,6 +3,7 @@ using MaaDownloadServer.Jobs;
 using MaaDownloadServer.Middleware;
 using MaaDownloadServer.Services;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
 using Serilog;
@@ -62,6 +63,23 @@ builder.Services.AddQuartzServer(options =>
 });
 
 var app = builder.Build();
+
+#region Database check
+
+using var scope = app.Services.CreateScope();
+await using var dbContext = scope.ServiceProvider.GetService<MaaDownloadServerDbContext>();
+
+if (File.Exists(
+        Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+            configuration["MaaServer:DataDirectories:SubDirectories:Database"],
+            "data.db")) is false)
+{
+    Log.Logger.Information("数据库文件不存在，准备创建新的数据库文件");
+    dbContext!.Database.Migrate();
+    Log.Logger.Information("数据库创建完成");
+}
+
+#endregion
 
 app.UseUpdateCheck();
 
