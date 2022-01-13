@@ -62,6 +62,7 @@ public class FetchGithubReleaseJob : IJob
             {
                 throw new ArgumentException("无法解析版本号：" + tag);
             }
+
             _logger.LogDebug("已获取版本号：v{Version}", tag);
             var localVersion = _resourceManagerService.GetLocalVersion();
             if (localVersion == version)
@@ -82,6 +83,7 @@ public class FetchGithubReleaseJob : IJob
                     _logger.LogWarning("获取第 {Index} 个资源文件名或下载链接失败", index);
                     continue;
                 }
+
                 _logger.LogDebug("获取到第 {Index} 个资源文件：{Name}", index, name);
                 // e.g. MeoAssistantArkNight-Windows-x64-2.6.5.zip
                 var split = name.Split("-");
@@ -95,6 +97,7 @@ public class FetchGithubReleaseJob : IJob
                         index, platformString, archString);
                     continue;
                 }
+
                 _logger.LogDebug("获取到第 {Index} 个资源，平台：{p}，架构：{a}",
                     index, platform.ToString(), arch.ToString());
                 var combination = new PlatformArchCombination(platform, arch);
@@ -102,7 +105,7 @@ public class FetchGithubReleaseJob : IJob
                 index++;
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "解析 Github Release API 响应失败, 出现错误");
             return;

@@ -4,7 +4,9 @@ namespace MaaServer.Download.Jobs;
 
 public static class JobExtension
 {
-    public static void AddQuartzFetchGithubReleaseJob(this IServiceCollection serviceCollection, IConfiguration configuration)
+    public static void AddQuartzFetchGithubReleaseJob(
+        this IServiceCollection serviceCollection,
+        IConfiguration configuration)
     {
         serviceCollection.AddQuartz(q =>
         {
