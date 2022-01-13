@@ -1,4 +1,6 @@
-namespace MaaServer.Download.Utils;
+using MaaDownloadServer.Enums;
+
+namespace MaaDownloadServer.Utils;
 
 public static class PlatformArchParser
 {

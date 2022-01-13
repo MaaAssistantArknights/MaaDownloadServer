@@ -1,4 +1,6 @@
-namespace MaaServer.Download.Model.General;
+using MaaDownloadServer.Enums;
+
+namespace MaaDownloadServer.Model.General;
 
 public record PlatformArchCombination(Platform Platform, Architecture Architecture)
 {

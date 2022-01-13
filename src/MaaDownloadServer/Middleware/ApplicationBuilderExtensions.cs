@@ -1,4 +1,4 @@
-namespace MaaServer.Download.Middleware;
+namespace MaaDownloadServer.Middleware;
 
 public static class ApplicationBuilderExtensions
 {

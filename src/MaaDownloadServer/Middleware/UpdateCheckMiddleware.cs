@@ -1,4 +1,6 @@
-﻿namespace MaaServer.Download.Middleware;
+﻿using MaaDownloadServer.Services.IServices;
+
+namespace MaaDownloadServer.Middleware;
 
 public class UpdateCheckMiddleware
 {

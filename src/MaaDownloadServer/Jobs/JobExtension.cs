@@ -1,6 +1,6 @@
 ﻿using Quartz;
 
-namespace MaaServer.Download.Jobs;
+namespace MaaDownloadServer.Jobs;
 
 public static class JobExtension
 {
@@ -11,7 +11,7 @@ public static class JobExtension
         serviceCollection.AddQuartz(q =>
         {
             q.SchedulerId = "MaaServer-Download-Main-Scheduler";
-            q.SchedulerName = "MaaServer.Download Main Scheduler";
+            q.SchedulerName = "MaaDownloadServer Main Scheduler";
             q.UseMicrosoftDependencyInjectionJobFactory();
             q.UseSimpleTypeLoader();
             q.UseInMemoryStore();

@@ -1,4 +1,4 @@
-﻿namespace MaaServer.Download.Enums;
+﻿namespace MaaDownloadServer.Enums;
 
 public enum Architecture
 {
