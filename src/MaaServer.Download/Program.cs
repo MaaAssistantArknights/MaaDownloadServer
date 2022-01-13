@@ -1,4 +1,5 @@
 using MaaServer.Download.Jobs;
+using MaaServer.Download.Middleware;
 using Quartz;
 using Serilog;
 
@@ -29,5 +30,6 @@ builder.Services.AddQuartzServer(options =>
 
 var app = builder.Build();
 
+app.UseUpdateCheck();
 app.MapControllers();
 app.Run();
