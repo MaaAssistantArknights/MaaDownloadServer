@@ -1,3 +1,5 @@
+using MaaServer.Download.Jobs;
+using Quartz;
 using Serilog;
 
 #region Build configuration and logger
@@ -19,6 +21,11 @@ Log.Logger.Information("启动中...");
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
+builder.Services.AddQuartzFetchGithubReleaseJob(configuration);
+builder.Services.AddQuartzServer(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
 
 var app = builder.Build();
 
