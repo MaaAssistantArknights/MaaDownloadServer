@@ -44,6 +44,12 @@ public record Package(Guid Id, string Version, Platform Platform, Architecture A
     public List<Resource> Resources { get; set; }
 
     /// <summary>
+    /// 发包时间
+    /// </summary>
+    [JsonPropertyName("publish_time")]
+    public DateTime PublishTime { get; set; }
+
+    /// <summary>
     /// 版本下载次数
     /// </summary>
     [JsonIgnore]
