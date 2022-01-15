@@ -9,7 +9,7 @@ namespace MaaDownloadServer.Model.Entities;
 /// <param name="Version"></param>
 /// <param name="Platform"></param>
 /// <param name="Architecture"></param>
-public record Package(Guid Id, string Version, Platform Platform, Architecture Architecture)
+public record Package(Guid Id, string Version, Platform Platform, Architecture Architecture, DateTime PublishTime)
 {
     /// <summary>
     /// 包 Id
@@ -47,7 +47,7 @@ public record Package(Guid Id, string Version, Platform Platform, Architecture A
     /// 发包时间
     /// </summary>
     [JsonPropertyName("publish_time")]
-    public DateTime PublishTime { get; set; }
+    public DateTime PublishTime { get; set; } = PublishTime;
 
     /// <summary>
     /// 版本下载次数

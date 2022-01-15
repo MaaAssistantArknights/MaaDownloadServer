@@ -14,13 +14,13 @@ public record Resource(Guid Id, string FileName, string Path, string Hash)
     /// <summary>
     /// 包 Id
     /// </summary>
-    [JsonIgnore]
+    [JsonPropertyName("id")]
     public Guid Id { get; set; } = Id;
 
     /// <summary>
     /// 文件名
     /// </summary>
-    [JsonPropertyName("fileName")]
+    [JsonPropertyName("file_name")]
     public string FileName { get; set; } = FileName;
 
     /// <summary>
