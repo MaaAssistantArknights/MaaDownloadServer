@@ -1,6 +1,5 @@
 using MaaDownloadServer.Database;
 using MaaDownloadServer.Jobs;
-using MaaDownloadServer.Middleware;
 using MaaDownloadServer.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
@@ -80,8 +79,6 @@ if (File.Exists(
 }
 
 #endregion
-
-app.UseUpdateCheck();
 
 #region File server middleware
 
