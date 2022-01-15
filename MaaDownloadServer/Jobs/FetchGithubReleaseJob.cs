@@ -53,7 +53,7 @@ public class FetchGithubReleaseJob : IJob
 
         // 解析 JSON
         SemVersion version;
-        var downloadUrls = new Dictionary<PlatformArchCombination, string>();
+        var downloadUrls = new Dictionary<PlatformArchCombination, (string, DateTime)>();
         var bodyStream = await response.Content.ReadAsStreamAsync();
         var doc = (await JsonDocument.ParseAsync(bodyStream)).RootElement;
         try
@@ -79,6 +79,16 @@ public class FetchGithubReleaseJob : IJob
             var index = 1;
             foreach (var asset in assets)
             {
+                // 获取和解析发布时间
+                var updateTimeString = doc.GetProperty("updated_at").GetString();
+                if (updateTimeString is null)
+                {
+                    throw new ArgumentException("无法解析发布时间");
+                }
+                var updateTime = DateTime.Parse(updateTimeString);
+                _logger.LogDebug("已解析资源发布时间：{UpdateTime}", updateTime);
+
+                // 获取和解析文件名
                 var name = asset.GetProperty("name").GetString();
                 var downloadUrl = asset.GetProperty("browser_download_url").GetString();
                 if (name is null || downloadUrl is null)
@@ -101,10 +111,10 @@ public class FetchGithubReleaseJob : IJob
                     continue;
                 }
 
-                _logger.LogDebug("获取到第 {Index} 个资源，平台：{p}，架构：{a}",
-                    index, platform.ToString(), arch.ToString());
+                _logger.LogDebug("获取到第 {Index} 个资源，平台：{p}，架构：{a}，发布时间：{UpdateTime}",
+                    index, platform.ToString(), arch.ToString(), updateTime);
                 var combination = new PlatformArchCombination(platform, arch);
-                downloadUrls.Add(combination, downloadUrl);
+                downloadUrls.Add(combination, (downloadUrl, updateTime));
                 index++;
             }
         }
