@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MaaDownloadServer.Migrations
 {
     [DbContext(typeof(MaaDownloadServerDbContext))]
-    [Migration("20220115170806_AddPublicContentTable")]
-    partial class AddPublicContentTable
+    [Migration("20220116072519_Initialize")]
+    partial class Initialize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -45,6 +45,29 @@ namespace MaaDownloadServer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Packages");
+                });
+
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.PublicContent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AddTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Duration")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Hash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tag")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PublicContents");
                 });
 
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.Resource", b =>

@@ -17,11 +17,27 @@ namespace MaaDownloadServer.Migrations
                     Version = table.Column<string>(type: "TEXT", nullable: true),
                     Platform = table.Column<string>(type: "TEXT", nullable: false),
                     Architecture = table.Column<string>(type: "TEXT", nullable: false),
+                    PublishTime = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DownloadTimes = table.Column<uint>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Packages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PublicContents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Tag = table.Column<string>(type: "TEXT", nullable: true),
+                    Duration = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Hash = table.Column<string>(type: "TEXT", nullable: true),
+                    AddTime = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PublicContents", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,6 +89,9 @@ namespace MaaDownloadServer.Migrations
         {
             migrationBuilder.DropTable(
                 name: "PackageResource");
+
+            migrationBuilder.DropTable(
+                name: "PublicContents");
 
             migrationBuilder.DropTable(
                 name: "Packages");

@@ -45,6 +45,29 @@ namespace MaaDownloadServer.Migrations
                     b.ToTable("Packages");
                 });
 
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.PublicContent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("AddTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Duration")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Hash")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tag")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PublicContents");
+                });
+
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.Resource", b =>
                 {
                     b.Property<Guid>("Id")
