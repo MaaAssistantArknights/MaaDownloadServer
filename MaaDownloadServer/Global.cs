@@ -4,5 +4,5 @@ global using MaaDownloadServer.Enums;
 global using MaaDownloadServer.Utils;
 global using MaaDownloadServer.Model.Entities;
 global using MaaDownloadServer.Model.General;
-global using MaaDownloadServer.Dto.Request;
-global using MaaDownloadServer.Dto.Response;
+global using MaaDownloadServer.Dto;
+global using MaaDownloadServer.Database;
