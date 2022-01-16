@@ -1,9 +1,10 @@
-﻿namespace MaaDownloadServer.Enums;
+﻿// ReSharper disable InconsistentNaming
+namespace MaaDownloadServer.Enums;
 
 public enum Platform
 {
-    Windows,
-    Linux,
-    MacOs,
+    windows,
+    linux,
+    macos,
     UnSupported
 }

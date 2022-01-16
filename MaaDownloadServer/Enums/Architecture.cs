@@ -1,8 +1,9 @@
-﻿namespace MaaDownloadServer.Enums;
+﻿// ReSharper disable InconsistentNaming
+namespace MaaDownloadServer.Enums;
 
 public enum Architecture
 {
-    X64,
-    Arm64,
+    x64,
+    arm64,
     UnSupported
 }

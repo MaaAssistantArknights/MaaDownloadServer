@@ -1,5 +1,3 @@
-using MaaDownloadServer.Enums;
-
 namespace MaaDownloadServer.Utils;
 
 public static class PlatformArchParser
@@ -9,11 +7,11 @@ public static class PlatformArchParser
         var str = platformString.ToLower();
         return str switch
         {
-            "windows" => Platform.Windows,
-            "win" => Platform.Windows,
-            "linux" => Platform.Linux,
-            "macos" => Platform.MacOs,
-            "osx" => Platform.MacOs,
+            "windows" => Platform.windows,
+            "win" => Platform.windows,
+            "linux" => Platform.linux,
+            "macos" => Platform.macos,
+            "osx" => Platform.macos,
             _ => Platform.UnSupported
         };
     }
@@ -23,8 +21,8 @@ public static class PlatformArchParser
         var str = architectureString.ToLower();
         return str switch
         {
-            "x64" => Architecture.X64,
-            "arm64" => Architecture.Arm64,
+            "x64" => Architecture.x64,
+            "arm64" => Architecture.arm64,
             _ => Architecture.UnSupported
         };
     }
