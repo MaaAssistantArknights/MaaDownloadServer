@@ -1,8 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using MaaDownloadServer.Enums;
-using MaaDownloadServer.Model.General;
-using MaaDownloadServer.Services.IServices;
 using Quartz;
 using Semver;
 
