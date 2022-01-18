@@ -1,4 +1,3 @@
-using MaaDownloadServer.Database;
 using MaaDownloadServer.Jobs;
 using MaaDownloadServer.Services;
 using Microsoft.AspNetCore.StaticFiles;
@@ -36,7 +35,8 @@ var subDirectories = new[]
     configuration["MaaServer:DataDirectories:SubDirectories:Downloads"],
     configuration["MaaServer:DataDirectories:SubDirectories:Public"],
     configuration["MaaServer:DataDirectories:SubDirectories:Resources"],
-    configuration["MaaServer:DataDirectories:SubDirectories:Database"]
+    configuration["MaaServer:DataDirectories:SubDirectories:Database"],
+    configuration["MaaServer:DataDirectories:SubDirectories:Temp"]
 };
 
 foreach (var subDirectory in subDirectories)

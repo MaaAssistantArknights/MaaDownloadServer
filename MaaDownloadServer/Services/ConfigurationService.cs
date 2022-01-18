@@ -30,6 +30,13 @@ public class ConfigurationService : IConfigurationService
             _configuration["MaaServer:DataDirectories:SubDirectories:Resources"]);
     }
 
+    public string GetTempDirectory()
+    {
+        return Path.Combine(
+            _configuration["MaaServer:DataDirectories:RootPath"],
+            _configuration["MaaServer:DataDirectories:SubDirectories:Temp"]);
+    }
+
     public int GetPublicContentDefaultDuration()
     {
         return _configuration.GetValue<int>("MaaServer:PublicContent:DefaultDuration");
