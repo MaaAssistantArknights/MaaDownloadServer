@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
-using MaaDownloadServer.Dto.General;
 
-namespace MaaDownloadServer.Dto;
+namespace MaaDownloadServer.Model.Dto;
 
 public record GetVersionsDto(string Platform, string Architecture, List<VersionMetadata> Version)
 {

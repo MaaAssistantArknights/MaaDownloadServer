@@ -1,4 +1,3 @@
-using MaaDownloadServer.Dto.General;
 using MaaDownloadServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Semver;

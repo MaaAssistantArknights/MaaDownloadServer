@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MaaDownloadServer.Dto.General;
+namespace MaaDownloadServer.Model.Dto.General;
 
 public record VersionMetadata(string Version, DateTime PublishTime)
 {

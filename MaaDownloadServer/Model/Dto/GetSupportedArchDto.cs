@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MaaDownloadServer.Dto;
+namespace MaaDownloadServer.Model.Dto;
 
 public record GetSupportedArchDto(string Platform, List<string> SupportArch)
 {
