@@ -121,14 +121,6 @@ public class FileSystemService : IFileSystemService
                 _logger.LogDebug("打包更新包 {Id}，复制新资源 {ResName} ({Hash})",
                     id, newResource.FileName, newResource.Hash);
             }
-
-            foreach (var replaceResource in diff.ReplaceResources)
-            {
-                File.Copy(Path.Combine(_configurationService.GetResourcesDirectory(), replaceResource.Hash),
-                    Path.Combine(tempFolder.FullName, replaceResource.FileName));
-                _logger.LogDebug("打包更新包 {Id}，复制更新资源 {ResName} ({Hash})",
-                    id, replaceResource.FileName, replaceResource.Hash);
-            }
             var updatePackageLog = JsonSerializer.Serialize(diff);
             await File.WriteAllTextAsync(Path.Combine(tempFolder.FullName, "update_log.json"), updatePackageLog);
             var zipFile = Path.Combine(tempFolder.FullName, $"{id}.zip");
