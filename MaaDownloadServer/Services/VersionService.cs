@@ -25,7 +25,7 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<(string, DateTime)> GetLatestVersion(Platform platform, Architecture architecture)
     {
-        var cacheKey = $"{platform}-{architecture}-versions-latest";
+        var cacheKey = CacheKeyUtil.GetLatestVersionKey(platform, architecture);
         if (_cache.TryGetValue(cacheKey, out _))
         {
             var (cachedVersionString, cachedVersionPublishTime) = _cache.Get<(string, DateTime)>(cacheKey);
@@ -58,7 +58,7 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<(string, DateTime)> GetVersion(Platform platform, Architecture architecture, SemVersion version)
     {
-        var cacheKey = $"{platform}-{architecture}-versions-{version}";
+        var cacheKey = CacheKeyUtil.GetVersionCacheKey(platform, architecture, version.ToString());
         if (_cache.TryGetValue(cacheKey, out _))
         {
             var (cachedVersionString, cachedVersionPublishTime) = _cache.Get<(string, DateTime)>(cacheKey);
@@ -87,20 +87,20 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<List<Platform>> GetSupportedPlatforms()
     {
-        const string CacheKey = "all-supported-platforms";
-        if (_cache.TryGetValue(CacheKey, out _))
+        var cacheKey = CacheKeyUtil.GetAllSupportedPlatformsKey();
+        if (_cache.TryGetValue(cacheKey, out _))
         {
-            var cachedSupportedPlatforms = _cache.Get<List<Platform>>(CacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", CacheKey);
+            var cachedSupportedPlatforms = _cache.Get<List<Platform>>(cacheKey);
+            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
             return cachedSupportedPlatforms;
         }
 
-        _logger.LogWarning("Cache 未命中 - {cacheKey}", CacheKey);
+        _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
         var supportedPlatforms = await _dbContext.Packages
             .Select(x => x.Platform)
             .Distinct()
             .ToListAsync();
-        _cache.Set(CacheKey, supportedPlatforms);
+        _cache.Set(cacheKey, supportedPlatforms);
         return supportedPlatforms;
     }
 
@@ -111,7 +111,7 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<List<Architecture>> GetSupportedArchitectures(Platform platform)
     {
-        var cacheKey = $"{platform}-supported-architectures";
+        var cacheKey = CacheKeyUtil.GetPlatformSupportedArchitecturesKey(platform);
         if (_cache.TryGetValue(cacheKey, out _))
         {
             var cachedSupportedArchitectures = _cache.Get<List<Architecture>>(cacheKey);
@@ -138,7 +138,7 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<Dictionary<string, DateTime>> GetVersions(Platform platform, Architecture architecture, int page)
     {
-        var cacheKey = $"{platform}-{architecture}-versions-{page}";
+        var cacheKey = CacheKeyUtil.GetVersionsCacheKey(platform, architecture, page);
         if (_cache.TryGetValue(cacheKey, out _))
         {
             var cachedVersions = _cache.Get<Dictionary<string, DateTime>>(cacheKey);
