@@ -45,12 +45,15 @@ public class FetchGithubReleaseJob : IJob
         var client = proxy is null or ""
             ? new HttpClient()
             : new HttpClient(new HttpClientHandler { Proxy = new WebProxy(proxy), UseProxy = true });
+        client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.62");
 
         // 请求 API
         var response = await client.GetAsync(url);
         if (response.StatusCode != HttpStatusCode.OK)
         {
-            _logger.LogError("请求 Github Release API 失败");
+            var errBody = await response.Content.ReadAsStringAsync();
+            _logger.LogError("请求 Github Release API 失败，状态码：{StatusCode}，Body：{Body}",
+                response.StatusCode, errBody is null or "" ? "NULL" : errBody);
             return;
         }
 
@@ -69,7 +72,7 @@ public class FetchGithubReleaseJob : IJob
             foreach (var asset in assets)
             {
                 // 获取和解析发布时间
-                var updateTimeString = doc.GetProperty("updated_at").GetString();
+                var updateTimeString = doc.GetProperty("published_at").GetString();
                 if (updateTimeString is null)
                 {
                     throw new ArgumentException("无法解析发布时间");
