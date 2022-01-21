@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Quartz;
 using Semver;
 
@@ -8,26 +9,31 @@ namespace MaaDownloadServer.Jobs;
 public class FetchGithubReleaseJob : IJob
 {
     private readonly ILogger<FetchGithubReleaseJob> _logger;
+    private readonly IVersionService _versionService;
+    private readonly IUpdateManagerService _updateManagerService;
     private readonly IConfiguration _configuration;
-    private readonly IResourceManagerService _resourceManagerService;
 
     public FetchGithubReleaseJob(
         ILogger<FetchGithubReleaseJob> logger,
-        IConfiguration configuration,
-        IResourceManagerService resourceManagerService)
+        IVersionService versionService,
+        IUpdateManagerService updateManagerService,
+        IConfiguration configuration)
     {
         _logger = logger;
+        _versionService = versionService;
+        _updateManagerService = updateManagerService;
         _configuration = configuration;
-        _resourceManagerService = resourceManagerService;
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-        _logger.LogInformation("从 Github 获取最新 Release 版本");
+        var jobId = Guid.NewGuid();
+        _logger.LogInformation("从 Github 获取最新 Release 版本，JobId: {JobId}", jobId);
 
         // 获取配置信息
         var url = _configuration["MaaServer:GithubQuery:ApiEndpoint"];
         var proxy = _configuration["MaaServer:GithubQuery:Proxy"];
+        var packageName = _configuration["MaaServer:GithubQuery:PackageName"];
 
         if (url is null or "")
         {
@@ -49,28 +55,13 @@ public class FetchGithubReleaseJob : IJob
         }
 
         // 解析 JSON
-        SemVersion version;
-        var downloadUrls = new Dictionary<PlatformArchCombination, (string, DateTime)>();
+        var updateTime = DateTime.MinValue;
+        var version = new SemVersion(0);
+        var downloadInfos = new List<DownloadContentInfo>();
         var bodyStream = await response.Content.ReadAsStreamAsync();
         var doc = (await JsonDocument.ParseAsync(bodyStream)).RootElement;
         try
         {
-            // 获取版本 Tag
-            var tag = doc.GetProperty("tag_name").GetString()?.Remove(0, 1);
-            var tagParsed = SemVersion.TryParse(tag, out version);
-            if (tagParsed is false)
-            {
-                throw new ArgumentException("无法解析版本号：" + tag);
-            }
-
-            _logger.LogDebug("已获取版本号：v{Version}", tag);
-            var localVersion = _resourceManagerService.GetLocalVersion();
-            if (localVersion == version)
-            {
-                _logger.LogInformation("当前本地版本为最新版本，无需更新");
-                return;
-            }
-
             // 获取资源下载链接
             var assets = doc.GetProperty("assets").EnumerateArray();
             var index = 1;
@@ -82,8 +73,12 @@ public class FetchGithubReleaseJob : IJob
                 {
                     throw new ArgumentException("无法解析发布时间");
                 }
-                var updateTime = DateTime.Parse(updateTimeString);
+                updateTime = DateTime.Parse(updateTimeString);
                 _logger.LogDebug("已解析资源发布时间：{UpdateTime}", updateTime);
+
+                // 获取版本号
+                var versionString = doc.GetProperty("tag_name").GetString()?[1..];;
+                version = SemVersion.Parse(versionString);
 
                 // 获取和解析文件名
                 var name = asset.GetProperty("name").GetString();
@@ -95,10 +90,20 @@ public class FetchGithubReleaseJob : IJob
                 }
 
                 _logger.LogDebug("获取到第 {Index} 个资源文件：{Name}", index, name);
-                // e.g. MeoAssistantArkNight-Windows-x64-2.6.5.zip
-                var split = name.Split("-");
-                var platformString = split[1];
-                var archString = split[2];
+                // e.g. {PackageName}-Windows-x64-2.6.5.zip
+                // e.g. {PackageName}-Windows-x64-2.6.5-alpha1+build10.zip
+                var match = Regex.Match(name, $"{packageName}-(.+)-(.+).zip");
+                if (match.Success is false)
+                {
+                    _logger.LogWarning("解析第 {Index} 个资源文件名 {Name} 失败，文件名格式匹配失败", index, name);
+                    continue;
+                }
+                var infoString = name.Replace($"{packageName}-", "").Replace(".zip", "");
+                // e.g Windows-x64-2.6.5
+                // e.g Windows-x64-2.6.5-alpha1+build10
+                var split = infoString.Split("-");
+                var platformString = split[0];
+                var archString = split[1];
                 var platform = platformString.ParseToPlatform();
                 var arch = archString.ParseToArchitecture();
                 if (platform is Platform.UnSupported || arch is Architecture.UnSupported)
@@ -107,11 +112,17 @@ public class FetchGithubReleaseJob : IJob
                         index, platformString, archString);
                     continue;
                 }
+                var (p, t) = await _versionService.GetVersion(platform, arch, version);
+                if (p is not null)
+                {
+                    _logger.LogWarning("获取第 {Index} 个资源，已存在版本：{p}-{a}-{v}，时间：{t}",
+                        index, platformString, archString, versionString, t);
+                    return;
+                }
 
                 _logger.LogDebug("获取到第 {Index} 个资源，平台：{p}，架构：{a}，发布时间：{UpdateTime}",
                     index, platform.ToString(), arch.ToString(), updateTime);
-                var combination = new PlatformArchCombination(platform, arch);
-                downloadUrls.Add(combination, (downloadUrl, updateTime));
+                downloadInfos.Add(new DownloadContentInfo(Guid.NewGuid(), downloadUrl, platform, arch));
                 index++;
             }
         }
@@ -121,7 +132,6 @@ public class FetchGithubReleaseJob : IJob
             return;
         }
 
-        // 更新
-        await _resourceManagerService.DownloadUpdates(downloadUrls, version);
+        await _updateManagerService.Update(downloadInfos, jobId, version, updateTime);
     }
 }
