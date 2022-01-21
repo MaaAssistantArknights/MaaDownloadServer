@@ -11,5 +11,8 @@ public static class ServiceExtension
         serviceCollection.AddScoped<IConfigurationService, ConfigurationService>();
         serviceCollection.AddScoped<IFileSystemService, FileSystemService>();
         serviceCollection.AddScoped<IVersionService, VersionService>();
+
+        // Transient
+        serviceCollection.AddTransient<IUpdateManagerService, UpdateManagerService>();
     }
 }
