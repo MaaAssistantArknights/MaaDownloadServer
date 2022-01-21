@@ -76,7 +76,7 @@ public class CacheService : ICacheService
 
     public bool Contains(string key)
     {
-        return _appCache.TryGetValue<>(key, out _);
+        return _appCache.TryGetValue<object>(key, out _);
     }
 
     public T Get<T>(string key)
