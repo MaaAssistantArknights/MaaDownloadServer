@@ -47,7 +47,7 @@ public class FileSystemService : IFileSystemService
                 continue;
             }
             ZipFile.CreateFromDirectory(pdzDi.FullName, Path.Combine(targetFolder, $"{pzd}.zip"));
-            pdzDi.Delete();
+            pdzDi.Delete(true);
         }
         return fileId;
     }

@@ -174,8 +174,8 @@ public class UpdateManagerService : IUpdateManagerService
 
     private void CleanUp()
     {
-        _downloadDirectory.Delete();
-        _tempDirectory.Delete();
+        _downloadDirectory.Delete(true);
+        _tempDirectory.Delete(true);
     }
 
     private async Task Download(IReadOnlyCollection<DownloadContentInfo> downloadContentInfos)
