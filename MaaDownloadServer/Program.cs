@@ -54,12 +54,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
-builder.Services.AddMemoryCache(options =>
-{
-    options.SizeLimit = Convert.ToInt32(configuration["MaaServer:MemoryCache:MaxCacheUnitSize"]);
-    options.ExpirationScanFrequency = TimeSpan.FromSeconds(
-        Convert.ToInt32(configuration["MaaServer:MemoryCache:ExpirationScanFrequencyInSeconds"]));
-});
+builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
 builder.Services.AddQuartzFetchGithubReleaseJob(configuration);
 builder.Services.AddQuartzServer(options =>

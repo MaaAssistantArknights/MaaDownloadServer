@@ -6,13 +6,15 @@ namespace MaaDownloadServer.Services;
 
 public class VersionService : IVersionService
 {
-    private readonly IMemoryCache _cache;
+    private readonly ICacheService _cacheService;
     private readonly MaaDownloadServerDbContext _dbContext;
     private readonly ILogger<VersionService> _logger;
 
-    public VersionService(IMemoryCache cache, MaaDownloadServerDbContext dbContext, ILogger<VersionService> logger)
+    public VersionService(ICacheService cacheService,
+        MaaDownloadServerDbContext dbContext,
+        ILogger<VersionService> logger)
     {
-        _cache = cache;
+        _cacheService = cacheService;
         _dbContext = dbContext;
         _logger = logger;
     }
@@ -25,10 +27,10 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<(string, DateTime)> GetLatestVersion(Platform platform, Architecture architecture)
     {
-        var cacheKey = CacheKeyUtil.GetLatestVersionKey(platform, architecture);
-        if (_cache.TryGetValue(cacheKey, out _))
+        var cacheKey = _cacheService.GetLatestVersionKey(platform, architecture);
+        if (_cacheService.Contains(cacheKey))
         {
-            var (cachedVersionString, cachedVersionPublishTime) = _cache.Get<(string, DateTime)>(cacheKey);
+            var (cachedVersionString, cachedVersionPublishTime) = _cacheService.Get<(string, DateTime)>(cacheKey);
             _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
             return cachedVersionString == "NotExist"
                 ? (null, cachedVersionPublishTime)
@@ -42,10 +44,10 @@ public class VersionService : IVersionService
             .FirstOrDefaultAsync();
         if (package is null)
         {
-            _cache.Set(cacheKey, ("NotExist", DateTime.Now));
+            _cacheService.Add(cacheKey, ("NotExist", DateTime.Now));
             return (null, DateTime.Now);
         }
-        _cache.Set(cacheKey, (package.Version, package.PublishTime));
+        _cacheService.Add(cacheKey, (package.Version, package.PublishTime));
         return (package.Version, package.PublishTime);
     }
 
@@ -58,10 +60,10 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<(string, DateTime)> GetVersion(Platform platform, Architecture architecture, SemVersion version)
     {
-        var cacheKey = CacheKeyUtil.GetVersionCacheKey(platform, architecture, version.ToString());
-        if (_cache.TryGetValue(cacheKey, out _))
+        var cacheKey = _cacheService.GetVersionCacheKey(platform, architecture, version.ToString());
+        if (_cacheService.Contains(cacheKey))
         {
-            var (cachedVersionString, cachedVersionPublishTime) = _cache.Get<(string, DateTime)>(cacheKey);
+            var (cachedVersionString, cachedVersionPublishTime) = _cacheService.Get<(string, DateTime)>(cacheKey);
             _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
             return cachedVersionString == "NotExist"
                 ? (null, cachedVersionPublishTime)
@@ -74,10 +76,10 @@ public class VersionService : IVersionService
             .FirstOrDefaultAsync();
         if (package is null)
         {
-            _cache.Set(cacheKey, ("NotExist", DateTime.Now));
+            _cacheService.Add(cacheKey, ("NotExist", DateTime.Now));
             return (null, DateTime.Now);
         }
-        _cache.Set(cacheKey, (package.Version, package.PublishTime));
+        _cacheService.Add(cacheKey, (package.Version, package.PublishTime));
         return (package.Version, package.PublishTime);
     }
 
@@ -87,10 +89,10 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<List<Platform>> GetSupportedPlatforms()
     {
-        var cacheKey = CacheKeyUtil.GetAllSupportedPlatformsKey();
-        if (_cache.TryGetValue(cacheKey, out _))
+        var cacheKey = _cacheService.GetAllSupportedPlatformsKey();
+        if (_cacheService.Contains(cacheKey))
         {
-            var cachedSupportedPlatforms = _cache.Get<List<Platform>>(cacheKey);
+            var cachedSupportedPlatforms = _cacheService.Get<List<Platform>>(cacheKey);
             _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
             return cachedSupportedPlatforms;
         }
@@ -100,7 +102,7 @@ public class VersionService : IVersionService
             .Select(x => x.Platform)
             .Distinct()
             .ToListAsync();
-        _cache.Set(cacheKey, supportedPlatforms);
+        _cacheService.Add(cacheKey, supportedPlatforms);
         return supportedPlatforms;
     }
 
@@ -111,10 +113,10 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<List<Architecture>> GetSupportedArchitectures(Platform platform)
     {
-        var cacheKey = CacheKeyUtil.GetPlatformSupportedArchitecturesKey(platform);
-        if (_cache.TryGetValue(cacheKey, out _))
+        var cacheKey = _cacheService.GetPlatformSupportedArchitecturesKey(platform);
+        if (_cacheService.Contains(cacheKey))
         {
-            var cachedSupportedArchitectures = _cache.Get<List<Architecture>>(cacheKey);
+            var cachedSupportedArchitectures = _cacheService.Get<List<Architecture>>(cacheKey);
             _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
             return cachedSupportedArchitectures;
         }
@@ -125,7 +127,7 @@ public class VersionService : IVersionService
             .Select(x => x.Architecture)
             .Distinct()
             .ToListAsync();
-        _cache.Set(cacheKey, supportedArchitectures);
+        _cacheService.Add(cacheKey, supportedArchitectures, "supported-architectures");
         return supportedArchitectures;
     }
 
@@ -138,10 +140,10 @@ public class VersionService : IVersionService
     /// <returns></returns>
     public async Task<Dictionary<string, DateTime>> GetVersions(Platform platform, Architecture architecture, int page)
     {
-        var cacheKey = CacheKeyUtil.GetVersionsCacheKey(platform, architecture, page);
-        if (_cache.TryGetValue(cacheKey, out _))
+        var cacheKey = _cacheService.GetVersionsCacheKey(platform, architecture, page);
+        if (_cacheService.Contains(cacheKey))
         {
-            var cachedVersions = _cache.Get<Dictionary<string, DateTime>>(cacheKey);
+            var cachedVersions = _cacheService.Get<Dictionary<string, DateTime>>(cacheKey);
             _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
             return cachedVersions;
         }
@@ -154,7 +156,7 @@ public class VersionService : IVersionService
             .Take(10)
             .ToListAsync();
         var result = versions.ToDictionary(x => x.Version, x => x.PublishTime);
-        _cache.Set(cacheKey, result);
+        _cacheService.Add(cacheKey, result, $"{platform}-{architecture}-versions");
         return result;
     }
 }
