@@ -21,74 +21,86 @@ namespace MaaDownloadServer.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
 
                     b.Property<string>("Architecture")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<uint>("DownloadTimes")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("architecture");
 
                     b.Property<string>("Platform")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("platform");
 
                     b.Property<DateTime>("PublishTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("publish_time");
+
+                    b.Property<string>("UpdateLog")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("update_log");
 
                     b.Property<string>("Version")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("version");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Packages");
+                    b.ToTable("package");
                 });
 
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.PublicContent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("AddTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("add_time");
 
                     b.Property<DateTime>("Duration")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("duration");
 
                     b.Property<string>("Hash")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("hash");
 
                     b.Property<string>("Tag")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("tag");
 
                     b.HasKey("Id");
 
-                    b.ToTable("PublicContents");
+                    b.ToTable("public_content");
                 });
 
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.Resource", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("DownloadTimes")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("id");
 
                     b.Property<string>("FileName")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("file_name");
 
                     b.Property<string>("Hash")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("hash");
 
                     b.Property<string>("Path")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("TEXT")
+                        .HasColumnName("path");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Resources");
+                    b.ToTable("resource");
                 });
 
             modelBuilder.Entity("PackageResource", b =>

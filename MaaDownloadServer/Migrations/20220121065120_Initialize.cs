@@ -10,49 +10,48 @@ namespace MaaDownloadServer.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Packages",
+                name: "package",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Version = table.Column<string>(type: "TEXT", nullable: true),
-                    Platform = table.Column<string>(type: "TEXT", nullable: false),
-                    Architecture = table.Column<string>(type: "TEXT", nullable: false),
-                    PublishTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    DownloadTimes = table.Column<uint>(type: "INTEGER", nullable: false)
+                    id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    version = table.Column<string>(type: "TEXT", nullable: true),
+                    platform = table.Column<string>(type: "TEXT", nullable: false),
+                    architecture = table.Column<string>(type: "TEXT", nullable: false),
+                    publish_time = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    update_log = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Packages", x => x.Id);
+                    table.PrimaryKey("PK_package", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PublicContents",
+                name: "public_content",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Tag = table.Column<string>(type: "TEXT", nullable: true),
-                    Duration = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Hash = table.Column<string>(type: "TEXT", nullable: true),
-                    AddTime = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    tag = table.Column<string>(type: "TEXT", nullable: true),
+                    duration = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    hash = table.Column<string>(type: "TEXT", nullable: true),
+                    add_time = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PublicContents", x => x.Id);
+                    table.PrimaryKey("PK_public_content", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Resources",
+                name: "resource",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    FileName = table.Column<string>(type: "TEXT", nullable: true),
-                    Path = table.Column<string>(type: "TEXT", nullable: true),
-                    Hash = table.Column<string>(type: "TEXT", nullable: true),
-                    DownloadTimes = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    file_name = table.Column<string>(type: "TEXT", nullable: true),
+                    path = table.Column<string>(type: "TEXT", nullable: true),
+                    hash = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Resources", x => x.Id);
+                    table.PrimaryKey("PK_resource", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -66,16 +65,16 @@ namespace MaaDownloadServer.Migrations
                 {
                     table.PrimaryKey("PK_PackageResource", x => new { x.PackagesId, x.ResourcesId });
                     table.ForeignKey(
-                        name: "FK_PackageResource_Packages_PackagesId",
+                        name: "FK_PackageResource_package_PackagesId",
                         column: x => x.PackagesId,
-                        principalTable: "Packages",
-                        principalColumn: "Id",
+                        principalTable: "package",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PackageResource_Resources_ResourcesId",
+                        name: "FK_PackageResource_resource_ResourcesId",
                         column: x => x.ResourcesId,
-                        principalTable: "Resources",
-                        principalColumn: "Id",
+                        principalTable: "resource",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -91,13 +90,13 @@ namespace MaaDownloadServer.Migrations
                 name: "PackageResource");
 
             migrationBuilder.DropTable(
-                name: "PublicContents");
+                name: "public_content");
 
             migrationBuilder.DropTable(
-                name: "Packages");
+                name: "package");
 
             migrationBuilder.DropTable(
-                name: "Resources");
+                name: "resource");
         }
     }
 }

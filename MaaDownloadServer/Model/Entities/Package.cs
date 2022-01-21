@@ -1,57 +1,58 @@
-using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MaaDownloadServer.Model.Entities;
 
 /// <summary>
 /// 包（一个平台的所有文件）
 /// </summary>
-/// <param name="Id"></param>
-/// <param name="Version"></param>
-/// <param name="Platform"></param>
-/// <param name="Architecture"></param>
-public record Package(Guid Id, string Version, Platform Platform, Architecture Architecture, DateTime PublishTime)
+/// <param name="Id">ID</param>
+/// <param name="Version">版本</param>
+/// <param name="Platform">平台</param>
+/// <param name="Architecture">架构</param>
+/// <param name="PublishTime">发布时间</param>
+/// <param name="UpdateLog">更新日志</param>
+[Table("package")]
+public record Package(Guid Id, string Version, Platform Platform, Architecture Architecture, DateTime PublishTime, string UpdateLog)
 {
     /// <summary>
     /// 包 Id
     /// </summary>
-    [JsonIgnore]
+    [Column("id")]
     public Guid Id { get; set; } = Id;
 
     /// <summary>
     /// 版本
     /// </summary>
-    [JsonPropertyName("version")]
+    [Column("version")]
     public string Version { get; set; } = Version;
 
     /// <summary>
     /// 平台
     /// </summary>
-    [JsonPropertyName("platform")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [Column("platform")]
     public Platform Platform { get; set; } = Platform;
 
     /// <summary>
     /// 架构
     /// </summary>
-    [JsonPropertyName("arch")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [Column("architecture")]
     public Architecture Architecture { get; set; } = Architecture;
 
     /// <summary>
     /// 资源
     /// </summary>
-    [JsonPropertyName("resources")]
-    public List<Resource> Resources { get; set; }
+    [Column("resources")]
+    public List<Resource> Resources { get; set; } = new();
 
     /// <summary>
     /// 发包时间
     /// </summary>
-    [JsonPropertyName("publish_time")]
+    [Column("publish_time")]
     public DateTime PublishTime { get; set; } = PublishTime;
 
     /// <summary>
-    /// 版本下载次数
+    /// 更新日志
     /// </summary>
-    [JsonIgnore]
-    public uint DownloadTimes  { get; set; }
+    [Column("update_log")]
+    public string UpdateLog { get; set; } = UpdateLog;
 }
