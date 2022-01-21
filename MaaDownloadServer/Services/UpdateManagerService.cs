@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Semver;
 
 #pragma warning disable CS0618
@@ -9,7 +8,7 @@ namespace MaaDownloadServer.Services;
 
 public class UpdateManagerService : IUpdateManagerService
 {
-    private readonly Logger<UpdateManagerService> _logger;
+    private readonly ILogger<UpdateManagerService> _logger;
     private readonly IFileSystemService _fileSystemService;
     private readonly IConfiguration _configuration;
     private readonly IConfigurationService _configurationService;
@@ -21,7 +20,7 @@ public class UpdateManagerService : IUpdateManagerService
     private DirectoryInfo _tempDirectory;
 
     public UpdateManagerService(
-        Logger<UpdateManagerService> logger,
+        ILogger<UpdateManagerService> logger,
         IFileSystemService fileSystemService,
         IConfiguration configuration,
         IConfigurationService configurationService,
@@ -36,7 +35,7 @@ public class UpdateManagerService : IUpdateManagerService
         _dbContext = dbContext;
     }
 
-    public async Task<bool> Update(List<DownloadContentInfo> downloadContentInfos, Guid jobId, SemVersion version, DateTime publishTime)
+    public async Task<bool> Update(List<DownloadContentInfo> downloadContentInfos, Guid jobId, SemVersion version, DateTime publishTime, string updateLog)
     {
         _jobId = jobId;
         _logger.LogInformation("新的更新服务器启动，开始更新，JobId：{jobId}", _jobId);
@@ -117,7 +116,7 @@ public class UpdateManagerService : IUpdateManagerService
             var newPackageList = new List<Package>();
             foreach (var ((id, p, a), resInfos) in versionToResourceInfo)
             {
-                var package = new Package(id, version.ToString(), p, a, publishTime);
+                var package = new Package(id, version.ToString(), p, a, publishTime, updateLog);
                 var resources = _dbContext.Resources
                     .Where(x => resInfos.Exists(y => x.Path == y.RelativePath && x.Hash == y.Hash))
                     .ToList();
@@ -147,7 +146,7 @@ public class UpdateManagerService : IUpdateManagerService
 
             // Step 12 - 通过增量更新文件列表打包文件（复制到 Temps/{zipId} 打包到 Temps/{zipId}.zip）并写入数据库 (FileSystemService)
             _logger.LogDebug("Step 12 - 开始通过增量更新文件列表打包文件，JobId：{jobId}", _jobId);
-            var newPublicContents = await _fileSystemService.AddUpdatePackages(updateDiffs);
+            var _ = await _fileSystemService.AddUpdatePackages(updateDiffs);
 
             // Step 13 - 更新 版本-平台-架构 信息删缓存 (UpdateManagerService)
             _logger.LogDebug("Step 13 - 删缓存");

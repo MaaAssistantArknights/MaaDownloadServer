@@ -90,10 +90,12 @@ public class VersionController : ControllerBase
             _logger.LogWarning("传入 version 值 {version} 解析失败", version);
             return NotFound();
         }
-        var (versionString, dateTime) = await _versionService.GetVersion(pf, a, semVer);
-        if (versionString is not null)
+        var package = await _versionService.GetVersion(pf, a, semVer);
+        if (package is not null)
         {
-            return Ok(new GetVersionDto(platform, arch, new VersionMetadata(versionString, dateTime)));
+            return Ok(new GetVersionDto(platform, arch,
+                new VersionDetail(package.Version, package.PublishTime, package.UpdateLog,
+                    package.Resources.Select(x => new ResourceMetadata(x.FileName, x.Path, x.Hash)).ToList())));
         }
 
         _logger.LogWarning("GetVersion() returned null");

@@ -58,6 +58,7 @@ public class FetchGithubReleaseJob : IJob
         var updateTime = DateTime.MinValue;
         var version = new SemVersion(0);
         var downloadInfos = new List<DownloadContentInfo>();
+        var updateLog = string.Empty;
         var bodyStream = await response.Content.ReadAsStreamAsync();
         var doc = (await JsonDocument.ParseAsync(bodyStream)).RootElement;
         try
@@ -77,8 +78,11 @@ public class FetchGithubReleaseJob : IJob
                 _logger.LogDebug("已解析资源发布时间：{UpdateTime}", updateTime);
 
                 // 获取版本号
-                var versionString = doc.GetProperty("tag_name").GetString()?[1..];;
+                var versionString = doc.GetProperty("tag_name").GetString()?[1..];
                 version = SemVersion.Parse(versionString);
+
+                // 获取更新日志
+                updateLog = doc.GetProperty("body").GetString();
 
                 // 获取和解析文件名
                 var name = asset.GetProperty("name").GetString();
@@ -112,11 +116,11 @@ public class FetchGithubReleaseJob : IJob
                         index, platformString, archString);
                     continue;
                 }
-                var (p, t) = await _versionService.GetVersion(platform, arch, version);
+                var p = await _versionService.GetVersion(platform, arch, version);
                 if (p is not null)
                 {
                     _logger.LogWarning("获取第 {Index} 个资源，已存在版本：{p}-{a}-{v}，时间：{t}",
-                        index, platformString, archString, versionString, t);
+                        index, platformString, archString, versionString, p.PublishTime);
                     return;
                 }
 
@@ -132,6 +136,6 @@ public class FetchGithubReleaseJob : IJob
             return;
         }
 
-        await _updateManagerService.Update(downloadInfos, jobId, version, updateTime);
+        await _updateManagerService.Update(downloadInfos, jobId, version, updateTime, updateLog);
     }
 }

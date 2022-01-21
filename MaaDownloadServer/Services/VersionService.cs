@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Semver;
 
 namespace MaaDownloadServer.Services;
@@ -58,16 +57,14 @@ public class VersionService : IVersionService
     /// <param name="architecture">架构</param>
     /// <param name="version">版本</param>
     /// <returns></returns>
-    public async Task<(string, DateTime)> GetVersion(Platform platform, Architecture architecture, SemVersion version)
+    public async Task<Package> GetVersion(Platform platform, Architecture architecture, SemVersion version)
     {
         var cacheKey = _cacheService.GetVersionCacheKey(platform, architecture, version.ToString());
         if (_cacheService.Contains(cacheKey))
         {
-            var (cachedVersionString, cachedVersionPublishTime) = _cacheService.Get<(string, DateTime)>(cacheKey);
+            var cachedPackage = _cacheService.Get<Package>(cacheKey);
             _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
-            return cachedVersionString == "NotExist"
-                ? (null, cachedVersionPublishTime)
-                : (cachedVersionString, cachedVersionPublishTime);
+            return cachedPackage;
         }
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
@@ -77,10 +74,10 @@ public class VersionService : IVersionService
         if (package is null)
         {
             _cacheService.Add(cacheKey, ("NotExist", DateTime.Now));
-            return (null, DateTime.Now);
+            return null;
         }
-        _cacheService.Add(cacheKey, (package.Version, package.PublishTime));
-        return (package.Version, package.PublishTime);
+        _cacheService.Add(cacheKey, package);
+        return package;
     }
 
     /// <summary>
