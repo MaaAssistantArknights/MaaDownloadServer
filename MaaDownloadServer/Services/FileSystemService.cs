@@ -38,7 +38,8 @@ public class FileSystemService : IFileSystemService
         ZipFile.ExtractToDirectory(filePath, targetFolder);
 
         // 压缩待压缩的文件夹
-        var pendingZippedFolder = _configuration.GetValue<List<string>>("MaaServer:ZipRequiredFolder");
+        var pendingZippedFolder = _configuration.GetSection("MaaServer:ZipRequiredFolder")
+            .GetChildren().Select(x => x.Value).ToList();
         foreach (var pzd in pendingZippedFolder)
         {
             var pdzDi = new DirectoryInfo(Path.Combine(targetFolder, pzd));
@@ -94,7 +95,7 @@ public class FileSystemService : IFileSystemService
         {
             var id = Guid.NewGuid();
             var name = Path.GetFileName(path);
-            _logger.LogInformation("添加新的资源文件 {Path} ({Hash}) [{id}]", name, hash, id);
+            _logger.LogDebug("添加新的资源文件 {Path} ({Hash}) [{id}]", name, hash, id);
             resources.Add(new Resource(id, name, relativePath, hash));
             Debug.Assert(path != null, "r.Path != null");
             File.Move(path, Path.Combine(
@@ -109,12 +110,13 @@ public class FileSystemService : IFileSystemService
     public void CleanDownloadDirectory(Guid jobId)
     {
         var di = new DirectoryInfo(Path.Combine(_configurationService.GetDownloadDirectory(), jobId.ToString()));
-        if (di.Exists)
+        if (di.Exists is false)
         {
-            _logger.LogInformation("正在清理下载目录 Job = {jobId}", jobId);
-            di.Delete(true);
+            return;
         }
-        _logger.LogWarning("尝试清理下载目录 Job = {jobId} 但是目录不存在", jobId);
+
+        _logger.LogInformation("正在清理下载目录 Job = {jobId}", jobId);
+        di.Delete(true);
     }
 
     /// <inheritdoc />

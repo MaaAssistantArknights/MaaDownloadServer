@@ -84,6 +84,14 @@ public class FetchGithubReleaseJob : IJob
                 var versionString = doc.GetProperty("tag_name").GetString()?[1..];
                 version = SemVersion.Parse(versionString);
 
+                // 检查版本是否已经存在
+                var exist = await _versionService.IsVersionExist(version);
+                if (exist)
+                {
+                    _logger.LogWarning("版本 {Version} 已存在，跳过", version);
+                    return;
+                }
+
                 // 获取更新日志
                 updateLog = doc.GetProperty("body").GetString();
 
@@ -118,13 +126,6 @@ public class FetchGithubReleaseJob : IJob
                     _logger.LogWarning("获取第 {Index} 个资源，平台或架构不受支持：{p}-{a}",
                         index, platformString, archString);
                     continue;
-                }
-                var p = await _versionService.GetVersion(platform, arch, version);
-                if (p is not null)
-                {
-                    _logger.LogWarning("获取第 {Index} 个资源，已存在版本：{p}-{a}-{v}，时间：{t}",
-                        index, platformString, archString, versionString, p.PublishTime);
-                    return;
                 }
 
                 _logger.LogDebug("获取到第 {Index} 个资源，平台：{p}，架构：{a}，发布时间：{UpdateTime}",

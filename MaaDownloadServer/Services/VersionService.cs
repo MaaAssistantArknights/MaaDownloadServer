@@ -19,6 +19,18 @@ public class VersionService : IVersionService
     }
 
     /// <summary>
+    /// 检查版本是否存在
+    /// </summary>
+    /// <param name="version">版本号</param>
+    /// <returns></returns>
+    public async Task<bool> IsVersionExist(SemVersion version)
+    {
+        var exist = await _dbContext.Packages
+            .FirstOrDefaultAsync(x => x.Version == version.ToString());
+        return exist is not null;
+    }
+
+    /// <summary>
     /// 获取对应平台和架构的最新版本
     /// </summary>
     /// <param name="platform">平台</param>
@@ -69,6 +81,7 @@ public class VersionService : IVersionService
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
         var package = await _dbContext.Packages
+            .Include(x => x.Resources)
             .Where(x => x.Platform == platform && x.Architecture == architecture && x.Version == version.ToString())
             .FirstOrDefaultAsync();
         if (package is null)
@@ -148,10 +161,12 @@ public class VersionService : IVersionService
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
         var versions = await _dbContext.Packages
             .Where(x => x.Platform == platform && x.Architecture == architecture)
-            .OrderByDescending(x => SemVersion.Parse(x.Version, false))
-            .Skip(page * 10)
-            .Take(10)
             .ToListAsync();
+        versions = versions
+            .OrderByDescending(x => SemVersion.Parse(x.Version))
+            .Skip(10 * (page - 1))
+            .Take(10)
+            .ToList();
         var result = versions.ToDictionary(x => x.Version, x => x.PublishTime);
         _cacheService.Add(cacheKey, result, $"{platform}-{architecture}-versions");
         return result;

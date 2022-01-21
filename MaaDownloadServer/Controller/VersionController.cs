@@ -58,7 +58,7 @@ public class VersionController : ControllerBase
             return NotFound();
         }
         var pf = platform.ParseToPlatform();
-        var a = platform.ParseToArchitecture();
+        var a = arch.ParseToArchitecture();
         if (pf is Platform.UnSupported || a is Architecture.UnSupported)
         {
             _logger.LogWarning("传入 Platform 值 {platform} 或 Arch 值 {arch} 解析为不受支持", platform, arch);
