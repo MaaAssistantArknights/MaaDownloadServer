@@ -9,15 +9,18 @@ public class FileSystemService : IFileSystemService
 {
     private readonly MaaDownloadServerDbContext _dbContext;
     private readonly ILogger<FileSystemService> _logger;
+    private readonly IConfiguration _configuration;
     private readonly IConfigurationService _configurationService;
 
     public FileSystemService(
         MaaDownloadServerDbContext dbContext,
         ILogger<FileSystemService> logger,
+        IConfiguration configuration,
         IConfigurationService configurationService)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _configuration = configuration;
         _configurationService = configurationService;
     }
 
@@ -33,6 +36,19 @@ public class FileSystemService : IFileSystemService
             jobId.ToString(),
             fileId.ToString());
         ZipFile.ExtractToDirectory(filePath, targetFolder);
+
+        // 压缩待压缩的文件夹
+        var pendingZippedFolder = _configuration.GetValue<List<string>>("MaaServer:ZipRequiredFolder");
+        foreach (var pzd in pendingZippedFolder)
+        {
+            var pdzDi = new DirectoryInfo(Path.Combine(targetFolder, pzd));
+            if (pdzDi.Exists is false)
+            {
+                continue;
+            }
+            ZipFile.CreateFromDirectory(pdzDi.FullName, Path.Combine(targetFolder, $"{pzd}.zip"));
+            pdzDi.Delete();
+        }
         return fileId;
     }
 
