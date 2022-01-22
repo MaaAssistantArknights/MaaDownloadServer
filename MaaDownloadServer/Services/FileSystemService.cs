@@ -160,7 +160,7 @@ public class FileSystemService : IFileSystemService
             }
             var updatePackageLog = JsonSerializer.Serialize(diff);
             await File.WriteAllTextAsync(Path.Combine(tempFolder.FullName, "update_log.json"), updatePackageLog);
-            var zipFile = Path.Combine(tempFolder.FullName, $"{id}.zip");
+            var zipFile = Path.Combine(_configurationService.GetTempDirectory(), $"{id}.zip");
             ZipFile.CreateFromDirectory(tempFolder.FullName, zipFile);
             var hash = HashUtil.ComputeFileMd5Hash(zipFile);
             pcs.Add(new PublicContent(id, pcTag, DateTime.Now, hash, DateTime.Now.AddDays(_configurationService.GetPublicContentDefaultDuration())));
