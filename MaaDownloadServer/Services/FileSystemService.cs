@@ -164,6 +164,8 @@ public class FileSystemService : IFileSystemService
             ZipFile.CreateFromDirectory(tempFolder.FullName, zipFile);
             var hash = HashUtil.ComputeFileMd5Hash(zipFile);
             pcs.Add(new PublicContent(id, pcTag, DateTime.Now, hash, DateTime.Now.AddDays(_configurationService.GetPublicContentDefaultDuration())));
+            File.Move(zipFile, Path.Combine(_configurationService.GetPublicDirectory(), $"{id}.zip"));
+            tempFolder.Delete(true);
             _logger.LogInformation("已打包更新包 {Id}，MD5校验 = {Hash}", id, hash);
         }
         await _dbContext.PublicContents.AddRangeAsync(pcs);
