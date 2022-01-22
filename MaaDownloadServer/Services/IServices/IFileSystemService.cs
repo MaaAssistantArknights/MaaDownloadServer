@@ -35,6 +35,14 @@ public interface IFileSystemService
     void CleanDownloadDirectory(Guid jobId);
 
     /// <summary>
+    /// 获取更新 Diff
+    /// </summary>
+    /// <param name="fromPackage">起始版本</param>
+    /// <param name="toPackage">目标版本</param>
+    /// <returns></returns>
+    UpdateDiff GetUpdateDiff(Package fromPackage, Package toPackage);
+
+    /// <summary>
     /// 创建更新包
     /// </summary>
     /// <param name="diffs">更新 Diff 列表</param>

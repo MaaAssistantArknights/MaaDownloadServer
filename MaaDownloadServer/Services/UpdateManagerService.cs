@@ -235,22 +235,12 @@ public class UpdateManagerService : IUpdateManagerService
                     recentVersionPackage.Version, thisVersionPackage.Version, _jobId);
                 // 新资源包括了 旧版本和新版本中同路径、同文件名但是 Hash 不同的文件；旧版本不存在但是新版本存在的文件
                 // 路径、文件名、Hash 三者任意一个不同，这 ID 不同，因此匹配 ID 即可
-                var newRes = thisVersionPackage.Resources
-                    .Where(x => recentVersionPackage.Resources.Exists(y => y.Id != x.Id))
-                    .ToList();
-                // 不需要的指 旧版本存在，但是新版本中，同路径、同文件名的文件不存在的资源
-                var unNeededRes = recentVersionPackage.Resources
-                    .Where(x => thisVersionPackage.Resources
-                        .Exists(y => (y.Path == x.Path && y.FileName == x.FileName) is false))
-                    .ToList();
-                var diff = new UpdateDiff(recentVersionPackage.Version, thisVersionPackage.Version,
-                    thisVersionPackage.Platform, thisVersionPackage.Architecture,
-                    newRes, unNeededRes);
+                var diff = _fileSystemService.GetUpdateDiff(recentVersionPackage, thisVersionPackage);
                 updateDiffs.Add(diff);
                 _logger.LogInformation("从 {P}-{A} {V1} -> {V2} 的 Diff 计算完成，新增 {New}，移除 {Remove}，JobId：{jobId}",
                     thisVersionPackage.Platform, thisVersionPackage.Architecture,
                     recentVersionPackage.Version, thisVersionPackage.Version,
-                    newRes.Count, unNeededRes.Count, _jobId);
+                    diff.NewResources.Count, diff.UnNeededResources.Count, _jobId);
             }
         }
         return updateDiffs;

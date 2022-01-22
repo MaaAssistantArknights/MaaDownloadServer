@@ -120,6 +120,25 @@ public class FileSystemService : IFileSystemService
     }
 
     /// <inheritdoc />
+    public UpdateDiff GetUpdateDiff(Package fromPackage, Package toPackage)
+    {
+        // 新资源包括了 旧版本和新版本中同路径、同文件名但是 Hash 不同的文件；旧版本不存在但是新版本存在的文件
+        // 路径、文件名、Hash 三者任意一个不同，这 ID 不同，因此匹配 ID 即可
+        var newRes = toPackage.Resources
+            .Where(x => fromPackage.Resources.Exists(y => y.Id != x.Id))
+            .ToList();
+        // 不需要的指 旧版本存在，但是新版本中，同路径、同文件名的文件不存在的资源
+        var unNeededRes = fromPackage.Resources
+            .Where(x => toPackage.Resources
+                .Exists(y => (y.Path == x.Path && y.FileName == x.FileName) is false))
+            .ToList();
+        var diff = new UpdateDiff(fromPackage.Version, toPackage.Version,
+            toPackage.Platform, toPackage.Architecture,
+            newRes, unNeededRes);
+        return diff;
+    }
+
+    /// <inheritdoc />
     public async Task<List<PublicContent>> AddUpdatePackages(List<UpdateDiff> diffs)
     {
         var pcs = new List<PublicContent>();
