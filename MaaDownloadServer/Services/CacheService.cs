@@ -12,6 +12,8 @@ public class CacheService : ICacheService
     private const string Versions = "{p}-{a}-versions-all-{page}";
     private const string AllSupportedPlatforms = "all-supported-platforms";
     private const string PlatformSupportedArchitectures = "{p}-supported-architectures";
+    private const string DownloadFullPackage = "{p}-{a}-pc-f-{v}";
+    private const string DownloadUpdatePackage = "{p}-{a}-pc-u-{from}-{to}";
 
     private readonly int _cacheExpirationInMinutes;
 
@@ -49,6 +51,20 @@ public class CacheService : ICacheService
         _appCache.Add(key, value, _group[group].Item2);
     }
 
+    public void Add(string key, PublicContent pc, PublicContentTagType type)
+    {
+        if (_group.ContainsKey(type.ToString()) is false)
+        {
+            var ts = new CancellationTokenSource();
+            _group.Add(type.ToString(), (ts, null));
+        }
+        var option = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(pc.Duration)
+            .AddExpirationToken(new CancellationChangeToken(_cancellationTokenSource.Token))
+            .AddExpirationToken(new CancellationChangeToken(_group[type.ToString()].Item1.Token));
+        _appCache.Add(key, pc, option);
+    }
+
     public void RemoveAll()
     {
         _cancellationTokenSource.Cancel();
@@ -67,6 +83,16 @@ public class CacheService : ICacheService
         }
         _group[group].Item1.Cancel();
         _group.Remove(group);
+    }
+
+    public void RemoveAll(PublicContentTagType type)
+    {
+        if (_group.ContainsKey(type.ToString()) is false)
+        {
+            return;
+        }
+        _group[type.ToString()].Item1.Cancel();
+        _group.Remove(type.ToString());
     }
 
     public void Remove(string key)
@@ -107,5 +133,16 @@ public class CacheService : ICacheService
     public string GetPlatformSupportedArchitecturesKey(Platform p)
     {
         return PlatformSupportedArchitectures.ReplacePlatform(p);
+    }
+
+    public string GetDownloadFullPackageKey(Platform p, Architecture a, string version)
+    {
+        return DownloadFullPackage.ReplacePlatform(p).ReplaceArchitecture(a).Replace("{v}", version);
+    }
+
+    public string GetDownloadUpdatePackageKey(Platform p, Architecture a, string from, string to)
+    {
+        return DownloadUpdatePackage.ReplacePlatform(p).ReplaceArchitecture(a)
+            .Replace("{from}", from).Replace("{to}", to);
     }
 }
