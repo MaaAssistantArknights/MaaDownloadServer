@@ -2,6 +2,8 @@
 using Cake.Core;
 using Cake.Frosting;
 
+namespace MaaDownloadServer.Build;
+
 public class BuildContext : FrostingContext
 {
     public string MsBuildConfiguration { get; set; }

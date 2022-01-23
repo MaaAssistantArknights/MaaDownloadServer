@@ -17,7 +17,7 @@ public sealed class PublishTask : FrostingTask<BuildContext>
             SelfContained = false,
             OutputDirectory = "../publish",
             Framework = context.Framework,
-            Runtime = context.PublishRid is "any" ? null : context.PublishRid,
+            Runtime = context.PublishRid is "portable" ? null : context.PublishRid,
             MSBuildSettings = new DotNetCoreMSBuildSettings()
                 .TreatAllWarningsAs(MSBuildTreatAllWarningsAs.Error)
         });
