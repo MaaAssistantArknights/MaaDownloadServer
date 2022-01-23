@@ -33,6 +33,22 @@ public static class JobExtension
             {
                 job.WithIdentity("Fetch-Github-Release-Job", "Download");
             });
+
+            q.ScheduleJob<PublicContentCheckJob>(trigger =>
+            {
+                trigger.WithIdentity("Public-Content-Check-Trigger", "Database")
+                    .WithCalendarIntervalSchedule(schedule =>
+                    {
+                        schedule.WithIntervalInMinutes(
+                            Convert.ToInt32(configuration["MaaServer:PublicContent:OutdatedCheckInterval"]));
+                        schedule.InTimeZone(TimeZoneInfo.Local);
+                        schedule.WithMisfireHandlingInstructionDoNothing();
+                    })
+                    .StartAt(DateTimeOffset.Now.AddMinutes(1));
+            }, job =>
+            {
+                job.WithIdentity("Public-Content-Check-Job", "Database");
+            });
         });
     }
 }
