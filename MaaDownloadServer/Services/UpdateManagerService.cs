@@ -131,13 +131,19 @@ public class UpdateManagerService : IUpdateManagerService
 
             // Step 9 - 检索数据库获取前三个版本的资源数据  (UpdateManagerService)
             _logger.LogInformation("Step 9 - 开始检索数据库获取前三个版本的资源数据，JobId：{jobId}", _jobId);
-            var recentVersionPackages = await _dbContext.Packages
-                .AsNoTracking()
-                .Include(x => x.Resources)
-                .Where(x => x.PublishTime < publishTime)
-                .OrderByDescending(x => x.PublishTime)
-                .Take(3)
-                .ToListAsync();
+            var recentVersionPackages = new List<Package>();
+            foreach (var newPackage in newPackageList)
+            {
+                var recentPackages = await _dbContext.Packages
+                    .AsNoTracking()
+                    .Include(x => x.Resources)
+                    .Where(x => x.Platform == newPackage.Platform && x.Architecture == newPackage.Architecture)
+                    .Where(x => x.PublishTime < publishTime)
+                    .OrderByDescending(x => x.PublishTime)
+                    .Take(3)
+                    .ToListAsync();
+                recentVersionPackages.AddRange(recentPackages);
+            }
 
             // Step 10 - 遍历 版本-资源（Hash + 相对路径）的索引，逐个和前三个版本的每一个做比对，得到增量更新列表 (UpdateManagerService)
             _logger.LogInformation("Step 10 - 开始和前三个版本做对比建立 Diff，JobId：{jobId}", _jobId);
