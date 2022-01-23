@@ -17,6 +17,7 @@ public sealed class BuildTask : FrostingTask<BuildContext>
         {
             Configuration = context.MsBuildConfiguration,
             NoIncremental = context.HasArgument("rebuild"),
+            Framework = context.Framework,
             MSBuildSettings = new DotNetMSBuildSettings()
                 .TreatAllWarningsAs(MSBuildTreatAllWarningsAs.Error)
         });

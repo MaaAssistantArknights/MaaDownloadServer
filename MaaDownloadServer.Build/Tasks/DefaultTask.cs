@@ -3,5 +3,5 @@
 namespace MaaDownloadServer.Build.Tasks;
 
 [TaskName("Default")]
-[IsDependentOn(typeof(PublishTask))]
+[IsDependentOn(typeof(PostPublishTask))]
 public sealed class DefaultTask : FrostingTask { }
