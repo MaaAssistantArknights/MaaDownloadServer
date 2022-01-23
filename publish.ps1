@@ -11,3 +11,6 @@ dotnet restore
 
 Write-Output "Running Cake build process with args: $CakeBuildArgs"
 dotnet run --no-restore -- $CakeBuildArgs
+
+Write-Output "Finished!"
+Set-Location -Path ../

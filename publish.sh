@@ -13,3 +13,6 @@ dotnet restore
 
 echo "Running Cake build process with args: $CakeBuildArgs"
 dotnet run --no-restore -- "$CakeBuildArgs"
+
+echo "Finished!"
+cd .. || exit
