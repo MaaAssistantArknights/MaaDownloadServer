@@ -58,12 +58,14 @@ public class DownloadService : IDownloadService
             _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
             var tag = new PublicContentTag(PublicContentTagType.UpdatePackage, platform, architecture, from, to).ParseToTagString();
             pc = await _dbContext.PublicContents.FirstOrDefaultAsync(x => x.Tag == tag);
+            var fromVersion = from.ToString();
+            var toVersion = to.ToString();
             if (pc is null)
             {
                 var fromPackage = await _dbContext.Packages
-                    .FirstOrDefaultAsync(x => x.Platform == platform && x.Architecture == architecture && x.Version == from);
+                    .FirstOrDefaultAsync(x => x.Platform == platform && x.Architecture == architecture && x.Version == fromVersion);
                 var toPackage = await _dbContext.Packages
-                    .FirstOrDefaultAsync(x => x.Platform == platform && x.Architecture == architecture && x.Version == to);
+                    .FirstOrDefaultAsync(x => x.Platform == platform && x.Architecture == architecture && x.Version == toVersion);
                 if (fromPackage is null || toPackage is null)
                 {
                     return null;
