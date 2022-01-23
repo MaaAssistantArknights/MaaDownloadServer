@@ -10,7 +10,7 @@ using Serilog;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
-    .AddJsonFile("appsettings.Development.json", optional: true)
+    .AddJsonFile("appsettings.Development.json", true)
     .AddEnvironmentVariables()
     .AddCommandLine(args)
     .Build();
@@ -32,19 +32,24 @@ if (Directory.Exists(configuration["MaaServer:DataDirectories:RootPath"]) is fal
 
 var subDirectories = new[]
 {
-    configuration["MaaServer:DataDirectories:SubDirectories:Downloads"],
-    configuration["MaaServer:DataDirectories:SubDirectories:Public"],
-    configuration["MaaServer:DataDirectories:SubDirectories:Resources"],
-    configuration["MaaServer:DataDirectories:SubDirectories:Database"],
-    configuration["MaaServer:DataDirectories:SubDirectories:Temp"]
+    (configuration["MaaServer:DataDirectories:SubDirectories:Downloads"], true),
+    (configuration["MaaServer:DataDirectories:SubDirectories:Public"], false),
+    (configuration["MaaServer:DataDirectories:SubDirectories:Resources"], false),
+    (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
+    (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true)
 };
 
-foreach (var subDirectory in subDirectories)
+foreach (var (subDirectory, initRequired) in subDirectories)
 {
     var dir = Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], subDirectory);
-    if (Directory.Exists(dir) is false)
+    var di = new DirectoryInfo(dir);
+    if (initRequired && di.Exists)
     {
-        Directory.CreateDirectory(dir);
+        di.Delete();
+    }
+    if (di.Exists is false)
+    {
+        di.Create();
     }
 }
 
