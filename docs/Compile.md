@@ -17,7 +17,7 @@
 
 运行格式：`./publish.sh [options]`
 
-Options 格式：`-<option> <value>`
+Options 格式：`--<option> <value>`
 
 ### 可用参数
 
