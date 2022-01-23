@@ -10,12 +10,12 @@
 * 用任何方法把这个仓库里的代码弄到本地
 * 打开命令行 (CMD/PowerShell/Bash...)
 * CD 到项目目录
-* 执行 `publish.sh` 或者 `publish.sh1` 文件，参数见下面
+* 执行 `publish.sh` 或者 `publish.ps1` 文件，参数见下面
 * Publish 文件在 `./publish` 目录下，同时会打包为 `./MaaDownloadServer-{Configuration}-{Framework}-{RID}.zip` 文件
 
 ## Publish 参数
 
-运行格式：`./publish.sh [options]`
+运行格式：`./publish.sh [options]` 或者 `./publish.ps1 [options]`
 
 Options 格式：`--<option> <value>`
 
