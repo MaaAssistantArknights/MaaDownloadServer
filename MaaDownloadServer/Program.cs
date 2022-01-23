@@ -57,6 +57,8 @@ foreach (var (subDirectory, initRequired) in subDirectories)
 #endregion
 
 var builder = WebApplication.CreateBuilder(args);
+var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
+builder.WebHost.UseUrls(url);
 
 #region Services
 
