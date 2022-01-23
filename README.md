@@ -13,3 +13,4 @@ MAA 更新和下载服务器用于 MAA 本体在国内的下载加速和提供�
 
 * [编译和打包](./docs/Compile.md)
 * [运行配置](./docs/Run.md)
+* [API 文档](./docs/Api.md)
