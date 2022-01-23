@@ -79,12 +79,12 @@ public class UpdateManagerService : IUpdateManagerService
                         // __MACOSX 属于 MacOs 使用的 APFS 文件系统使用的文件夹，排除此项，防止因失误打包进来
                         .Where(x => x.FullName.Contains("__MACOSX") is false);
                 var resInfos = (from fi in fis
-                        let relativePath = fi.FullName
-                            .Replace(fi.Name, string.Empty)
-                            .Replace($"/{id.ToString()}", string.Empty)
-                            .Replace(_tempDirectory.FullName, string.Empty)
-                        let hash = HashUtil.ComputeFileMd5Hash(fi.FullName)
-                        select new ResourceInfo(fi.FullName, relativePath, hash)).ToList();
+                                let relativePath = fi.FullName
+                                    .Replace(fi.Name, string.Empty)
+                                    .Replace($"/{id}", string.Empty)
+                                    .Replace(_tempDirectory.FullName, string.Empty)
+                                let hash = HashUtil.ComputeFileMd5Hash(fi.FullName)
+                                select new ResourceInfo(fi.FullName, relativePath, hash)).ToList();
                 versionToResourceInfo.Add((id, p, a), resInfos);
                 _logger.LogDebug("已完成 版本-ResInfo 索引，JobId：{jobId}，dZipId：{dZipId}", _jobId, id);
             }
@@ -204,7 +204,7 @@ public class UpdateManagerService : IUpdateManagerService
         downloadContentInfos.AsParallel().ForAll(info =>
         {
             var filePath = Path.Combine(_downloadDirectory.FullName, $"{info.Id}.zip");
-            var responseResult= httpClient.GetAsync(info.DownloadUrl);
+            var responseResult = httpClient.GetAsync(info.DownloadUrl);
             using var memStream = responseResult.Result.Content.ReadAsStreamAsync().Result;
             using var fileStream = File.Create(filePath);
             memStream.CopyTo(fileStream);

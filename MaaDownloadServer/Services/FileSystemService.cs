@@ -30,7 +30,7 @@ public class FileSystemService : IFileSystemService
         var filePath = Path.Combine(
             _configurationService.GetDownloadDirectory(),
             jobId.ToString(),
-            $"{fileId.ToString()}.zip");
+            $"{fileId}.zip");
         var targetFolder = Path.Combine(
             _configurationService.GetTempDirectory(),
             jobId.ToString(),
@@ -62,7 +62,7 @@ public class FileSystemService : IFileSystemService
             var path = Path.Combine(
                 _configurationService.GetDownloadDirectory(),
                 jobId.ToString(),
-                $"{id.ToString()}.zip");
+                $"{id}.zip");
             if (File.Exists(path) is false)
             {
                 _logger.LogError("正在准备移动完整包至 Public 但是文件 {Path} 不存在", path);
@@ -125,14 +125,14 @@ public class FileSystemService : IFileSystemService
         // 在新版本中选择 路径/文件名/Hash 三者存在不同的文件，为新增文件
         // 可能是二进制文件更新导致 Hash 不同，可能是文件移动导致路径不同，可能是文件重命名导致文件名不同
         var newRes = (from r in toPackage.Resources
-            let isOld = fromPackage.Resources.Exists(x => x.Hash == r.Hash && x.FileName == r.FileName && x.Path == r.Path)
-            where isOld is false
-            select r).ToList();
+                      let isOld = fromPackage.Resources.Exists(x => x.Hash == r.Hash && x.FileName == r.FileName && x.Path == r.Path)
+                      where isOld is false
+                      select r).ToList();
         // 不需要的指 旧版本存在，但是新版本中，同路径、同文件名、同 Hash 的文件不存在的资源
         var unNeededRes = (from r in fromPackage.Resources
-            let isOld = toPackage.Resources.Exists(x => x.Hash == r.Hash && x.FileName == r.FileName && x.Path == r.Path)
-            where isOld is false
-            select r).ToList();
+                           let isOld = toPackage.Resources.Exists(x => x.Hash == r.Hash && x.FileName == r.FileName && x.Path == r.Path)
+                           where isOld is false
+                           select r).ToList();
         var diff = new UpdateDiff(fromPackage.Version, toPackage.Version,
             toPackage.Platform, toPackage.Architecture,
             newRes, unNeededRes);
