@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using MaaDownloadServer.Jobs;
 using MaaDownloadServer.Services;
 using Microsoft.AspNetCore.StaticFiles;
@@ -56,16 +57,26 @@ foreach (var (subDirectory, initRequired) in subDirectories)
 #endregion
 
 var builder = WebApplication.CreateBuilder(args);
+
+#region Services
+
 builder.Host.UseSerilog();
+builder.Services.AddOptions();
+builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
 builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 builder.Services.AddQuartzFetchGithubReleaseJob(configuration);
 builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
 });
+
+#endregion
 
 var app = builder.Build();
 
@@ -85,6 +96,8 @@ if (File.Exists(
 }
 
 #endregion
+
+app.UseIpRateLimiting();
 
 #region File server middleware
 
