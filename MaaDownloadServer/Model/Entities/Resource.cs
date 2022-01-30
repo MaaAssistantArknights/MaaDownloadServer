@@ -14,7 +14,7 @@ namespace MaaDownloadServer.Model.Entities;
 public record Resource(Guid Id, string FileName, string Path, string Hash)
 {
     /// <summary>
-    /// 包 Id
+    /// 资源 Id
     /// </summary>
     [Column("id")]
     [JsonPropertyName("id")]
