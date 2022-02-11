@@ -49,6 +49,16 @@ public static class JobExtension
             {
                 job.WithIdentity("Public-Content-Check-Job", "Database");
             });
+
+            q.ScheduleJob<DropResourceJob>(trigger =>
+            {
+                trigger
+                    .WithIdentity("Drop-Resource-Trigger", "Resource")
+                    .StartNow();
+            }, job =>
+            {
+                job.WithIdentity("Drop-Resource-Job", "Resource");
+            });
         });
     }
 }

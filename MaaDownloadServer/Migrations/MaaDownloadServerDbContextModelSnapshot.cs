@@ -17,6 +17,50 @@ namespace MaaDownloadServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
 
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("image");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ObtainApproach")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("obtain_approach");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("rarity");
+
+                    b.Property<string>("Usage")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("usage");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ark_item");
+                });
+
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.Package", b =>
                 {
                     b.Property<Guid>("Id")

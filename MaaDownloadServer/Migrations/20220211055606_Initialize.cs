@@ -10,6 +10,26 @@ namespace MaaDownloadServer.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ark_item",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    item_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    name = table.Column<string>(type: "TEXT", nullable: true),
+                    description = table.Column<string>(type: "TEXT", nullable: true),
+                    usage = table.Column<string>(type: "TEXT", nullable: true),
+                    obtain_approach = table.Column<string>(type: "TEXT", nullable: true),
+                    rarity = table.Column<int>(type: "INTEGER", nullable: false),
+                    image = table.Column<string>(type: "TEXT", nullable: true),
+                    category = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ark_item", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "package",
                 columns: table => new
                 {
@@ -86,6 +106,9 @@ namespace MaaDownloadServer.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ark_item");
+
             migrationBuilder.DropTable(
                 name: "PackageResource");
 
