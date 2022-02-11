@@ -107,7 +107,8 @@ var provider = new FileExtensionContentTypeProvider
 {
     Mappings =
     {
-        [".zip"] = "application/octet-stream"
+        [".zip"] = "application/octet-stream",
+        [".png"] = "image/png",
     }
 };
 
@@ -119,7 +120,10 @@ app.UseFileServer(new FileServerOptions
         OnPrepareResponse = context =>
         {
             var fn = context.File.Name;
-            context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={fn}");
+            var ext = Path.GetExtension(fn);
+            if (provider.Mappings[ext] == "application/octet-stream") {
+                context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={fn}");
+            }
         }
     },
     FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], "public")),
