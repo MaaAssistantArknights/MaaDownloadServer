@@ -4,7 +4,7 @@ namespace MaaDownloadServer.External;
 
 public class Python
 {
-    public static bool EnvironmentCheck(ILogger<Python> logger, string pythonExecutable)
+    public static bool EnvironmentCheck(ILogger logger, string pythonExecutable)
     {
         // 检查 Python 是否存在
         try
@@ -100,12 +100,20 @@ public class Python
         return true;
     }
 
-    public static bool CreateVirtualEnvironment(ILogger<Python> logger, string pythonExecutable, string virtualenvPath, string requirements)
+    public static bool CreateVirtualEnvironment(ILogger logger, string pythonExecutable, string virtualenvPath, string requirements)
     {
         if (Directory.Exists(virtualenvPath))
         {
-            logger.LogWarning("已存在的 Python 虚拟环境：{Path}", virtualenvPath);
-            return true;
+            var bin = Path.Combine(virtualenvPath, "bin");
+            if (Directory.Exists(bin))
+            {
+                var pythonExist = Directory.GetFiles(bin, "python*").Any();
+                if (pythonExist)
+                {
+                    logger.LogWarning("已存在的 Python 虚拟环境：{Path}", virtualenvPath);
+                    return true;
+                }
+            }
         }
 
         try
@@ -182,7 +190,7 @@ public class Python
         return true;
     }
 
-    public static string Run(ILogger<Python> logger, string pythonExecutable, string scriptFile, IEnumerable<string> args)
+    public static string Run(ILogger logger, string pythonExecutable, string scriptFile, IEnumerable<string> args)
     {
         try
         {
