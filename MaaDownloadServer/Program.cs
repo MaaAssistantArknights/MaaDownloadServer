@@ -1,11 +1,15 @@
+using System.Text.Json;
 using AspNetCoreRateLimit;
+using MaaDownloadServer.External;
 using MaaDownloadServer.Jobs;
+using MaaDownloadServer.Model.External;
 using MaaDownloadServer.Services;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 #region Build configuration and logger
 
@@ -37,7 +41,9 @@ var subDirectories = new[]
     (configuration["MaaServer:DataDirectories:SubDirectories:Public"], false),
     (configuration["MaaServer:DataDirectories:SubDirectories:Resources"], false),
     (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
-    (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true)
+    (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
+    (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
+    (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false)
 };
 
 foreach (var (subDirectory, initRequired) in subDirectories)
@@ -56,12 +62,69 @@ foreach (var (subDirectory, initRequired) in subDirectories)
 
 #endregion
 
+#region Python environment and script configuration
+
+var basePythonInterpreter = configuration["MaaServer:ScriptEngine:Python"];
+var logger = new SerilogLoggerProvider(Log.Logger).CreateLogger(nameof(Python));
+
+// Check Python Interpreter Exist
+var pythonInterpreterExist = Python.EnvironmentCheck(logger, basePythonInterpreter);
+if (pythonInterpreterExist is false)
+{
+    Log.Logger.Fatal("Python 解释器不存在，请检查配置");
+    return -1;
+}
+
+// Init Python environment
+var scriptRootDirectory = new DirectoryInfo(Path.Combine(
+    configuration["MaaServer:DataDirectories:RootPath"],
+    configuration["MaaServer:DataDirectories:SubDirectories:Scripts"]));
+var venvRootDirectory = new DirectoryInfo(Path.Combine(
+    configuration["MaaServer:DataDirectories:RootPath"],
+    configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"]));
+
+var scriptDirectories = scriptRootDirectory.GetDirectories();
+
+var componentConfigurations = new List<ComponentConfiguration>();
+foreach (var scriptDirectory in scriptDirectories)
+{
+    var configurationFile = Path.Combine(scriptDirectory.FullName, "component.json");
+    if (File.Exists(configurationFile) is false)
+    {
+        return -1;
+    }
+
+    try
+    {
+        using var configFileStream = File.OpenRead(configurationFile);
+        var configObj = JsonSerializer.Deserialize<ComponentConfiguration>(configFileStream);
+        componentConfigurations.Add(configObj);
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "解析组件配置文件失败");
+        return -1;
+    }
+
+    var venvDirectory = Path.Combine(
+        venvRootDirectory.FullName,
+        scriptDirectory.Name);
+    var requirements = scriptDirectory.GetFiles().FirstOrDefault(x => x.Name == "requirements.txt");
+    var pyVenvCreateStatus = Python.CreateVirtualEnvironment(logger, basePythonInterpreter, venvDirectory, requirements?.FullName);
+    if (pyVenvCreateStatus is false)
+    {
+        logger.LogCritical("Python 虚拟环境创建失败，venvDirectory: {venvDirectory}", venvDirectory);
+        return -1;
+    }
+}
+
+#endregion
+
 var builder = WebApplication.CreateBuilder(args);
 var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
 builder.WebHost.UseUrls(url);
 
 #region Services
-
 builder.Host.UseSerilog();
 builder.Services.AddOptions();
 builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
@@ -72,7 +135,7 @@ builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-builder.Services.AddQuartzFetchGithubReleaseJob(configuration);
+builder.Services.AddQuartzFetchGithubReleaseJob(configuration, componentConfigurations);
 builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
@@ -132,4 +195,8 @@ app.UseFileServer(new FileServerOptions
 #endregion
 
 app.MapControllers();
+
+GC.Collect();
+GC.WaitForPendingFinalizers();
+
 app.Run();
