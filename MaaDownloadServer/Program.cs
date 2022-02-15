@@ -1,10 +1,11 @@
+using System.Text;
 using System.Text.Json;
+using System.Web;
 using AspNetCoreRateLimit;
 using MaaDownloadServer.External;
 using MaaDownloadServer.Jobs;
 using MaaDownloadServer.Model.External;
 using MaaDownloadServer.Services;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
@@ -166,23 +167,21 @@ app.UseIpRateLimiting();
 
 #region File server middleware
 
-var provider = new FileExtensionContentTypeProvider
-{
-    Mappings =
-    {
-        [".zip"] = "application/octet-stream"
-    }
-};
-
 app.UseFileServer(new FileServerOptions
 {
     StaticFileOptions =
     {
-        ContentTypeProvider = provider,
+        DefaultContentType = "application/octet-stream",
         OnPrepareResponse = context =>
         {
             var fn = context.File.Name;
-            context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={fn}");
+            if (fn is null)
+            {
+                return;
+            }
+
+            var encodedName = HttpUtility.UrlEncode(fn, Encoding.UTF8);
+            context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
         }
     },
     FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], "public")),
