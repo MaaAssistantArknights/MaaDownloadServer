@@ -4,26 +4,32 @@ using Fizzler.Systems.HtmlAgilityPack;
 
 namespace MaaDownloadServer.Jobs;
 
-public class DropResourceJob : IJob
+public class GameDataUpdateJob : IJob
 {
 
-    private readonly ILogger<DropResourceJob> _logger;
+    private readonly ILogger<GameDataUpdateJob> _logger;
     private readonly IConfigurationService _configurationService;
     private readonly MaaDownloadServerDbContext _dbContext;
-    private readonly string _itemDirectoryPath;
+    private readonly string _dataDirectoryPath;
 
-    public DropResourceJob(
-        ILogger<DropResourceJob> logger,
+    public GameDataUpdateJob(
+        ILogger<GameDataUpdateJob> logger,
         IConfigurationService configurationService,
         MaaDownloadServerDbContext dbContext)
     {
         _logger = logger;
         _configurationService = configurationService;
         _dbContext = dbContext;
-        _itemDirectoryPath = Path.Combine(_configurationService.GetPublicDirectory(), "resource/item");
-        if (!Directory.Exists(_itemDirectoryPath))
+        _dataDirectoryPath = Path.Combine(_configurationService.GetResourcesDirectory(), "gamedata");
+        if (!Directory.Exists(_dataDirectoryPath))
         {
-            Directory.CreateDirectory(_itemDirectoryPath);
+            Directory.CreateDirectory(_dataDirectoryPath);
+        }
+
+        var itemImageDirectoryPath = Path.Combine(_dataDirectoryPath, "items");
+        if (!Directory.Exists(itemImageDirectoryPath))
+        {
+            Directory.CreateDirectory(itemImageDirectoryPath);
         }
     }
 
@@ -38,23 +44,33 @@ public class DropResourceJob : IJob
         html.LoadHtml(results);
         var doc = html.DocumentNode;
         var nodes = doc.QuerySelectorAll(".smwdata");
-        foreach (var node in nodes)
+
+        nodes.AsParallel().ForAll(node =>
         {
             var attrs = node.Attributes;
             var itemId = Convert.ToInt32(attrs["data-id"].Value);
             var name = attrs["data-name"].Value;
-            if (_dbContext.ArkItems.Where(item => item.Name == name).Count() != 0) continue;
-
+            lock (this)
+            {
+                if (_dbContext.ArkItems.Where(item => item.Name == name).Count() != 0)
+                    return;
+            }
 
             var url = String.Format("https:{0}", attrs["data-file"].Value);
 
             using (var httpClient = new HttpClient())
             {
-                var filePath = Path.Combine(_itemDirectoryPath, $"{name}.png");
-                var responseResult = httpClient.GetAsync(url);
-                using var memStream = responseResult.Result.Content.ReadAsStreamAsync().Result;
-                using var fileStream = File.Create(filePath);
-                memStream.CopyTo(fileStream);
+                var filePath = Path.Combine(_dataDirectoryPath, $"items/{name}.png");
+                try
+                {
+                    var responseResult = httpClient.GetAsync(url);
+                    using var memStream = responseResult.Result.Content.ReadAsStreamAsync().Result;
+                    using var fileStream = File.Create(filePath);
+                    memStream.CopyTo(fileStream);
+                }
+                catch (System.Exception) {
+                    
+                }
             }
 
             ArkItem item = new(
@@ -68,12 +84,12 @@ public class DropResourceJob : IJob
                 attrs["data-category"].Value
             );
             _dbContext.ArkItems.AddAsync(item);
-        }
+        });
+        _dbContext.SaveChanges();
     }
     public Task Execute(IJobExecutionContext context)
     {
         PtrsGet();
-        _dbContext.SaveChanges();
         return Task.CompletedTask;
     }
 }

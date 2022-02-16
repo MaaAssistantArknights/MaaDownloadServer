@@ -50,14 +50,14 @@ public static class JobExtension
                 job.WithIdentity("Public-Content-Check-Job", "Database");
             });
 
-            q.ScheduleJob<DropResourceJob>(trigger =>
+            q.ScheduleJob<GameDataUpdateJob>(trigger =>
             {
                 trigger
-                    .WithIdentity("Drop-Resource-Trigger", "Resource")
+                    .WithIdentity("GameData-Update-Trigger", "Resource")
                     .StartNow();
             }, job =>
             {
-                job.WithIdentity("Drop-Resource-Job", "Resource");
+                job.WithIdentity("GameData-Update-Job", "Resource");
             });
         });
     }

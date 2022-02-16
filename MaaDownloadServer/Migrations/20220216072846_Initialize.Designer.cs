@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MaaDownloadServer.Migrations
 {
     [DbContext(typeof(MaaDownloadServerDbContext))]
-    [Migration("20220211055606_Initialize")]
+    [Migration("20220216072846_Initialize")]
     partial class Initialize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
