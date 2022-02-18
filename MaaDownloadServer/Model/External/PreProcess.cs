@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MaaDownloadServer.Model.External;
 
@@ -9,5 +10,5 @@ public class PreProcess<T> where T : Enum
     public T Operation { get; set; }
 
     [JsonPropertyName("args")]
-    public Dictionary<string, object> Args { get; set; }
+    public JsonElement Args { get; set; }
 }
