@@ -9,82 +9,97 @@ public class FileSystemService : IFileSystemService
 {
     private readonly MaaDownloadServerDbContext _dbContext;
     private readonly ILogger<FileSystemService> _logger;
-    private readonly IConfiguration _configuration;
     private readonly IConfigurationService _configurationService;
 
     public FileSystemService(
         MaaDownloadServerDbContext dbContext,
         ILogger<FileSystemService> logger,
-        IConfiguration configuration,
         IConfigurationService configurationService)
     {
         _dbContext = dbContext;
         _logger = logger;
-        _configuration = configuration;
         _configurationService = configurationService;
     }
 
     /// <inheritdoc />
-    public Guid UnZipDownloadFile(Guid jobId, Guid fileId)
+    public string CreateZipFile(string sourceFolder, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false)
     {
-        var filePath = Path.Combine(
-            _configurationService.GetDownloadDirectory(),
-            jobId.ToString(),
-            $"{fileId}.zip");
-        var targetFolder = Path.Combine(
-            _configurationService.GetTempDirectory(),
-            jobId.ToString(),
-            fileId.ToString());
-        ZipFile.ExtractToDirectory(filePath, targetFolder);
-
-        // 压缩待压缩的文件夹
-        var pendingZippedFolder = _configuration.GetSection("MaaServer:ZipRequiredFolder")
-            .GetChildren().Select(x => x.Value).ToList();
-        foreach (var pzd in pendingZippedFolder)
+        if (targetName is null)
         {
-            var pdzDi = new DirectoryInfo(Path.Combine(targetFolder, pzd));
-            if (pdzDi.Exists is false)
-            {
-                continue;
-            }
-            ZipFile.CreateFromDirectory(pdzDi.FullName, Path.Combine(targetFolder, $"{pzd}.zip"));
-            pdzDi.Delete(true);
+            throw new ArgumentNullException(nameof(targetName));
         }
-        return fileId;
+
+        if (Directory.Exists(sourceFolder) is false)
+        {
+            throw new DirectoryNotFoundException($"文件夹 {sourceFolder} 不存在");
+        }
+
+        if (File.Exists(targetName))
+        {
+            throw new FileNotFoundException($"文件 {targetName} 已存在");
+        }
+
+        ZipFile.CreateFromDirectory(sourceFolder, targetName, level, false);
+        if (deleteSource)
+        {
+            Directory.Delete(sourceFolder, true);
+        }
+
+        return targetName;
     }
 
     /// <inheritdoc />
-    public async Task<List<PublicContent>> AddFullPackage(Guid jobId, SemVersion version, Dictionary<(Platform, Architecture), Guid> files)
+    public string CreateZipFile(IEnumerable<string> sourceFiles, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false)
     {
-        var publicContents = new List<PublicContent>();
-        foreach (var ((p, a), id) in files)
+        var randomId = Guid.NewGuid().ToString();
+        var tempFolder = Path.Combine(_configurationService.GetTempDirectory(), randomId);
+        Directory.CreateDirectory(tempFolder);
+        foreach (var sourceFile in sourceFiles)
         {
-            var path = Path.Combine(
-                _configurationService.GetDownloadDirectory(),
-                jobId.ToString(),
-                $"{id}.zip");
-            if (File.Exists(path) is false)
+            var fi = new FileInfo(sourceFile);
+            if (fi.Exists)
             {
-                _logger.LogError("正在准备移动完整包至 Public 但是文件 {Path} 不存在", path);
-                return null;
+                fi.CopyTo(Path.Combine(tempFolder, fi.Name));
+                continue;
             }
-
-            var hash = HashUtil.ComputeFileMd5Hash(path);
-            var publicContentTag = new PublicContentTag(PublicContentTagType.FullPackage, p, a, version);
-            publicContents.Add(new PublicContent(
-                id,
-                publicContentTag.ParseToTagString(),
-                DateTime.Now,
-                hash,
-                DateTime.Now.AddDays(_configurationService.GetPublicContentAutoBundledDuration())));
-            var targetPath = Path.Combine(
-                _configurationService.GetPublicDirectory(),
-                $"{id}.zip");
-            File.Move(path, targetPath);
+            Directory.Delete(tempFolder, true);
+            throw new FileNotFoundException($"文件 {sourceFile} 不存在");
         }
-        await _dbContext.PublicContents.AddRangeAsync(publicContents);
+
+        return CreateZipFile(tempFolder, targetName, level, deleteSource);
+    }
+
+    /// <inheritdoc />
+    public async Task<PublicContent> AddFullPackage(Guid jobId, string componentName, DownloadContentInfo downloadContentInfo)
+    {
+        var path = Path.Combine(
+            _configurationService.GetDownloadDirectory(),
+            jobId.ToString(),
+            $"{downloadContentInfo.Id}.{downloadContentInfo.FileExtension}");
+        if (File.Exists(path) is false)
+        {
+            _logger.LogError("正在准备复制完整包至 Public 但是文件 {Path} 不存在", path);
+            return null;
+        }
+
+        var hash = HashUtil.ComputeFileMd5Hash(path);
+        var publicContentTag = new PublicContentTag(PublicContentTagType.FullPackage, downloadContentInfo.Platform,
+            downloadContentInfo.Architecture, componentName, SemVersion.Parse(downloadContentInfo.Version));
+
+        var pc = new PublicContent(
+            downloadContentInfo.Id,
+            downloadContentInfo.FileExtension,
+            publicContentTag.ParseToTagString(),
+            DateTime.Now,
+            hash,
+            DateTime.Now.AddDays(_configurationService.GetPublicContentAutoBundledDuration()));
+        var targetPath = Path.Combine(
+            _configurationService.GetPublicDirectory(),
+            $"{downloadContentInfo.Id}.{downloadContentInfo.FileExtension}");
+        File.Copy(path, targetPath);
+        await _dbContext.PublicContents.AddAsync(pc);
         await _dbContext.SaveChangesAsync();
-        return publicContents;
+        return pc;
     }
 
     /// <inheritdoc />
@@ -164,7 +179,7 @@ public class FileSystemService : IFileSystemService
             var zipFile = Path.Combine(_configurationService.GetTempDirectory(), $"{id}.zip");
             ZipFile.CreateFromDirectory(tempFolder.FullName, zipFile);
             var hash = HashUtil.ComputeFileMd5Hash(zipFile);
-            pcs.Add(new PublicContent(id, pcTag, DateTime.Now, hash, DateTime.Now.AddDays(_configurationService.GetPublicContentDefaultDuration())));
+            pcs.Add(new PublicContent(id, "zip", pcTag, DateTime.Now, hash, DateTime.Now.AddDays(_configurationService.GetPublicContentDefaultDuration())));
             File.Move(zipFile, Path.Combine(_configurationService.GetPublicDirectory(), $"{id}.zip"));
             tempFolder.Delete(true);
             _logger.LogInformation("已打包更新包 {Id}，MD5校验 = {Hash}", id, hash);

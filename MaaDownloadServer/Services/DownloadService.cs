@@ -22,9 +22,9 @@ public class DownloadService : IDownloadService
         _dbContext = dbContext;
     }
 
-    public async Task<PublicContent> GetFullPackage(Platform platform, Architecture architecture, SemVersion version)
+    public async Task<PublicContent> GetFullPackage(string componentName, Platform platform, Architecture architecture, SemVersion version)
     {
-        var cacheKey = _cacheService.GetDownloadFullPackageKey(platform, architecture, version.ToString());
+        var cacheKey = _cacheService.GetDownloadFullPackageKey(componentName, platform, architecture, version.ToString());
         PublicContent pc;
         if (_cacheService.Contains(cacheKey))
         {
@@ -34,7 +34,7 @@ public class DownloadService : IDownloadService
         else
         {
             _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
-            var tag = new PublicContentTag(PublicContentTagType.FullPackage, platform, architecture, version).ParseToTagString();
+            var tag = new PublicContentTag(PublicContentTagType.FullPackage, platform, architecture, componentName, version).ParseToTagString();
             pc = await _dbContext.PublicContents.FirstOrDefaultAsync(x => x.Tag == tag);
             if (pc is not null)
             {
@@ -44,9 +44,9 @@ public class DownloadService : IDownloadService
         return pc;
     }
 
-    public async Task<PublicContent> GetUpdatePackage(Platform platform, Architecture architecture, SemVersion from, SemVersion to)
+    public async Task<PublicContent> GetUpdatePackage(string componentName, Platform platform, Architecture architecture, SemVersion from, SemVersion to)
     {
-        var cacheKey = _cacheService.GetDownloadUpdatePackageKey(platform, architecture, from.ToString(), to.ToString());
+        var cacheKey = _cacheService.GetDownloadUpdatePackageKey(componentName, platform, architecture, from.ToString(), to.ToString());
         PublicContent pc;
         if (_cacheService.Contains(cacheKey))
         {
@@ -56,7 +56,7 @@ public class DownloadService : IDownloadService
         else
         {
             _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
-            var tag = new PublicContentTag(PublicContentTagType.UpdatePackage, platform, architecture, from, to).ParseToTagString();
+            var tag = new PublicContentTag(PublicContentTagType.UpdatePackage, platform, architecture, componentName, from, to).ParseToTagString();
             pc = await _dbContext.PublicContents.FirstOrDefaultAsync(x => x.Tag == tag);
             var fromVersion = from.ToString();
             var toVersion = to.ToString();

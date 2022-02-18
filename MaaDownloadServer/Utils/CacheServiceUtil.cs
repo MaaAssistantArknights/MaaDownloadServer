@@ -10,4 +10,8 @@ public static class CacheServiceUtil
     {
         return o.Replace("{a}", a.ToString());
     }
+    internal static string ReplaceComponentName(this string o, string c)
+    {
+        return o.Replace("{c}", c);
+    }
 }

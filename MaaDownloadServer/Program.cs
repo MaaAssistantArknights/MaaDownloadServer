@@ -31,49 +31,65 @@ Log.Logger.Information("启动中...");
 
 #region Data directories
 
-if (Directory.Exists(configuration["MaaServer:DataDirectories:RootPath"]) is false)
+if (configuration.GetValue<bool>("no-data-directory-check") is false)
 {
-    Directory.CreateDirectory(configuration["MaaServer:DataDirectories:RootPath"]);
+    if (Directory.Exists(configuration["MaaServer:DataDirectories:RootPath"]) is false)
+    {
+        Directory.CreateDirectory(configuration["MaaServer:DataDirectories:RootPath"]);
+    }
+
+    var subDirectories = new[]
+    {
+        (configuration["MaaServer:DataDirectories:SubDirectories:Downloads"], true),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Public"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Resources"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false)
+    };
+
+    foreach (var (subDirectory, initRequired) in subDirectories)
+    {
+        var dir = Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], subDirectory);
+        var di = new DirectoryInfo(dir);
+        if (initRequired && di.Exists)
+        {
+            di.Delete();
+        }
+        if (di.Exists is false)
+        {
+            di.Create();
+        }
+    }
 }
-
-var subDirectories = new[]
+else
 {
-    (configuration["MaaServer:DataDirectories:SubDirectories:Downloads"], true),
-    (configuration["MaaServer:DataDirectories:SubDirectories:Public"], false),
-    (configuration["MaaServer:DataDirectories:SubDirectories:Resources"], false),
-    (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
-    (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
-    (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
-    (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false)
-};
-
-foreach (var (subDirectory, initRequired) in subDirectories)
-{
-    var dir = Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], subDirectory);
-    var di = new DirectoryInfo(dir);
-    if (initRequired && di.Exists)
-    {
-        di.Delete();
-    }
-    if (di.Exists is false)
-    {
-        di.Create();
-    }
+    Log.Logger.Warning("跳过了数据目录检查");
 }
 
 #endregion
 
 #region Python environment and script configuration
 
+var noCheckPythonEnvironment = configuration.GetValue<bool>("no-python-environment-check");
+if (noCheckPythonEnvironment)
+{
+    Log.Logger.Warning("跳过了 Python 环境检查");
+}
+
 var basePythonInterpreter = configuration["MaaServer:ScriptEngine:Python"];
 var logger = new SerilogLoggerProvider(Log.Logger).CreateLogger(nameof(Python));
 
-// Check Python Interpreter Exist
-var pythonInterpreterExist = Python.EnvironmentCheck(logger, basePythonInterpreter);
-if (pythonInterpreterExist is false)
+if (noCheckPythonEnvironment is false)
 {
-    Log.Logger.Fatal("Python 解释器不存在，请检查配置");
-    return -1;
+    // Check Python Interpreter Exist
+    var pythonInterpreterExist = Python.EnvironmentCheck(logger, basePythonInterpreter);
+    if (pythonInterpreterExist is false)
+    {
+        Log.Logger.Fatal("Python 解释器不存在，请检查配置");
+        Environment.Exit(-1);
+    }
 }
 
 // Init Python environment
@@ -92,7 +108,7 @@ foreach (var scriptDirectory in scriptDirectories)
     var configurationFile = Path.Combine(scriptDirectory.FullName, "component.json");
     if (File.Exists(configurationFile) is false)
     {
-        return -1;
+        Environment.Exit(-1);
     }
 
     try
@@ -104,18 +120,21 @@ foreach (var scriptDirectory in scriptDirectories)
     catch (Exception ex)
     {
         logger.LogCritical(ex, "解析组件配置文件失败");
-        return -1;
+        Environment.Exit(-1);
     }
 
-    var venvDirectory = Path.Combine(
-        venvRootDirectory.FullName,
-        scriptDirectory.Name);
-    var requirements = scriptDirectory.GetFiles().FirstOrDefault(x => x.Name == "requirements.txt");
-    var pyVenvCreateStatus = Python.CreateVirtualEnvironment(logger, basePythonInterpreter, venvDirectory, requirements?.FullName);
-    if (pyVenvCreateStatus is false)
+    if (noCheckPythonEnvironment is false)
     {
-        logger.LogCritical("Python 虚拟环境创建失败，venvDirectory: {venvDirectory}", venvDirectory);
-        return -1;
+        var venvDirectory = Path.Combine(
+            venvRootDirectory.FullName,
+            scriptDirectory.Name);
+        var requirements = scriptDirectory.GetFiles().FirstOrDefault(x => x.Name == "requirements.txt");
+        var pyVenvCreateStatus = Python.CreateVirtualEnvironment(logger, basePythonInterpreter, venvDirectory, requirements?.FullName);
+        if (pyVenvCreateStatus is false)
+        {
+            logger.LogCritical("Python 虚拟环境创建失败，venvDirectory: {venvDirectory}", venvDirectory);
+            Environment.Exit(-1);
+        }
     }
 }
 

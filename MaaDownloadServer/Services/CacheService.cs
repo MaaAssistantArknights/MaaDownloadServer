@@ -7,13 +7,13 @@ namespace MaaDownloadServer.Services;
 public class CacheService : ICacheService
 {
     private readonly IAppCache _appCache;
-    private const string LatestVersion = "{p}-{a}-versions-latest";
-    private const string Version = "{p}-{a}-versions-{v}";
-    private const string Versions = "{p}-{a}-versions-all-{page}";
-    private const string AllSupportedPlatforms = "all-supported-platforms";
-    private const string PlatformSupportedArchitectures = "{p}-supported-architectures";
-    private const string DownloadFullPackage = "{p}-{a}-pc-f-{v}";
-    private const string DownloadUpdatePackage = "{p}-{a}-pc-u-{from}-{to}";
+    private const string LatestVersion = "{c}-{p}-{a}-versions-latest";
+    private const string Version = "{c}-{p}-{a}-versions-{v}";
+    private const string Versions = "{c}-{p}-{a}-versions-all-{page}";
+    private const string AllSupportedPlatforms = "{c}-all-supported-platforms";
+    private const string PlatformSupportedArchitectures = "{c}-{p}-supported-architectures";
+    private const string DownloadFullPackage = "{c}-{p}-{a}-pc-f-{v}";
+    private const string DownloadUpdatePackage = "{c}-{p}-{a}-pc-u-{from}-{to}";
 
     private readonly int _cacheExpirationInMinutes;
 
@@ -110,39 +110,39 @@ public class CacheService : ICacheService
         return _appCache.Get<T>(key);
     }
 
-    public string GetLatestVersionKey(Platform p, Architecture a)
+    public string GetLatestVersionKey(string componentName, Platform p, Architecture a)
     {
-        return LatestVersion.ReplacePlatform(p).ReplaceArchitecture(a);
+        return LatestVersion.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a);
     }
 
-    public string GetVersionCacheKey(Platform p, Architecture a, string version)
+    public string GetVersionCacheKey(string componentName, Platform p, Architecture a, string version)
     {
-        return Version.ReplacePlatform(p).ReplaceArchitecture(a).Replace("{v}", version);
+        return Version.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a).Replace("{v}", version);
     }
 
-    public string GetVersionsCacheKey(Platform p, Architecture a, int page)
+    public string GetVersionsCacheKey(string componentName, Platform p, Architecture a, int page)
     {
-        return Versions.ReplacePlatform(p).ReplaceArchitecture(a).Replace("{page}", page.ToString());
+        return Versions.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a).Replace("{page}", page.ToString());
     }
 
-    public string GetAllSupportedPlatformsKey()
+    public string GetAllSupportedPlatformsKey(string componentName)
     {
-        return AllSupportedPlatforms;
+        return AllSupportedPlatforms.ReplaceComponentName(componentName);
     }
 
-    public string GetPlatformSupportedArchitecturesKey(Platform p)
+    public string GetPlatformSupportedArchitecturesKey(string componentName, Platform p)
     {
-        return PlatformSupportedArchitectures.ReplacePlatform(p);
+        return PlatformSupportedArchitectures.ReplaceComponentName(componentName).ReplacePlatform(p);
     }
 
-    public string GetDownloadFullPackageKey(Platform p, Architecture a, string version)
+    public string GetDownloadFullPackageKey(string componentName, Platform p, Architecture a, string version)
     {
-        return DownloadFullPackage.ReplacePlatform(p).ReplaceArchitecture(a).Replace("{v}", version);
+        return DownloadFullPackage.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a).Replace("{v}", version);
     }
 
-    public string GetDownloadUpdatePackageKey(Platform p, Architecture a, string from, string to)
+    public string GetDownloadUpdatePackageKey(string componentName, Platform p, Architecture a, string from, string to)
     {
-        return DownloadUpdatePackage.ReplacePlatform(p).ReplaceArchitecture(a)
+        return DownloadUpdatePackage.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a)
             .Replace("{from}", from).Replace("{to}", to);
     }
 }
