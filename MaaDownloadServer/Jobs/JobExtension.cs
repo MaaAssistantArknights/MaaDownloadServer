@@ -54,6 +54,7 @@ public static class JobExtension
             {
                 trigger
                     .WithIdentity("GameData-Update-Trigger", "Resource")
+                    .WithCronSchedule("0 0 4,16 * * *")
                     .StartNow();
             }, job =>
             {
