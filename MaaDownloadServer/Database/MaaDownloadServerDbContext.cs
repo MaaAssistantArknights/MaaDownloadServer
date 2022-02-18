@@ -19,6 +19,8 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<PublicContent> PublicContents { get; set; }
     public DbSet<ArkItem> ArkItems { get; set; }
 
+    public DbSet<ArkStage> ArkStages { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var connectionString = $"Data Source={Path.Combine(_configuration["MaaServer:DataDirectories:RootPath"], _configuration["MaaServer:DataDirectories:SubDirectories:Database"], "data.db")};";

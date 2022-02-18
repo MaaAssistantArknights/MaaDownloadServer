@@ -20,27 +20,25 @@ public class ItemController : ControllerBase
     [HttpGet("{name}")]
     public async Task<ActionResult<ArkItem>> GetItemInfo(string name)
     {
-        var item = _dbContext.ArkItems.Where(item => item.Name == name).AsEnumerable();
-        if (item.Count() == 0)
-        {
+        var item = _dbContext.ArkItems.FirstOrDefault(item => item.Name == name);
+        if (item is null) {
             return NotFound();
         }
-        return Ok(item.ElementAt(0));
+        return Ok(item);
     }
 
     [HttpGet("{name}/image")]
     [HttpRequestPriority(2)]
     public async Task<ActionResult> GetItemImage(string name)
     {
-        var item = _dbContext.ArkItems.Where(item => item.Name == name).AsEnumerable();
-        if (item.Count() == 0)
-        {
+        var item = _dbContext.ArkItems.FirstOrDefault(item => item.Name == name);
+        if (item is null) {
             return NotFound();
         }
         var imagePath = Path.Combine(
             _configuration["MaaServer:DataDirectories:RootPath"],
             _configuration["MaaServer:DataDirectories:SubDirectories:Resources"], 
-            $"gamedata/items/{item.ElementAt(0).Image}"
+            $"gamedata/items/{item.Image}"
         );
         if (!System.IO.File.Exists(imagePath)) {
             return NotFound();
