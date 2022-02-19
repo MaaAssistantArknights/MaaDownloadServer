@@ -57,9 +57,16 @@ public class FileSystemService : IFileSystemService
         foreach (var sourceFile in sourceFiles)
         {
             var fi = new FileInfo(sourceFile);
+            var di = new DirectoryInfo(sourceFile);
             if (fi.Exists)
             {
                 fi.CopyTo(Path.Combine(tempFolder, fi.Name));
+                continue;
+            }
+
+            if (di.Exists)
+            {
+                di.CopyTo(Path.Combine(tempFolder, di.Name));
                 continue;
             }
             Directory.Delete(tempFolder, true);
