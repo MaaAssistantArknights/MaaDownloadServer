@@ -55,7 +55,7 @@ if (configuration.GetValue<bool>("no-data-directory-check") is false)
         var di = new DirectoryInfo(dir);
         if (initRequired && di.Exists)
         {
-            di.Delete();
+            di.Delete(true);
         }
         if (di.Exists is false)
         {
@@ -79,7 +79,7 @@ if (noCheckPythonEnvironment)
 }
 
 var basePythonInterpreter = configuration["MaaServer:ScriptEngine:Python"];
-var logger = new SerilogLoggerProvider(Log.Logger).CreateLogger(nameof(Python));
+var logger = new SerilogLoggerFactory(Log.Logger).CreateLogger<Python>();
 
 if (noCheckPythonEnvironment is false)
 {
