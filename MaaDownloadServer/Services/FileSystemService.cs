@@ -49,31 +49,62 @@ public class FileSystemService : IFileSystemService
     }
 
     /// <inheritdoc />
-    public string CreateZipFile(IEnumerable<string> sourceFiles, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false)
+    public string CreateZipFile(IEnumerable<string> sourceFiles, IEnumerable<string> sourceDirectories,
+        string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false)
     {
         var randomId = Guid.NewGuid().ToString();
         var tempFolder = Path.Combine(_configurationService.GetTempDirectory(), randomId);
         Directory.CreateDirectory(tempFolder);
-        foreach (var sourceFile in sourceFiles)
+        var fileEnumerable = sourceFiles as string[] ?? sourceFiles.ToArray();
+        var directoryEnumerable = sourceDirectories as string[] ?? sourceDirectories.ToArray();
+        foreach (var sourceFile in fileEnumerable)
         {
             var fi = new FileInfo(sourceFile);
-            var di = new DirectoryInfo(sourceFile);
             if (fi.Exists)
             {
                 fi.CopyTo(Path.Combine(tempFolder, fi.Name));
-                continue;
-            }
-
-            if (di.Exists)
-            {
-                di.CopyTo(Path.Combine(tempFolder, di.Name));
                 continue;
             }
             Directory.Delete(tempFolder, true);
             throw new FileNotFoundException($"文件 {sourceFile} 不存在");
         }
 
-        return CreateZipFile(tempFolder, targetName, level, deleteSource);
+        foreach (var sourceDirectory in directoryEnumerable)
+        {
+            var di = new DirectoryInfo(sourceDirectory);
+            if (di.Exists)
+            {
+                di.CopyTo(Path.Combine(tempFolder, di.Name));
+                continue;
+            }
+            Directory.Delete(tempFolder, true);
+            throw new DirectoryNotFoundException($"文件夹 {sourceDirectory} 不存在");
+        }
+
+        var result = CreateZipFile(tempFolder, targetName, level, deleteSource);
+
+        if (deleteSource is false)
+        {
+            return result;
+        }
+
+        foreach (var sourceFile in fileEnumerable)
+        {
+            if (File.Exists(sourceFile))
+            {
+                File.Delete(sourceFile);
+            }
+        }
+
+        foreach (var sourceDirectory in directoryEnumerable)
+        {
+            if (Directory.Exists(sourceDirectory))
+            {
+                Directory.Delete(sourceDirectory, true);
+            }
+        }
+
+        return result;
     }
 
     /// <inheritdoc />

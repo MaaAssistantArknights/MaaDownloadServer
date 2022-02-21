@@ -18,12 +18,13 @@ public interface IFileSystemService
     /// <summary>
     /// 创建压缩包
     /// </summary>
-    /// <param name="sourceFiles">源文件/文件夹</param>
+    /// <param name="sourceFiles">源文件</param>
+    /// <param name="sourceDirectories">源文件夹</param>
     /// <param name="targetName">目标文件位置，扩展名必须为 .zip</param>
     /// <param name="level">压缩等级</param>
     /// <param name="deleteSource">是否删除源</param>
     /// <returns></returns>
-    string CreateZipFile(IEnumerable<string> sourceFiles, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false);
+    string CreateZipFile(IEnumerable<string> sourceFiles, IEnumerable<string> sourceDirectories, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false);
 
     /// <summary>
     /// 添加完整包至 Public
