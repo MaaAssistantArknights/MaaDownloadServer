@@ -30,4 +30,10 @@ public record DownloadContentInfo()
     [JsonPropertyName("checksum_type")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public ChecksumType ChecksumType { get; init; }
+
+    [JsonPropertyName("update_time")]
+    public DateTime UpdateTime { get; set; }
+
+    [JsonPropertyName("update_log")]
+    public string UpdateLog { get; set; }
 }
