@@ -14,6 +14,7 @@ public class CacheService : ICacheService
     private const string PlatformSupportedArchitectures = "{c}-{p}-supported-architectures";
     private const string DownloadFullPackage = "{c}-{p}-{a}-pc-f-{v}";
     private const string DownloadUpdatePackage = "{c}-{p}-{a}-pc-u-{from}-{to}";
+    private const string AllComponents = "all-components";
 
     private readonly int _cacheExpirationInMinutes;
 
@@ -144,5 +145,10 @@ public class CacheService : ICacheService
     {
         return DownloadUpdatePackage.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a)
             .Replace("{from}", from).Replace("{to}", to);
+    }
+
+    public string GetAllComponentsKey()
+    {
+        return AllComponents;
     }
 }

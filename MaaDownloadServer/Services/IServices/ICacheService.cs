@@ -19,4 +19,5 @@ public interface ICacheService
     string GetPlatformSupportedArchitecturesKey(string componentName, Platform p);
     string GetDownloadFullPackageKey(string componentName, Platform p, Architecture a, string version);
     string GetDownloadUpdatePackageKey(string componentName, Platform p, Architecture a, string from, string to);
+    string GetAllComponentsKey();
 }

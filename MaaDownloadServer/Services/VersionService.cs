@@ -59,10 +59,10 @@ public class VersionService : IVersionService
             .FirstOrDefaultAsync();
         if (package is null)
         {
-            _cacheService.Add(cacheKey, ("NotExist", DateTime.Now));
+            _cacheService.Add(cacheKey, ("NotExist", DateTime.Now), componentName);
             return (null, DateTime.Now);
         }
-        _cacheService.Add(cacheKey, (package.Version, package.PublishTime));
+        _cacheService.Add(cacheKey, (package.Version, package.PublishTime), componentName);
         return (package.Version, package.PublishTime);
     }
 
@@ -92,10 +92,10 @@ public class VersionService : IVersionService
             .FirstOrDefaultAsync();
         if (package is null)
         {
-            _cacheService.Add(cacheKey, ("NotExist", DateTime.Now));
+            _cacheService.Add(cacheKey, ("NotExist", DateTime.Now), componentName);
             return null;
         }
-        _cacheService.Add(cacheKey, package);
+        _cacheService.Add(cacheKey, package, componentName);
         return package;
     }
 
@@ -120,7 +120,7 @@ public class VersionService : IVersionService
             .Select(x => x.Platform)
             .Distinct()
             .ToListAsync();
-        _cacheService.Add(cacheKey, supportedPlatforms);
+        _cacheService.Add(cacheKey, supportedPlatforms, componentName);
         return supportedPlatforms;
     }
 
@@ -147,7 +147,7 @@ public class VersionService : IVersionService
             .Select(x => x.Architecture)
             .Distinct()
             .ToListAsync();
-        _cacheService.Add(cacheKey, supportedArchitectures, "supported-architectures");
+        _cacheService.Add(cacheKey, supportedArchitectures, componentName);
         return supportedArchitectures;
     }
 
@@ -180,7 +180,7 @@ public class VersionService : IVersionService
             .Take(10)
             .ToList();
         var result = versions.ToDictionary(x => x.Version, x => x.PublishTime);
-        _cacheService.Add(cacheKey, result, $"{platform}-{architecture}-versions");
+        _cacheService.Add(cacheKey, result, componentName);
         return result;
     }
 }
