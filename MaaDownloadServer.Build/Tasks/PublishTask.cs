@@ -15,7 +15,7 @@ public sealed class PublishTask : FrostingTask<BuildContext>
         {
             Configuration = context.MsBuildConfiguration,
             SelfContained = false,
-            OutputDirectory = "../publish",
+            OutputDirectory = $"../publish/{context.Framework}-{context.PublishRid}-{context.MsBuildConfiguration}",
             Framework = context.Framework,
             Runtime = context.PublishRid is "portable" ? null : context.PublishRid,
             MSBuildSettings = new DotNetCoreMSBuildSettings()
