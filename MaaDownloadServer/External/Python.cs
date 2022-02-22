@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using EscapeRoute;
 
 namespace MaaDownloadServer.External;
 
@@ -194,7 +195,13 @@ public class Python
     {
         try
         {
-            var pythonStartInfo = new ProcessStartInfo(pythonExecutable, $"{scriptFile} {string.Join(" ", args)}")
+            var escapeRoute = new EscapeRouter();
+            var formattedArgs = args
+                .Select(x => x.Replace("\r\n", "").Replace("\n", "").Replace(" ", ""))
+                .Select(x => escapeRoute.ParseAsync(x).Result)
+                .ToArray();
+
+            var pythonStartInfo = new ProcessStartInfo(pythonExecutable, $"{scriptFile} {string.Join(" ", formattedArgs)}")
             {
                 RedirectStandardError = true, RedirectStandardOutput = true, UseShellExecute = false
             };
