@@ -10,11 +10,11 @@ public record ArkStage(
     string ZoneName,
     string StageName,
     int SanityCost,
-    string? OpenCN,
-    string? CloseCN,
-    bool ExistCN,
-    string? OpenGlobal,
-    string? CloseGlobal,
+    string OpenCn,
+    string CloseCn,
+    bool ExistCn,
+    string OpenGlobal,
+    string CloseGlobal,
     bool ExistGlobal
 )
 {
@@ -40,20 +40,20 @@ public record ArkStage(
     public int SanityCost { get; set; } = SanityCost;
 
     [Column("open_cn")]
-    public string? OpenCN { get; set; } = OpenCN;
+    public string OpenCn { get; set; } = OpenCn;
 
     [Column("close_cn")]
-    public string? CloseCN { get; set; } = CloseCN;
+    public string CloseCn { get; set; } = CloseCn;
 
     [Column("exist_cn")]
-    public bool ExistCN { get; set; } = ExistCN;
+    public bool ExistCn { get; set; } = ExistCn;
 
     [Column("open_global")]
-    public string? OpenGlobal { get; set; } = OpenGlobal;
+    public string OpenGlobal { get; set; } = OpenGlobal;
 
     [Column("close_global")]
-    public string? CloseGlobal { get; set; } = CloseGlobal;
-    
+    public string CloseGlobal { get; set; } = CloseGlobal;
+
     [Column("exist_global")]
     public bool ExistGlobal { get; set; } = ExistGlobal;
 }
