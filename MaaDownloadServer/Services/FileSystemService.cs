@@ -141,7 +141,7 @@ public class FileSystemService : IFileSystemService
     }
 
     /// <inheritdoc />
-    public async Task<List<Resource>> AddNewResources(List<ResourceInfo> res)
+    public async Task AddNewResources(List<ResourceInfo> res)
     {
         var resources = new List<Resource>();
         foreach (var (path, relativePath, hash) in res)
@@ -156,7 +156,6 @@ public class FileSystemService : IFileSystemService
         }
         await _dbContext.Resources.AddRangeAsync(resources);
         await _dbContext.SaveChangesAsync();
-        return resources;
     }
 
     /// <inheritdoc />

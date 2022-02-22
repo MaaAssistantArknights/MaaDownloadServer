@@ -39,8 +39,8 @@ public interface IFileSystemService
     /// 添加新的资源文件
     /// </summary>
     /// <param name="res">资源文件信息表</param>
-    /// <returns>新增的资源列表</returns>
-    Task<List<Resource>> AddNewResources(List<ResourceInfo> res);
+    /// <returns></returns>
+    Task AddNewResources(List<ResourceInfo> res);
 
     /// <summary>
     /// 清空下载目录
