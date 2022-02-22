@@ -20,7 +20,7 @@ public class DownloadController : ControllerBase
 
     [HttpGet("{version}")]
     public async Task<ActionResult<GetDownloadUrlDto>> GetFullPackageDownloadUrl(string platform, string arch,
-        string version, [FromQuery]string component)
+        string version, [FromQuery] string component)
     {
         var pf = platform.ParseToPlatform();
         var a = arch.ParseToArchitecture();
@@ -47,7 +47,7 @@ public class DownloadController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<GetDownloadUrlDto>> GetUpdatePackageDownloadUrl(
-        string platform, string arch, [FromQuery] string from, [FromQuery] string to, [FromQuery]string component)
+        string platform, string arch, [FromQuery] string from, [FromQuery] string to, [FromQuery] string component)
     {
         var pf = platform.ParseToPlatform();
         var a = arch.ParseToArchitecture();

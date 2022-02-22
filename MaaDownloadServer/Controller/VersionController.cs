@@ -18,7 +18,7 @@ public class VersionController : ControllerBase
     }
 
     [HttpGet("getPlatform")]
-    public async Task<ActionResult<GetSupportedPlatformDto>> GetSupportedPlatforms([FromQuery]string component)
+    public async Task<ActionResult<GetSupportedPlatformDto>> GetSupportedPlatforms([FromQuery] string component)
     {
         var platforms = await _versionService.GetSupportedPlatforms(component);
         if (platforms is null)
@@ -31,7 +31,7 @@ public class VersionController : ControllerBase
     }
 
     [HttpGet("{platform}/getArch")]
-    public async Task<ActionResult<GetSupportedArchDto>> GetSupportedArchitectures(string platform, [FromQuery]string component)
+    public async Task<ActionResult<GetSupportedArchDto>> GetSupportedArchitectures(string platform, [FromQuery] string component)
     {
         var pf = platform.ParseToPlatform();
         if (pf is Platform.UnSupported)
@@ -50,7 +50,7 @@ public class VersionController : ControllerBase
     }
 
     [HttpGet("{platform}/{arch}/getVersion")]
-    public async Task<ActionResult<GetVersionsDto>> GetVersionList(string platform, string arch, [FromQuery] int page, [FromQuery]string component)
+    public async Task<ActionResult<GetVersionsDto>> GetVersionList(string platform, string arch, [FromQuery] int page, [FromQuery] string component)
     {
         if (page < 1)
         {
@@ -75,7 +75,7 @@ public class VersionController : ControllerBase
     }
 
     [HttpGet("{platform}/{arch}/{version}")]
-    public async Task<ActionResult<GetVersionDto>> GetVersion(string platform, string arch, string version, [FromQuery]string component)
+    public async Task<ActionResult<GetVersionDto>> GetVersion(string platform, string arch, string version, [FromQuery] string component)
     {
         var pf = platform.ParseToPlatform();
         var a = arch.ParseToArchitecture();

@@ -12,7 +12,8 @@ public class Python
         {
             var pythonVersionProcessStartInfo = new ProcessStartInfo(pythonExecutable, "--version")
             {
-                RedirectStandardOutput = true, RedirectStandardError = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
             logger.LogInformation("运行 {cmd}", pythonVersionProcessStartInfo.FileName + " " + pythonVersionProcessStartInfo.Arguments);
             var pythonVersionProcess = Process.Start(pythonVersionProcessStartInfo);
@@ -41,7 +42,8 @@ public class Python
         {
             var pipProcessStartInfo = new ProcessStartInfo(pythonExecutable, "-m pip --version")
             {
-                RedirectStandardOutput = true, RedirectStandardError = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
             logger.LogInformation("运行 {cmd}", pipProcessStartInfo.FileName + " " + pipProcessStartInfo.Arguments);
             var pipProcess = Process.Start(pipProcessStartInfo);
@@ -72,7 +74,8 @@ public class Python
         {
             var virtualenvProcessStartInfo = new ProcessStartInfo(pythonExecutable, "-m pip show virtualenv")
             {
-                RedirectStandardOutput = true, RedirectStandardError = true
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
             logger.LogInformation("运行 {cmd}", virtualenvProcessStartInfo.FileName + " " + virtualenvProcessStartInfo.Arguments);
             var virtualenvProcess = Process.Start(virtualenvProcessStartInfo);
@@ -203,7 +206,9 @@ public class Python
 
             var pythonStartInfo = new ProcessStartInfo(pythonExecutable, $"{scriptFile} {string.Join(" ", formattedArgs)}")
             {
-                RedirectStandardError = true, RedirectStandardOutput = true, UseShellExecute = false
+                RedirectStandardError = true,
+                RedirectStandardOutput = true,
+                UseShellExecute = false
             };
             logger.LogDebug("运行 {cmd}", pythonStartInfo.FileName + " " + pythonStartInfo.Arguments);
             var pythonProcess = Process.Start(pythonStartInfo);
