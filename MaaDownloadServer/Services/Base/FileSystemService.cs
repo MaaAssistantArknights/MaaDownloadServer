@@ -3,7 +3,7 @@ using System.IO.Compression;
 using System.Text.Json;
 using Semver;
 
-namespace MaaDownloadServer.Services;
+namespace MaaDownloadServer.Services.Base;
 
 public class FileSystemService : IFileSystemService
 {

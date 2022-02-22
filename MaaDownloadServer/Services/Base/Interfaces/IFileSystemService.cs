@@ -1,6 +1,6 @@
 using System.IO.Compression;
 
-namespace MaaDownloadServer.Services.IServices;
+namespace MaaDownloadServer.Services.Base.Interfaces;
 
 public interface IFileSystemService
 {

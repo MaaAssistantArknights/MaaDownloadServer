@@ -1,3 +1,6 @@
+using MaaDownloadServer.Services.Base;
+using MaaDownloadServer.Services.Controller;
+
 namespace MaaDownloadServer.Services;
 
 public static class ServiceExtension

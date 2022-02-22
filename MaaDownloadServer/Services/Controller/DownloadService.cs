@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Semver;
 
-namespace MaaDownloadServer.Services;
+namespace MaaDownloadServer.Services.Controller;
 
 public class DownloadService : IDownloadService
 {

@@ -1,4 +1,4 @@
-namespace MaaDownloadServer.Services;
+namespace MaaDownloadServer.Services.Base;
 
 public class ConfigurationService : IConfigurationService
 {

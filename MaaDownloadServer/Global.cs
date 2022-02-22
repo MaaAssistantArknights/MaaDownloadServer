@@ -1,5 +1,6 @@
 ﻿global using Microsoft.Extensions.Logging;
-global using MaaDownloadServer.Services.IServices;
+global using MaaDownloadServer.Services.Base.Interfaces;
+global using MaaDownloadServer.Services.Controller.Interfaces;
 global using MaaDownloadServer.Enums;
 global using MaaDownloadServer.Utils;
 global using MaaDownloadServer.Model.Entities;

@@ -1,6 +1,6 @@
 using Semver;
 
-namespace MaaDownloadServer.Services.IServices;
+namespace MaaDownloadServer.Services.Controller.Interfaces;
 
 public interface IDownloadService
 {

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
 
-namespace MaaDownloadServer.Services;
+namespace MaaDownloadServer.Services.Base;
 
 public class CacheService : ICacheService
 {
