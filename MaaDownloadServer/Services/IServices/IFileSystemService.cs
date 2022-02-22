@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using Semver;
 
 namespace MaaDownloadServer.Services.IServices;
 
