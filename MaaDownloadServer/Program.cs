@@ -46,7 +46,8 @@ if (configuration.GetValue<bool>("no-data-directory-check") is false)
         (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
         (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false)
+        (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:GameData"], false)
     };
 
     foreach (var (subDirectory, initRequired) in subDirectories)

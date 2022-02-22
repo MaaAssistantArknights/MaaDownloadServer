@@ -37,6 +37,13 @@ public class ConfigurationService : IConfigurationService
             _configuration["MaaServer:DataDirectories:SubDirectories:Temp"]);
     }
 
+    public string GetGameDataDirectory()
+    {
+        return Path.Combine(
+            _configuration["MaaServer:DataDirectories:RootPath"],
+            _configuration["MaaServer:DataDirectories:SubDirectories:GameData"]);
+    }
+
     public int GetPublicContentDefaultDuration()
     {
         return _configuration.GetValue<int>("MaaServer:PublicContent:DefaultDuration");

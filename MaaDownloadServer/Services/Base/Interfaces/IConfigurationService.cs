@@ -6,6 +6,7 @@ public interface IConfigurationService
     string GetDownloadDirectory();
     string GetResourcesDirectory();
     string GetTempDirectory();
+    string GetGameDataDirectory();
     int GetPublicContentDefaultDuration();
     int GetPublicContentAutoBundledDuration();
 }
