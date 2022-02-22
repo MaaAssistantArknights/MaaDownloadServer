@@ -194,6 +194,7 @@ app.UseFileServer(new FileServerOptions
         OnPrepareResponse = context =>
         {
             var fn = context.File.Name;
+
             if (fn is null)
             {
                 return;

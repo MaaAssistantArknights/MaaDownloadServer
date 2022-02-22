@@ -58,6 +58,17 @@ public static class JobExtension
             {
                 job.WithIdentity("Public-Content-Check-Job", "Database");
             });
+
+            q.ScheduleJob<GameDataUpdateJob>(trigger =>
+            {
+                trigger
+                    .WithIdentity("GameData-Update-Trigger", "Resource")
+                    .WithCronSchedule("0 0 4,16 * * *")
+                    .StartNow();
+            }, job =>
+            {
+                job.WithIdentity("GameData-Update-Job", "Resource");
+            });
         });
     }
 }

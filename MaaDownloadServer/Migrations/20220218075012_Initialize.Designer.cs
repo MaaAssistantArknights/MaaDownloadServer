@@ -11,13 +11,128 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MaaDownloadServer.Migrations
 {
     [DbContext(typeof(MaaDownloadServerDbContext))]
-    [Migration("20220121065120_Initialize")]
+    [Migration("20220218075012_Initialize")]
     partial class Initialize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
+
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("image");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("item_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<string>("ObtainApproach")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("obtain_approach");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("rarity");
+
+                    b.Property<string>("Usage")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("usage");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ark_item");
+                });
+
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkStage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CloseCN")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("close_cn");
+
+                    b.Property<string>("CloseGlobal")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("close_global");
+
+                    b.Property<bool>("ExistCN")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("exist_cn");
+
+                    b.Property<bool>("ExistGlobal")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("exist_global");
+
+                    b.Property<string>("OpenCN")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("open_cn");
+
+                    b.Property<string>("OpenGlobal")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("open_global");
+
+                    b.Property<int>("SanityCost")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("sanity_cost");
+
+                    b.Property<string>("StageId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("stage_id");
+
+                    b.Property<string>("StageName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("stage_name");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("type");
+
+                    b.Property<string>("ZoneId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("zone_id");
+
+                    b.Property<string>("ZoneName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("zone_name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ark_stage");
+                });
 
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.Package", b =>
                 {
@@ -41,10 +156,12 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnName("publish_time");
 
                     b.Property<string>("UpdateLog")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("update_log");
 
                     b.Property<string>("Version")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("version");
 
@@ -69,10 +186,12 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnName("duration");
 
                     b.Property<string>("Hash")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("hash");
 
                     b.Property<string>("Tag")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("tag");
 
@@ -89,14 +208,17 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("FileName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("file_name");
 
                     b.Property<string>("Hash")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("hash");
 
                     b.Property<string>("Path")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("path");
 
