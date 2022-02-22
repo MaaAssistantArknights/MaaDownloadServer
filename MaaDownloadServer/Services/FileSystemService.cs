@@ -148,7 +148,7 @@ public class FileSystemService : IFileSystemService
         {
             var id = Guid.NewGuid();
             var name = Path.GetFileName(path);
-            _logger.LogDebug("添加新的资源文件 {Path} ({Hash}) [{id}]", name, hash, id);
+            _logger.LogDebug("添加新的资源文件 [{id}] {Path} ({Hash})", id, name, hash);
             resources.Add(new Resource(id, name, relativePath, hash));
             Debug.Assert(path != null, "r.Path != null");
             File.Move(path, Path.Combine(
