@@ -207,7 +207,18 @@ app.UseFileServer(new FileServerOptions
     },
     FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
             configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
-    RequestPath = "/files",
+    RequestPath = "/files/maa",
+    EnableDirectoryBrowsing = false,
+    EnableDefaultFiles = false,
+    RedirectToAppendTrailingSlash = false,
+});
+
+app.UseFileServer(new FileServerOptions
+{
+    StaticFileOptions = { DefaultContentType = "image/png", },
+    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+        configuration["MaaServer:DataDirectories:SubDirectories:GameData"])),
+    RequestPath = "/files/game-data",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,
