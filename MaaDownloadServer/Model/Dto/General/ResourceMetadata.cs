@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace MaaDownloadServer.Model.Dto.General;
+namespace MaaDownloadServer.Model.Dto;
 
 public record ResourceMetadata(string FileName, string Path, string Hash)
 {
