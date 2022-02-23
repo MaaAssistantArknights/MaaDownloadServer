@@ -19,10 +19,11 @@ public static class JobExtension
             q.UseInMemoryStore();
             q.UseDefaultThreadPool(10);
 
-            #region 添加更新任务
-
+            // 组件更新任务
+            var componentCount = 1;
             foreach (var componentConfiguration in componentConfigurations)
             {
+                var startDelay = 1 + componentCount * 0.5;
                 q.ScheduleJob<PackageUpdateJob>(trigger =>
                 {
                     trigger.WithIdentity($"Package-{componentConfiguration.Name}-Update-Trigger", "Package-Update-Trigger")
@@ -31,18 +32,19 @@ public static class JobExtension
                             schedule.WithIntervalInMinutes(componentConfiguration.Interval);
                             schedule.InTimeZone(TimeZoneInfo.Local);
                             schedule.WithMisfireHandlingInstructionDoNothing();
-                        });
+                        })
+                        .StartAt(DateTimeOffset.Now.AddMinutes(startDelay));
                 }, job =>
                 {
                     job.WithIdentity($"Package-{componentConfiguration.Name}-Update-Job", "Package-Update-Job");
                     IDictionary<string, object> data = new Dictionary<string, object> { { "configuration", componentConfiguration } };
                     job.SetJobData(new JobDataMap(data));
                 });
+
+                componentCount++;
             }
 
-            #endregion
-
-            // Public Content 过期检查 Job
+            // Public Content 过期检查任务
             q.ScheduleJob<PublicContentCheckJob>(trigger =>
             {
                 trigger.WithIdentity("Public-Content-Check-Trigger", "Database")
@@ -53,21 +55,27 @@ public static class JobExtension
                         schedule.InTimeZone(TimeZoneInfo.Local);
                         schedule.WithMisfireHandlingInstructionDoNothing();
                     })
-                    .StartAt(DateTimeOffset.Now.AddMinutes(1));
+                    .StartAt(DateTimeOffset.Now.AddMinutes(10));
             }, job =>
             {
                 job.WithIdentity("Public-Content-Check-Job", "Database");
             });
 
+            // Game Data 更新任务
             q.ScheduleJob<GameDataUpdateJob>(trigger =>
             {
-                trigger
-                    .WithIdentity("GameData-Update-Trigger", "Resource")
-                    .WithCronSchedule("0 0 4,16 * * *")
-                    .StartNow();
+                trigger.WithIdentity("GameData-Update-Trigger", "GameData")
+                    .WithCalendarIntervalSchedule(schedule =>
+                    {
+                        schedule.WithIntervalInMinutes(
+                            Convert.ToInt32(configuration["MaaServer:GameData:UpdateJobInterval"]));
+                        schedule.InTimeZone(TimeZoneInfo.Local);
+                        schedule.WithMisfireHandlingInstructionDoNothing();
+                    })
+                    .StartAt(DateTimeOffset.Now.AddMinutes(1));
             }, job =>
             {
-                job.WithIdentity("GameData-Update-Job", "Resource");
+                job.WithIdentity("GameData-Update-Job", "GameData");
             });
         });
     }

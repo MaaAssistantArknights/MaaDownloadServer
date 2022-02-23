@@ -1,6 +1,6 @@
 using Quartz;
 using HtmlAgilityPack;
-using System.Reflection;
+using System.Text.Json.Serialization;
 using Fizzler.Systems.HtmlAgilityPack;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +10,8 @@ public class GameDataUpdateJob : IJob
 {
     private readonly ILogger<GameDataUpdateJob> _logger;
     private readonly MaaDownloadServerDbContext _dbContext;
-    private readonly string _dataDirectoryPath;
+
+    private readonly DirectoryInfo _itemDirectory;
 
     public GameDataUpdateJob(
         ILogger<GameDataUpdateJob> logger,
@@ -19,68 +20,32 @@ public class GameDataUpdateJob : IJob
     {
         _logger = logger;
         _dbContext = dbContext;
-        // TODO: DO NOT USE RESOURCE DIRECTORY
-        _dataDirectoryPath = Path.Combine(configurationService.GetResourcesDirectory(), "gamedata");
-        if (Directory.Exists(_dataDirectoryPath) is false)
-        {
-            Directory.CreateDirectory(_dataDirectoryPath);
-        }
 
-        var itemImageDirectoryPath = Path.Combine(_dataDirectoryPath, "items");
-        if (Directory.Exists(itemImageDirectoryPath) is false)
+        var itemImageDirectoryPath = Path.Combine(configurationService.GetGameDataDirectory(), "items");
+        _itemDirectory = new DirectoryInfo(itemImageDirectoryPath);
+        if (_itemDirectory.Exists is false)
         {
-            Directory.CreateDirectory(itemImageDirectoryPath);
+            _itemDirectory.Create();
         }
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-        await ItemUpdate();
+        _logger.LogInformation("开始更新游戏数据");
+
+        _logger.LogInformation("游戏数据更新: 开始更新关卡信息");
         await StageUpdate();
-    }
-
-    private record ApiZone
-    {
-        public string ZoneId { get; init; } = default!;
-        public int ZoneIndex { get; init; }
-        public string Type { get; init; } = default!;
-        public string SubType { get; init; }
-        public string ZoneName { get; init; } = default!;
-        public IList<string> Stages { get; init; } = default!;
-        public string Background { get; init; } = default!;
-    }
-
-    private record ApiStage
-    {
-        internal record ApiExistence
-        {
-            internal record Existence
-            {
-                public bool Exist { get; init; } = default;
-                public long? OpenTime { get; init; }
-                public long? CloseTime { get; init; }
-            }
-
-            public Existence Us { get; init; } = default;
-            public Existence Jp { get; init; } = default;
-            public Existence Cn { get; init; } = default;
-            public Existence Kr { get; init; } = default;
-        }
-
-        public string StageType { get; init; } = default;
-        public string StageId { get; init; } = default;
-        public string ZoneId { get; init; } = default;
-        public string Code { get; init; } = default;
-        public int ApCost { get; init; } = default;
-        public ApiExistence Existence { get; init; }
-        public int MinClearTime { get; init; } = default;
+        _logger.LogInformation("游戏数据更新: 开始更新物品信息");
+        await ItemUpdate();
     }
 
     private async Task ItemUpdate()
     {
         try
         {
-            using var client = new HttpClient(new HttpClientHandler());
+            #region 获取和解析 PRTS Wiki 道具页面 Html
+
+            using var client = new HttpClient();
             client.BaseAddress = new Uri("https://prts.wiki/");
             var response = await client.GetAsync("index.php?title=道具一览");
             var content = await response.Content.ReadAsStringAsync();
@@ -96,55 +61,114 @@ public class GameDataUpdateJob : IJob
             // ReSharper disable once StringLiteralTypo
             var nodes = doc.QuerySelectorAll(".smwdata").ToList();
 
+            _logger.LogInformation("获取和解析 PRTS Wiki 道具页面成功, 共 {count} 个节点", nodes.Count);
+
+            #endregion
+
+            var downloadContentInfo = new List<ItemImageDownloadInfo>();
+            var prtsItems = new List<ArkPrtsItem>();
+
             nodes.AsParallel().ForAll(node =>
             {
-                var attrs = node.Attributes;
-                var itemId = Convert.ToInt32(attrs["data-id"].Value);
-                var name = attrs["data-name"].Value;
-                lock (nodes)
+                var id = node.Attributes["data-id"].Value;
+                var name = node.Attributes["data-name"].Value;
+                var description = node.Attributes["data-description"].Value;
+                var usage = node.Attributes["data-usage"].Value;
+                var obtain = node.Attributes["data-obtain_approach"].Value;
+                var rarityString = node.Attributes["data-rarity"].Value;
+                var fileDownloadUrl = "https:" + node.Attributes["data-file"].Value;
+                var categoryString = node.Attributes["data-category"].Value;
+
+                var file = $"{name}.png";
+
+                var category = categoryString
+                    .Split(",")
+                    .Select(x => x.Trim())
+                    .Select(x => x.Replace("分类:", ""))
+                    .ToList();
+
+                var rarityParsed = int.TryParse(rarityString, out var rarity);
+                if (rarityParsed is false)
                 {
-                    if (_dbContext.ArkItems.FirstOrDefault(item => item.Name == name) is not null)
-                    {
-                        return;
-                    }
+                    rarity = -1;
                 }
 
-                var url = $"https:{attrs["data-file"].Value}";
+                var arkPrtsItem = new ArkPrtsItem
+                {
+                    Id = Guid.NewGuid(),
+                    ItemId = id,
+                    Name = name,
+                    Description = description,
+                    Usage = usage,
+                    ObtainMethod = obtain,
+                    Rarity = rarity,
+                    Image = file,
+                    ImageDownloadUrl = fileDownloadUrl,
+                    Category = category
+                };
 
-                using var httpClient = new HttpClient();
-                var filePath = Path.Combine(_dataDirectoryPath, $"items/{name}.png");
-                try
-                {
-                    var responseResult = httpClient.GetAsync(url);
-                    using var memStream = responseResult.Result.Content.ReadAsStreamAsync().Result;
-                    using var fileStream = File.Create(filePath);
-                    memStream.CopyTo(fileStream);
-                }
-                catch (Exception)
-                {
-                    // Ignore
-                    // TODO: Handle internal error
-                }
-
-                var item = new ArkItem(
-                    itemId,
-                    attrs["data-name"].Value,
-                    attrs["data-description"].Value,
-                    attrs["data-usage"].Value,
-                    attrs["data-obtain_approach"].Value,
-                    Convert.ToInt32(attrs["data-rarity"].Value),
-                    $"{attrs["data-name"].Value}.png",
-                    attrs["data-category"].Value
-                );
-                lock (nodes)
-                {
-                    _dbContext.ArkItems.Add(item);
-                }
+                prtsItems.Add(arkPrtsItem);
             });
-            lock (nodes)
+
+            foreach (var item in prtsItems)
             {
-                _dbContext.SaveChangesAsync().Wait();
+                var existed = await _dbContext.ArkPrtsItems.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Name == item.Name && x.ItemId == item.ItemId);
+
+                if (existed is null)
+                {
+                    await _dbContext.ArkPrtsItems.AddAsync(item);
+                }
+                else
+                {
+                    if (existed == item)
+                    {
+                        continue;
+                    }
+
+                    if (File.Exists(Path.Combine(_itemDirectory.FullName, existed.Image)))
+                    {
+                        File.Delete(Path.Combine(_itemDirectory.FullName, existed.Image));
+                    }
+
+                    var cId = existed.Id;
+
+                    existed = item with { Id = cId };
+                    _dbContext.ArkPrtsItems.Update(existed);
+                }
+
+                downloadContentInfo.Add(new ItemImageDownloadInfo(item.ImageDownloadUrl, Path.Combine(_itemDirectory.FullName, item.Image)));
             }
+
+            var downloadHttpClient = new HttpClient();
+
+            downloadContentInfo.AsParallel().ForAll(x =>
+            {
+                var (downloadUrl, filePath) = x;
+                var responseResult = downloadHttpClient.GetAsync(downloadUrl);
+                using var memStream = responseResult.Result.Content.ReadAsStreamAsync().Result;
+                using var fileStream = File.Create(filePath);
+                memStream.CopyTo(fileStream);
+                _logger.LogDebug("更新 Ark Item 数据, 已下载: {fn}", filePath);
+            });
+
+            var addOrModify = await _dbContext.SaveChangesAsync();
+
+            var removedItems = _dbContext.ArkPrtsItems
+                .ToList()
+                .Where(x => prtsItems.Exists(y => y.ItemId == x.ItemId && y.Name == x.Name) is false)
+                .ToList();
+
+            _dbContext.ArkPrtsItems.RemoveRange(removedItems);
+            var deleted = await _dbContext.SaveChangesAsync();
+
+            foreach (var removedItem in removedItems
+                         .Where(removedItem => File.Exists(Path.Combine(_itemDirectory.FullName, removedItem.Image))))
+            {
+                File.Delete(Path.Combine(_itemDirectory.FullName, removedItem.Image));
+            }
+
+            _logger.LogInformation("更新 Ark Stage 成功, 添加或更新条目 {au} 个, 删除条目 {d} 个", addOrModify, deleted);
         }
         catch (Exception ex)
         {
@@ -154,84 +178,117 @@ public class GameDataUpdateJob : IJob
 
     private async Task StageUpdate()
     {
-        using var client = new HttpClient(new HttpClientHandler());
-        client.BaseAddress = new Uri("https://penguin-stats.io");
-
-        var zones = (await client.GetFromJsonAsync<IList<ApiZone>>("/PenguinStats/api/v2/zones"))?.ToList();
-        var stages = (await client.GetFromJsonAsync<IList<ApiStage>>("/PenguinStats/api/v2/stages"))?.ToList();
-
-        if (stages is null)
+        try
         {
-            return;
-        }
+            using var client = new HttpClient();
+            client.BaseAddress = new Uri("https://penguin-stats.io/PenguinStats/api/v2/");
+            var stages = await client.GetFromJsonAsync<List<ApiPenguinStage>>("stages");
+            var zones = await client.GetFromJsonAsync<List<ApiPenguinZone>>("zones");
 
-        stages.AsParallel().ForAll(stage =>
-        {
-            ArkStage arkStage = new(
-                stage.StageType,
-                stage.ZoneId,
-                stage.StageId,
-                zones?.Find(zone => zone.ZoneId == stage.ZoneId)?.ZoneName ?? "",
-                stage.Code,
-                stage.ApCost,
-                TimeStringify(stage.Existence?.Cn?.OpenTime, TimeZoneInfo.FindSystemTimeZoneById("Asia/Shanghai")),
-                TimeStringify(stage.Existence?.Cn?.CloseTime, TimeZoneInfo.FindSystemTimeZoneById("Asia/Shanghai")),
-                stage.Existence?.Cn?.Exist ?? false,
-                TimeStringify(stage.Existence?.Jp?.OpenTime, TimeZoneInfo.FindSystemTimeZoneById("Japan")),
-                TimeStringify(stage.Existence?.Jp?.CloseTime, TimeZoneInfo.FindSystemTimeZoneById("Japan")),
-                stage.Existence?.Jp?.Exist ?? false
-            );
-            lock (stages)
+            // Add or Modify Stages
+            foreach (var stage in stages!)
             {
-                var record = _dbContext.ArkStages.FirstOrDefault(v => stage.StageId == v.StageId);
-                if (record is null)
+                var existed = await _dbContext.ArkPenguinStages.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.StageId == stage.StageId);
+                var zone = zones!.FirstOrDefault(x => x.ZoneId == stage.ZoneId);
+                if (zone is null)
                 {
-                    _dbContext.ArkStages.Add(arkStage);
+                    throw new Exception($"Zone {stage.ZoneId} not found");
+                }
+
+                var currentArkStage = stage.ToArkPenguinStage(zone);
+                if (existed is null)
+                {
+                    await _dbContext.ArkPenguinStages.AddAsync(currentArkStage);
                 }
                 else
                 {
-                    arkStage.Id = record.Id;
-                    if (record.GetHashCode() == arkStage.GetHashCode())
+                    if (existed == currentArkStage)
                     {
-                        return;
+                        continue;
                     }
 
-                    UpdateWithDiff(ref record, arkStage);
-                    _dbContext.SaveChanges();
+                    existed = currentArkStage;
+                    _dbContext.ArkPenguinStages.Update(existed);
                 }
             }
-        });
-        lock (stages)
+            var addOrModify = await _dbContext.SaveChangesAsync();
+
+            // Remove Extra Stages
+            var removedStages = _dbContext.ArkPenguinStages
+                .ToList()
+                .Where(x => stages.Exists(y => y.StageId == x.StageId) is false)
+                .ToList();
+
+            _dbContext.ArkPenguinStages.RemoveRange(removedStages);
+            var deleted = await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("更新 Ark Stage 成功, 添加或更新条目 {au} 个, 删除条目 {d} 个", addOrModify, deleted);
+        }
+        catch (Exception ex)
         {
-            _dbContext.SaveChangesAsync().Wait();
+            _logger.LogError("更新 Ark Stage 失败, Exception: {ex}", ex);
         }
     }
 
-    private static void UpdateWithDiff<T>(ref T target, T source)
+    #region 企鹅物流关卡和区域信息 API 模型
+
+    // ReSharper disable ClassNeverInstantiated.Global
+    // ReSharper disable UnusedAutoPropertyAccessor.Global
+
+    internal record ApiPenguinZone
     {
-        var properties = typeof(T).GetProperties();
-        foreach (var property in properties)
-        {
-            var targetValue = property.GetValue(target, null);
-            var sourceValue = property.GetValue(source, null);
-
-            if (targetValue != sourceValue && (targetValue is null || !targetValue.Equals(sourceValue)))
-            {
-                property.SetValue(target, sourceValue);
-                // Console.WriteLine(string.Format("Property {0} changed from {1} to {2}", property.Name, targetValue, sourceValue));
-            }
-        }
+        [JsonPropertyName("zoneId")] public string ZoneId { get; set; }
+        [JsonPropertyName("type")] public string ZoneType { get; set; }
+        [JsonPropertyName("zoneName")] public string ZoneName { get; set; }
+        [JsonPropertyName("existence")] public ApiPenguinExistence Existence { get; set; }
+        [JsonPropertyName("stages")] public List<string> Stages { get; set; }
+        [JsonPropertyName("zoneName_i18n")] public ApiPenguinI18N ZoneNameI18N { get; set; }
+        [JsonExtensionData] public Dictionary<string, object> ExtensionData { get; set; }
     }
 
-    private static string TimeStringify(long? timestamp, TimeZoneInfo zoneInfo)
+    internal record ApiPenguinStage
     {
-        if (timestamp is null)
-        {
-            return null;
-        }
-
-        var utc = DateTimeOffset.FromUnixTimeMilliseconds((long)timestamp).DateTime;
-        utc += zoneInfo.BaseUtcOffset;
-        return utc.ToString("yyyy'-'MM'-'dd HH':'mm':'ss");
+        [JsonPropertyName("stageType")] public string StageType { get; set; }
+        [JsonPropertyName("stageId")] public string StageId { get; set; }
+        [JsonPropertyName("zoneId")] public string ZoneId { get; set; }
+        [JsonPropertyName("code")] public string StageCode { get; set; }
+        [JsonPropertyName("apCost")] public int StageApCost { get; set; }
+        [JsonPropertyName("existence")] public ApiPenguinExistence Existence { get; set; }
+        [JsonPropertyName("code_i18n")] public ApiPenguinI18N CodeI18N { get; set; }
+        [JsonExtensionData] public Dictionary<string, object> ExtensionData { get; set; }
     }
+
+    internal record ApiPenguinExistence
+    {
+        [JsonPropertyName("US")] public ApiPenguinExistenceContent Us { get; set; }
+        [JsonPropertyName("JP")] public ApiPenguinExistenceContent Jp { get; set; }
+        [JsonPropertyName("CN")] public ApiPenguinExistenceContent Cn { get; set; }
+        [JsonPropertyName("KR")] public ApiPenguinExistenceContent Kr { get; set; }
+    }
+
+    internal record ApiPenguinExistenceContent
+    {
+        [JsonPropertyName("exist")] public bool Exist { get; set; }
+        [JsonPropertyName("openTime")] public long? OpenTime { get; set; } = null;
+        [JsonPropertyName("closeTime")] public long? CloseTime { get; set; } = null;
+    }
+
+    internal record ApiPenguinI18N
+    {
+        [JsonPropertyName("ko")] public string Korean { get; set; }
+        [JsonPropertyName("ja")] public string Japanese { get; set; }
+        [JsonPropertyName("en")] public string English { get; set; }
+        [JsonPropertyName("zh")] public string Chinese { get; set; }
+    }
+
+    // ReSharper restore ClassNeverInstantiated.Global
+    // ReSharper restore UnusedAutoPropertyAccessor.Global
+    #endregion
+
+    #region PRTS.Wiki 物品信息获取工具类和函数
+
+    private record ItemImageDownloadInfo(string DownloadUrl, string SavePath);
+
+    #endregion
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MaaDownloadServer.Database;
@@ -17,9 +18,8 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<Package> Packages { get; set; }
     public DbSet<Resource> Resources { get; set; }
     public DbSet<PublicContent> PublicContents { get; set; }
-    public DbSet<ArkItem> ArkItems { get; set; }
-
-    public DbSet<ArkStage> ArkStages { get; set; }
+    public DbSet<ArkPenguinStage> ArkPenguinStages { get; set; }
+    public DbSet<ArkPrtsItem> ArkPrtsItems { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -41,6 +41,19 @@ public class MaaDownloadServerDbContext : DbContext
             .Entity<Package>()
             .Property(x => x.Platform)
             .HasConversion<EnumToStringConverter<Platform>>();
+
+        var arkItemCategoryStringListConverter = new ValueConverter<List<string>, string>(
+            v => string.Join(";;", v),
+            v => v.Split(";;", StringSplitOptions.RemoveEmptyEntries).ToList());
+        var arkItemCategoryValueCompare = new ValueComparer<List<string>>(
+            (v, k) => v.EqualWith(k),
+            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())));
+
+        modelBuilder.Entity<ArkPrtsItem>()
+            .Property(x => x.Category)
+            .HasConversion(arkItemCategoryStringListConverter)
+            .Metadata
+            .SetValueComparer(arkItemCategoryValueCompare);
 
         #endregion
 
