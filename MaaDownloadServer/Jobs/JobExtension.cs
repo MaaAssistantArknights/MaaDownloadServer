@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using MaaDownloadServer.Model.External;
+using Quartz;
 
 namespace MaaDownloadServer.Jobs;
 
@@ -6,7 +7,8 @@ public static class JobExtension
 {
     public static void AddQuartzFetchGithubReleaseJob(
         this IServiceCollection serviceCollection,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        List<ComponentConfiguration> componentConfigurations)
     {
         serviceCollection.AddQuartz(q =>
         {
@@ -17,23 +19,30 @@ public static class JobExtension
             q.UseInMemoryStore();
             q.UseDefaultThreadPool(10);
 
+            #region 添加更新任务
 
-            q.ScheduleJob<FetchGithubReleaseJob>(trigger =>
+            foreach (var componentConfiguration in componentConfigurations)
             {
-                trigger.WithIdentity("Fetch-Github-Release-Trigger", "Download")
-                    .WithCalendarIntervalSchedule(schedule =>
-                    {
-                        schedule.WithIntervalInMinutes(
-                            Convert.ToInt32(configuration["MaaServer:GithubQuery:Interval"]));
-                        schedule.InTimeZone(TimeZoneInfo.Local);
-                        schedule.WithMisfireHandlingInstructionDoNothing();
-                    })
-                    .StartNow();
-            }, job =>
-            {
-                job.WithIdentity("Fetch-Github-Release-Job", "Download");
-            });
+                q.ScheduleJob<PackageUpdateJob>(trigger =>
+                {
+                    trigger.WithIdentity($"Package-{componentConfiguration.Name}-Update-Trigger", "Package-Update-Trigger")
+                        .WithCalendarIntervalSchedule(schedule =>
+                        {
+                            schedule.WithIntervalInMinutes(componentConfiguration.Interval);
+                            schedule.InTimeZone(TimeZoneInfo.Local);
+                            schedule.WithMisfireHandlingInstructionDoNothing();
+                        });
+                }, job =>
+                {
+                    job.WithIdentity($"Package-{componentConfiguration.Name}-Update-Job", "Package-Update-Job");
+                    IDictionary<string, object> data = new Dictionary<string, object> { { "configuration", componentConfiguration } };
+                    job.SetJobData(new JobDataMap(data));
+                });
+            }
 
+            #endregion
+
+            // Public Content 过期检查 Job
             q.ScheduleJob<PublicContentCheckJob>(trigger =>
             {
                 trigger.WithIdentity("Public-Content-Check-Trigger", "Database")
@@ -48,6 +57,17 @@ public static class JobExtension
             }, job =>
             {
                 job.WithIdentity("Public-Content-Check-Job", "Database");
+            });
+
+            q.ScheduleJob<GameDataUpdateJob>(trigger =>
+            {
+                trigger
+                    .WithIdentity("GameData-Update-Trigger", "Resource")
+                    .WithCronSchedule("0 0 4,16 * * *")
+                    .StartNow();
+            }, job =>
+            {
+                job.WithIdentity("GameData-Update-Job", "Resource");
             });
         });
     }

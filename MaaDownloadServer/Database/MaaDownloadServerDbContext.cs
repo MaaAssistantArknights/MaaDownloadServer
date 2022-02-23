@@ -17,6 +17,9 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<Package> Packages { get; set; }
     public DbSet<Resource> Resources { get; set; }
     public DbSet<PublicContent> PublicContents { get; set; }
+    public DbSet<ArkItem> ArkItems { get; set; }
+
+    public DbSet<ArkStage> ArkStages { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

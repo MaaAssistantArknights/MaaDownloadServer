@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using Semver;
 
 namespace MaaDownloadServer.Services.IServices;
@@ -5,28 +6,41 @@ namespace MaaDownloadServer.Services.IServices;
 public interface IFileSystemService
 {
     /// <summary>
-    /// 解压下载下来的文件
+    /// 创建压缩包
     /// </summary>
-    /// <param name="jobId">本次 Job 的 Id</param>
-    /// <param name="fileId">文件 Id</param>
-    /// <returns>文件 Id</returns>
-    Guid UnZipDownloadFile(Guid jobId, Guid fileId);
+    /// <param name="sourceFolder">源文件夹</param>
+    /// <param name="targetName">目标文件位置，扩展名必须为 .zip</param>
+    /// <param name="level">压缩等级</param>
+    /// <param name="deleteSource">是否删除源</param>
+    /// <returns>创建的压缩包文件路径</returns>
+    string CreateZipFile(string sourceFolder, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false);
+
+    /// <summary>
+    /// 创建压缩包
+    /// </summary>
+    /// <param name="sourceFiles">源文件</param>
+    /// <param name="sourceDirectories">源文件夹</param>
+    /// <param name="targetName">目标文件位置，扩展名必须为 .zip</param>
+    /// <param name="level">压缩等级</param>
+    /// <param name="deleteSource">是否删除源</param>
+    /// <returns></returns>
+    string CreateZipFile(IEnumerable<string> sourceFiles, IEnumerable<string> sourceDirectories, string targetName, CompressionLevel level = CompressionLevel.NoCompression, bool deleteSource = false);
 
     /// <summary>
     /// 添加完整包至 Public
     /// </summary>
     /// <param name="jobId">本次 Job 的 Id，用于寻找完整包位置</param>
-    /// <param name="version">版本</param>
-    /// <param name="files">平台-架构->文件 Id 表，用于寻找完整包位置，并作为数据库主键</param>
+    /// <param name="componentName">组件名</param>
+    /// <param name="downloadContentInfo">下载元数据</param>
     /// <returns>PublicContent 实体</returns>
-    Task<List<PublicContent>> AddFullPackage(Guid jobId, SemVersion version, Dictionary<(Platform, Architecture), Guid> files);
+    Task<PublicContent> AddFullPackage(Guid jobId, string componentName, DownloadContentInfo downloadContentInfo);
 
     /// <summary>
     /// 添加新的资源文件
     /// </summary>
     /// <param name="res">资源文件信息表</param>
-    /// <returns>新增的资源列表</returns>
-    Task<List<Resource>> AddNewResources(List<ResourceInfo> res);
+    /// <returns></returns>
+    Task AddNewResources(List<ResourceInfo> res);
 
     /// <summary>
     /// 清空下载目录

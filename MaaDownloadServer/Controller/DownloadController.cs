@@ -19,7 +19,8 @@ public class DownloadController : ControllerBase
     }
 
     [HttpGet("{version}")]
-    public async Task<ActionResult<GetDownloadUrlDto>> GetFullPackageDownloadUrl(string platform, string arch, string version)
+    public async Task<ActionResult<GetDownloadUrlDto>> GetFullPackageDownloadUrl(string platform, string arch,
+        string version, [FromQuery] string component)
     {
         var pf = platform.ParseToPlatform();
         var a = arch.ParseToArchitecture();
@@ -34,19 +35,19 @@ public class DownloadController : ControllerBase
             _logger.LogWarning("传入 version 值 {version} 解析失败", version);
             return NotFound();
         }
-        var pc = await _downloadService.GetFullPackage(pf, a, semVer);
+        var pc = await _downloadService.GetFullPackage(component, pf, a, semVer);
         if (pc is null)
         {
             return NotFound();
         }
-        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.zip";
+        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
         var dto = new GetDownloadUrlDto(platform, arch, version, dUrl, pc.Hash);
         return Ok(dto);
     }
 
     [HttpGet]
     public async Task<ActionResult<GetDownloadUrlDto>> GetUpdatePackageDownloadUrl(
-        string platform, string arch, [FromQuery] string from, [FromQuery] string to)
+        string platform, string arch, [FromQuery] string from, [FromQuery] string to, [FromQuery] string component)
     {
         var pf = platform.ParseToPlatform();
         var a = arch.ParseToArchitecture();
@@ -62,12 +63,12 @@ public class DownloadController : ControllerBase
             _logger.LogWarning("传入 version 值 {from} 或 {to} 解析失败", from, to);
             return NotFound();
         }
-        var pc = await _downloadService.GetUpdatePackage(pf, a, fromSemVer, toSemVer);
+        var pc = await _downloadService.GetUpdatePackage(component, pf, a, fromSemVer, toSemVer);
         if (pc is null)
         {
             return NotFound();
         }
-        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.zip";
+        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
         var dto = new GetDownloadUrlDto(platform, arch, $"{from} -> {to}", dUrl, pc.Hash);
         return Ok(dto);
     }

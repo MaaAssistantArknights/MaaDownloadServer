@@ -6,13 +6,16 @@ namespace MaaDownloadServer.Model.Entities;
 /// 包（一个平台的所有文件）
 /// </summary>
 /// <param name="Id">ID</param>
+/// <param name="Component">组件名称</param>
 /// <param name="Version">版本</param>
 /// <param name="Platform">平台</param>
 /// <param name="Architecture">架构</param>
 /// <param name="PublishTime">发布时间</param>
 /// <param name="UpdateLog">更新日志</param>
 [Table("package")]
-public record Package(Guid Id, string Version, Platform Platform, Architecture Architecture, DateTime PublishTime, string UpdateLog)
+public record Package(Guid Id, string Component, string Version,
+    Platform Platform, Architecture Architecture,
+    DateTime PublishTime, string UpdateLog)
 {
     /// <summary>
     /// 包 Id
@@ -55,4 +58,10 @@ public record Package(Guid Id, string Version, Platform Platform, Architecture A
     /// </summary>
     [Column("update_log")]
     public string UpdateLog { get; set; } = UpdateLog;
+
+    /// <summary>
+    /// 组件名称
+    /// </summary>
+    [Column("component")]
+    public string Component { get; set; } = Component;
 }

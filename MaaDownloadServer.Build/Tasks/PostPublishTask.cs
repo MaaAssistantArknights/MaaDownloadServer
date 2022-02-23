@@ -9,11 +9,11 @@ public class PostPublishTask : FrostingTask<BuildContext>
 {
     public override void Run(BuildContext context)
     {
-        if (File.Exists("../publish/appsettings.Development.json"))
+        if (File.Exists($"../publish/{context.Framework}-{context.PublishRid}-{context.MsBuildConfiguration}/appsettings.Development.json"))
         {
-            File.Delete("../publish/appsettings.Development.json");
+            File.Delete($"../publish/{context.Framework}-{context.PublishRid}-{context.MsBuildConfiguration}/appsettings.Development.json");
         }
-        ZipFile.CreateFromDirectory("../publish",
-            $"../MaaDownloadServer-{context.MsBuildConfiguration}-{context.Framework}-{context.PublishRid}.zip");
+        ZipFile.CreateFromDirectory($"../publish/{context.Framework}-{context.PublishRid}-{context.MsBuildConfiguration}",
+            $"../publish/MaaDownloadServer-{context.MsBuildConfiguration}-{context.Framework}-{context.PublishRid}.zip");
     }
 }
