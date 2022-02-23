@@ -205,7 +205,8 @@ app.UseFileServer(new FileServerOptions
             context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
         }
     },
-    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], "public")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+            configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
     RequestPath = "/files",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
