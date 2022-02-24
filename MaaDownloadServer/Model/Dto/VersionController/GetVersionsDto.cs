@@ -2,14 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace MaaDownloadServer.Model.Dto;
 
-public record GetVersionsDto(string Platform, string Architecture, List<VersionMetadata> Version)
-{
-    [JsonPropertyName("platform")]
-    public string Platform { get; set; } = Platform;
-
-    [JsonPropertyName("arch")]
-    public string Architecture { get; set; } = Architecture;
-
-    [JsonPropertyName("versions")]
-    public List<VersionMetadata> Version { get; set; } = Version;
-}
+public record GetVersionsDto(
+    [property: JsonPropertyName("platform")] string Platform,
+    [property: JsonPropertyName("arch")] string Architecture,
+    [property: JsonPropertyName("versions")] List<VersionMetadata> Version);
