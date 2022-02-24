@@ -14,12 +14,22 @@ using Serilog.Extensions.Logging;
 
 #region Build configuration and logger
 
-var configuration = new ConfigurationBuilder()
+var configurationBuilder = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
-    .AddJsonFile("appsettings.Development.json", true)
-    .AddEnvironmentVariables()
-    .AddCommandLine(args)
-    .Build();
+    .AddJsonFile("appsettings.Development.json", true);
+
+var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("AZURE-APP-CONFIGURATION");
+
+if (azureAppConfigurationConnectionString is not null or "")
+{
+    configurationBuilder.AddAzureAppConfiguration(azureAppConfigurationConnectionString);
+}
+
+configurationBuilder
+    .AddEnvironmentVariables("MAA:")
+    .AddCommandLine(args);
+
+var configuration = configurationBuilder.Build();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration)
