@@ -9,6 +9,7 @@ namespace MaaDownloadServer.Jobs;
 public class GameDataUpdateJob : IJob
 {
     private readonly ILogger<GameDataUpdateJob> _logger;
+    private readonly ICacheService _cacheService;
     private readonly MaaDownloadServerDbContext _dbContext;
 
     private readonly DirectoryInfo _itemDirectory;
@@ -16,9 +17,11 @@ public class GameDataUpdateJob : IJob
     public GameDataUpdateJob(
         ILogger<GameDataUpdateJob> logger,
         IConfigurationService configurationService,
+        ICacheService cacheService,
         MaaDownloadServerDbContext dbContext)
     {
         _logger = logger;
+        _cacheService = cacheService;
         _dbContext = dbContext;
 
         var itemImageDirectoryPath = Path.Combine(configurationService.GetGameDataDirectory(), "items");
@@ -169,6 +172,13 @@ public class GameDataUpdateJob : IJob
             }
 
             _logger.LogInformation("更新 Ark Stage 成功, 添加或更新条目 {au} 个, 删除条目 {d} 个", addOrModify, deleted);
+
+            // 删缓存
+            if (deleted != 0 || addOrModify != 0)
+            {
+                _cacheService.RemoveAll(GameDataType.Item);
+                _logger.LogInformation("已删除 Item 组缓存");
+            }
         }
         catch (Exception ex)
         {
@@ -224,6 +234,13 @@ public class GameDataUpdateJob : IJob
             var deleted = await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation("更新 Ark Stage 成功, 添加或更新条目 {au} 个, 删除条目 {d} 个", addOrModify, deleted);
+
+            // 删缓存
+            if (deleted != 0 || addOrModify != 0)
+            {
+                _cacheService.RemoveAll(GameDataType.Item);
+                _logger.LogInformation("已删除 Stage 与 Zone 组缓存");
+            }
         }
         catch (Exception ex)
         {

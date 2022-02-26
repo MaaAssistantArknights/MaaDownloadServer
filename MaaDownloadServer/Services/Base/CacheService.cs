@@ -15,6 +15,7 @@ public class CacheService : ICacheService
     private const string DownloadFullPackage = "{c}-{p}-{a}-pc-f-{v}";
     private const string DownloadUpdatePackage = "{c}-{p}-{a}-pc-u-{from}-{to}";
     private const string AllComponents = "all-components";
+    private const string GameData = "{t}-{n}";
 
     private readonly int _cacheExpirationInMinutes;
 
@@ -50,6 +51,20 @@ public class CacheService : ICacheService
             _group.Add(group, (ts, option));
         }
         _appCache.Add(key, value, _group[group].Item2);
+    }
+
+    public void Add<T>(string key, T value, GameDataType gameDataType)
+    {
+        if (_group.ContainsKey(gameDataType.ToString()) is false)
+        {
+            var ts = new CancellationTokenSource();
+            var option = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(_cacheExpirationInMinutes))
+                .AddExpirationToken(new CancellationChangeToken(_cancellationTokenSource.Token))
+                .AddExpirationToken(new CancellationChangeToken(ts.Token));
+            _group.Add(gameDataType.ToString(), (ts, option));
+        }
+        _appCache.Add(key, value, _group[gameDataType.ToString()].Item2);
     }
 
     public void Add(string key, PublicContent pc, PublicContentTagType type)
@@ -88,12 +103,12 @@ public class CacheService : ICacheService
 
     public void RemoveAll(PublicContentTagType type)
     {
-        if (_group.ContainsKey(type.ToString()) is false)
-        {
-            return;
-        }
-        _group[type.ToString()].Item1.Cancel();
-        _group.Remove(type.ToString());
+        RemoveAll(type.ToString());
+    }
+
+    public void RemoveAll(GameDataType gameDataType)
+    {
+        RemoveAll(gameDataType.ToString());
     }
 
     public void Remove(string key)
@@ -145,6 +160,11 @@ public class CacheService : ICacheService
     {
         return DownloadUpdatePackage.ReplaceComponentName(componentName).ReplacePlatform(p).ReplaceArchitecture(a)
             .Replace("{from}", from).Replace("{to}", to);
+    }
+
+    public string GetGameDataKey(GameDataType type, string identifier)
+    {
+        return GameData.Replace("{t}", type.ToString()).Replace("{n}", identifier);
     }
 
     public string GetAllComponentsKey()
