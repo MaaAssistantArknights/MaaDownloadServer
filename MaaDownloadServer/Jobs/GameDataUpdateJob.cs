@@ -89,7 +89,7 @@ public class GameDataUpdateJob : IJob
                 }
                 else
                 {
-                    _logger.LogWarning("更新 Items 是出现错误, 物品 {itemName} 不存在图片", name);
+                    _logger.LogWarning("更新 Items 时出现错误, 物品 {itemName} 不存在图片", name);
                 }
 
                 var file = $"{name}.png";
@@ -123,6 +123,8 @@ public class GameDataUpdateJob : IJob
                 prtsItems.Add(arkPrtsItem);
             });
 
+            _logger.LogInformation("解析获得了 {c} 个 Ark Item 数据", prtsItems.Count);
+
             foreach (var item in prtsItems)
             {
                 var existed = await _dbContext.ArkPrtsItems.AsNoTracking()
@@ -149,6 +151,9 @@ public class GameDataUpdateJob : IJob
                     existed = item with { Id = cId };
                     _dbContext.ArkPrtsItems.Update(existed);
                 }
+
+                _logger.LogDebug("旧物品数据: {ori}", existed);
+                _logger.LogDebug("新物品数据: {new}", item);
 
                 if (item.ImageDownloadUrl is not (null or ""))
                 {
@@ -181,6 +186,7 @@ public class GameDataUpdateJob : IJob
             foreach (var removedItem in removedItems
                          .Where(removedItem => File.Exists(Path.Combine(_itemDirectory.FullName, removedItem.Image))))
             {
+                _logger.LogInformation("Ark Items 删除数据: {del}", removedItem);
                 File.Delete(Path.Combine(_itemDirectory.FullName, removedItem.Image));
             }
 
