@@ -41,7 +41,7 @@ public class ArkZoneService : IArkZoneService
         return zone;
     }
 
-    public async Task<QueryZoneDto> QueryZones(Dictionary<string, string> query)
+    public async Task<QueryZoneDto> QueryZones(IReadOnlyDictionary<string, string> query)
     {
         var limit = 50;
         var page = 1;
