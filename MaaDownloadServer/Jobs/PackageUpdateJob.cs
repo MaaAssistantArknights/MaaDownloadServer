@@ -187,6 +187,12 @@ public class PackageUpdateJob : IJob
                 }
             }
 
+            if (downloadContentInfos.Count == 0)
+            {
+                _logger.LogInformation("[{id}] 组件 {cName} 无版本变更, 退出更新任务", jobId, componentConfiguration.Name);
+                return;
+            }
+
             #endregion
 
             #region STEP 4, 5: 下载文件 & 校验文件，校验失败则返回重试，最多尝试下载3次
