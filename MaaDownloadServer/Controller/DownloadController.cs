@@ -40,7 +40,7 @@ public class DownloadController : ControllerBase
         {
             return NotFound();
         }
-        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
+        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/maa/{pc.Id}.{pc.FileExtension}";
         var dto = new GetDownloadUrlDto(platform, arch, version, dUrl, pc.Hash);
         return Ok(dto);
     }
@@ -68,7 +68,7 @@ public class DownloadController : ControllerBase
         {
             return NotFound();
         }
-        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
+        var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/maa/{pc.Id}.{pc.FileExtension}";
         var dto = new GetDownloadUrlDto(platform, arch, $"{from} -> {to}", dUrl, pc.Hash);
         return Ok(dto);
     }

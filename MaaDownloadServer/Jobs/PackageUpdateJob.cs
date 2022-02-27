@@ -187,6 +187,12 @@ public class PackageUpdateJob : IJob
                 }
             }
 
+            if (downloadContentInfos.Count == 0)
+            {
+                _logger.LogInformation("[{id}] 组件 {cName} 无版本变更, 退出更新任务", jobId, componentConfiguration.Name);
+                return;
+            }
+
             #endregion
 
             #region STEP 4, 5: 下载文件 & 校验文件，校验失败则返回重试，最多尝试下载3次
@@ -426,7 +432,10 @@ public class PackageUpdateJob : IJob
             {
                 var info = downloadContentInfos.First(x => x.Id == id);
                 var package = new Package(id, componentConfiguration.Name, info.Version, info.Platform,
-                    info.Architecture, info.UpdateTime, info.UpdateLog) { Resources = new List<Resource>() };
+                    info.Architecture, info.UpdateTime, info.UpdateLog)
+                {
+                    Resources = new List<Resource>()
+                };
 
                 foreach (var (path, relativePath, hash) in ris)
                 {
@@ -461,8 +470,8 @@ public class PackageUpdateJob : IJob
                         .Where(x => x.Component == package.Component)
                         .Where(x => x.Platform == package.Platform && x.Architecture == package.Architecture)
                         .ToListAsync())
-                    .Where(x => SemVersion.Parse(x.Version) < SemVersion.Parse(package.Version, false))
-                    .OrderByDescending(x => SemVersion.Parse(x.Version, false))
+                    .Where(x => SemVersion.Parse(x.Version) < SemVersion.Parse(package.Version))
+                    .OrderByDescending(x => SemVersion.Parse(x.Version))
                     .Take(3)
                     .ToList();
                 recentVersionPackages.AddRange(recentPackages);

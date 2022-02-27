@@ -24,6 +24,7 @@
     <PackageReference Include="Fizzler.Systems.HtmlAgilityPack" Version="1.2.1" />
     <PackageReference Include="EscapeRoute" Version="0.0.3" />
     <PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
+    <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="5.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -32,6 +33,10 @@
     <PackageReference Include="Quartz.AspNetCore" Version="3.3.3" />
     <PackageReference Include="Semver" Version="2.0.6" />
     <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations" />
   </ItemGroup>
 
 </Project>

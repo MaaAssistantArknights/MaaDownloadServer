@@ -14,12 +14,22 @@ using Serilog.Extensions.Logging;
 
 #region Build configuration and logger
 
-var configuration = new ConfigurationBuilder()
+var configurationBuilder = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
-    .AddJsonFile("appsettings.Development.json", true)
-    .AddEnvironmentVariables()
-    .AddCommandLine(args)
-    .Build();
+    .AddJsonFile("appsettings.Development.json", true);
+
+var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("AZURE-APP-CONFIGURATION");
+
+if (azureAppConfigurationConnectionString is not null or "")
+{
+    configurationBuilder.AddAzureAppConfiguration(azureAppConfigurationConnectionString);
+}
+
+configurationBuilder
+    .AddEnvironmentVariables("MAA:")
+    .AddCommandLine(args);
+
+var configuration = configurationBuilder.Build();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration)
@@ -46,7 +56,8 @@ if (configuration.GetValue<bool>("no-data-directory-check") is false)
         (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
         (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false)
+        (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:GameData"], false)
     };
 
     foreach (var (subDirectory, initRequired) in subDirectories)
@@ -204,8 +215,20 @@ app.UseFileServer(new FileServerOptions
             context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
         }
     },
-    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], "public")),
-    RequestPath = "/files",
+    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+            configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
+    RequestPath = "/files/maa",
+    EnableDirectoryBrowsing = false,
+    EnableDefaultFiles = false,
+    RedirectToAppendTrailingSlash = false,
+});
+
+app.UseFileServer(new FileServerOptions
+{
+    StaticFileOptions = { DefaultContentType = "image/png", },
+    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+        configuration["MaaServer:DataDirectories:SubDirectories:GameData"])),
+    RequestPath = "/files/game-data",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,
