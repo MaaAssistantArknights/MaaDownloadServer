@@ -49,7 +49,7 @@ public class ArkStageService : IArkStageService
         if (query.ContainsKey("limit"))
         {
             var parsedLimit = QueryValueParseToInt32(query["limit"], "limit");
-            if (parsedLimit is not null)
+            if (parsedLimit >= 0)
             {
                 limit = (int)parsedLimit;
             }
@@ -58,13 +58,13 @@ public class ArkStageService : IArkStageService
         if (query.ContainsKey("page"))
         {
             var parsedPage = QueryValueParseToInt32(query["page"], "page");
-            if (parsedPage is not null)
+            if (parsedPage >= 0)
             {
                 page = (int)parsedPage;
             }
         }
 
-        var validQuerySection = new List<string>();
+        var validQuerySection = new List<string> { $"page={page}", $"limit={limit}" };
 
         Expression<Func<ArkPenguinStage, bool>> expression = x => true;
         foreach (var (k, v) in query)
@@ -72,15 +72,15 @@ public class ArkStageService : IArkStageService
             switch (k)
             {
                 case "stage_id":
-                    expression.AndAlso(x => x.StageId.Contains(v));
+                    expression = expression.AndAlso(x => x.StageId.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "stage_type":
-                    expression.AndAlso(x => x.StageType.Contains(v));
+                    expression = expression.AndAlso(x => x.StageType.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "stage_code":
-                    expression.AndAlso(x => x.StageCode.Contains(v));
+                    expression = expression.AndAlso(x => x.StageCode.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "ap_cost_lower_limit":
@@ -88,29 +88,29 @@ public class ArkStageService : IArkStageService
                     if (apCostLowerLimit is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.StageApCost >= apCostLowerLimit);
+                        expression = expression.AndAlso(x => x.StageApCost >= apCostLowerLimit);
                         validQuerySection.Add($"{k}={v}");
                     }
                     break;
                 case "ap_cost_up_limit":
-                    var apCostUpLimit = QueryValueParseToInt32(v, "ap_cost_lower_limit");
+                    var apCostUpLimit = QueryValueParseToInt32(v, "ap_cost_up_limit");
                     if (apCostUpLimit is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.StageApCost >= apCostUpLimit);
+                        expression = expression.AndAlso(x => x.StageApCost <= apCostUpLimit);
                         validQuerySection.Add($"{k}={v}");
                     }
                     break;
                 case "zone_id":
-                    expression.AndAlso(x => x.ZoneId.Contains(v));
+                    expression = expression.AndAlso(x => x.ZoneId.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "zone_name":
-                    expression.AndAlso(x => x.ZoneName.Contains(v));
+                    expression = expression.AndAlso(x => x.ZoneName.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "zone_type":
-                    expression.AndAlso(x => x.ZoneType.Contains(v));
+                    expression = expression.AndAlso(x => x.ZoneType.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "available_cn":
@@ -118,7 +118,7 @@ public class ArkStageService : IArkStageService
                     if (availableCn is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.CnExist == (bool)availableCn);
+                        expression = expression.AndAlso(x => x.CnExist == (bool)availableCn);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -127,7 +127,7 @@ public class ArkStageService : IArkStageService
                     if (availableUs is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.UsExist == (bool)availableUs);
+                        expression = expression.AndAlso(x => x.UsExist == (bool)availableUs);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -136,7 +136,7 @@ public class ArkStageService : IArkStageService
                     if (availableKr is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.KrExist == (bool)availableKr);
+                        expression = expression.AndAlso(x => x.KrExist == (bool)availableKr);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -145,7 +145,7 @@ public class ArkStageService : IArkStageService
                     if (availableJp is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.JpExist == (bool)availableJp);
+                        expression = expression.AndAlso(x => x.JpExist == (bool)availableJp);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;

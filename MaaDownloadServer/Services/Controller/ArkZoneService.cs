@@ -49,7 +49,7 @@ public class ArkZoneService : IArkZoneService
         if (query.ContainsKey("limit"))
         {
             var parsedLimit = QueryValueParseToInt32(query["limit"], "limit");
-            if (parsedLimit is not null)
+            if (parsedLimit >= 0)
             {
                 limit = (int)parsedLimit;
             }
@@ -58,13 +58,13 @@ public class ArkZoneService : IArkZoneService
         if (query.ContainsKey("page"))
         {
             var parsedPage = QueryValueParseToInt32(query["page"], "page");
-            if (parsedPage is not null)
+            if (parsedPage >= 0)
             {
                 page = (int)parsedPage;
             }
         }
 
-        var validQuerySection = new List<string>();
+        var validQuerySection = new List<string> { $"page={page}", $"limit={limit}" };
 
         Expression<Func<ArkPenguinStage, bool>> expression = x => true;
         foreach (var (k, v) in query)
@@ -72,15 +72,15 @@ public class ArkZoneService : IArkZoneService
             switch (k)
             {
                 case "zone_id":
-                    expression.AndAlso(x => x.ZoneId.Contains(v));
+                    expression = expression.AndAlso(x => x.ZoneId.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "zone_name":
-                    expression.AndAlso(x => x.ZoneName.Contains(v));
+                    expression = expression.AndAlso(x => x.ZoneName.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "zone_type":
-                    expression.AndAlso(x => x.ZoneType.Contains(v));
+                    expression = expression.AndAlso(x => x.ZoneType.Contains(v));
                     validQuerySection.Add($"{k}={v}");
                     break;
                 case "available_cn":
@@ -88,7 +88,7 @@ public class ArkZoneService : IArkZoneService
                     if (availableCn is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.CnExist == (bool)availableCn);
+                        expression = expression.AndAlso(x => x.CnExist == (bool)availableCn);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -97,7 +97,7 @@ public class ArkZoneService : IArkZoneService
                     if (availableUs is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.UsExist == (bool)availableUs);
+                        expression = expression.AndAlso(x => x.UsExist == (bool)availableUs);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -106,7 +106,7 @@ public class ArkZoneService : IArkZoneService
                     if (availableKr is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.KrExist == (bool)availableKr);
+                        expression = expression.AndAlso(x => x.KrExist == (bool)availableKr);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -115,7 +115,7 @@ public class ArkZoneService : IArkZoneService
                     if (availableJp is not null)
                     {
                         // ReSharper disable once AccessToModifiedClosure
-                        expression.AndAlso(x => x.JpExist == (bool)availableJp);
+                        expression = expression.AndAlso(x => x.JpExist == (bool)availableJp);
                         validQuerySection.Add($"{k}={v.ToLower()}");
                     }
                     break;
@@ -134,12 +134,14 @@ public class ArkZoneService : IArkZoneService
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
 
-        var data = await _dbContext.ArkPenguinStages
+        var allData = await _dbContext.ArkPenguinStages
             .AsNoTracking()
             .Where(expression)
             .OrderBy(x => x.StageCode)
-            .DistinctBy(x => x.ZoneId)
             .ToListAsync();
+        var data = allData
+            .DistinctBy(x => x.ZoneId)
+            .ToList();
 
         var items = new List<GetZoneDto>();
 
