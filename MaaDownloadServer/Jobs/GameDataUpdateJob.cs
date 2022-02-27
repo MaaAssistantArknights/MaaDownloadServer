@@ -71,7 +71,9 @@ public class GameDataUpdateJob : IJob
             var downloadContentInfo = new List<ItemImageDownloadInfo>();
             var prtsItems = new List<ArkPrtsItem>();
 
-            nodes.AsParallel().ForAll(node =>
+            // 放弃使用 AsParallel
+            // AsParallel 似乎会漏数据, 500 个节点解析后会丢失 1 - 10 个
+            foreach (var node in nodes)
             {
                 var id = node.Attributes["data-id"].Value;
                 var name = node.Attributes["data-name"].Value;
@@ -121,9 +123,7 @@ public class GameDataUpdateJob : IJob
                 };
 
                 prtsItems.Add(arkPrtsItem);
-            });
-
-            _logger.LogInformation("解析获得了 {c} 个 Ark Item 数据", prtsItems.Count);
+            }
 
             foreach (var item in prtsItems)
             {
