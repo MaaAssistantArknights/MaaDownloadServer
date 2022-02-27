@@ -79,8 +79,18 @@ public class GameDataUpdateJob : IJob
                 var usage = node.Attributes["data-usage"].Value;
                 var obtain = node.Attributes["data-obtain_approach"].Value;
                 var rarityString = node.Attributes["data-rarity"].Value;
-                var fileDownloadUrl = "https:" + node.Attributes["data-file"].Value;
+                var fileDownloadUrlWithoutProtocol = node.Attributes["data-file"].Value;
                 var categoryString = node.Attributes["data-category"].Value;
+
+                var fileDownloadUrl = "";
+                if (fileDownloadUrlWithoutProtocol is not (null or ""))
+                {
+                    fileDownloadUrl = "https:" + fileDownloadUrlWithoutProtocol;
+                }
+                else
+                {
+                    _logger.LogWarning("更新 Items 是出现错误, 物品 {itemName} 不存在图片", name);
+                }
 
                 var file = $"{name}.png";
 
@@ -124,7 +134,7 @@ public class GameDataUpdateJob : IJob
                 }
                 else
                 {
-                    if (existed == item)
+                    if (existed.Equal(item))
                     {
                         continue;
                     }
@@ -140,7 +150,10 @@ public class GameDataUpdateJob : IJob
                     _dbContext.ArkPrtsItems.Update(existed);
                 }
 
-                downloadContentInfo.Add(new ItemImageDownloadInfo(item.ImageDownloadUrl, Path.Combine(_itemDirectory.FullName, item.Image)));
+                if (item.ImageDownloadUrl is not (null or ""))
+                {
+                    downloadContentInfo.Add(new ItemImageDownloadInfo(item.ImageDownloadUrl, Path.Combine(_itemDirectory.FullName, item.Image)));
+                }
             }
 
             var downloadHttpClient = new HttpClient();
