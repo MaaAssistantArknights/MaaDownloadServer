@@ -20,6 +20,7 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<PublicContent> PublicContents { get; set; }
     public DbSet<ArkPenguinStage> ArkPenguinStages { get; set; }
     public DbSet<ArkPrtsItem> ArkPrtsItems { get; set; }
+    public DbSet<DatabaseCache> DatabaseCaches { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
