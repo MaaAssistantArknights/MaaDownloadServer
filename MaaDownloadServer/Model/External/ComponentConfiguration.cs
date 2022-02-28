@@ -6,6 +6,8 @@ public class ComponentConfiguration
 {
     [JsonPropertyName("name")]
     public string Name { get; set; }
+    [JsonPropertyName("description")]
+    public string Description { get; set; }
 
     [JsonPropertyName("metadata_urls")]
     public List<string> MetadataUrl { get; set; }

@@ -20,5 +20,6 @@ public static class ServiceExtension
         serviceCollection.AddScoped<IArkItemService, ArkItemService>();
         serviceCollection.AddScoped<IArkStageService, ArkStageService>();
         serviceCollection.AddScoped<IArkZoneService, ArkZoneService>();
+        serviceCollection.AddScoped<IComponentService, ComponentService>();
     }
 }

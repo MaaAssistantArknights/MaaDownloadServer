@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Web;
@@ -12,13 +13,50 @@ using Quartz;
 using Serilog;
 using Serilog.Extensions.Logging;
 
+#region First run
+
+var dataDirectoryEnvironmentVariable = Environment.GetEnvironmentVariable("MAADS_DATA_DIRECTORY");
+var assemblyPath = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory!.FullName;
+
+var dataDirectory = string.IsNullOrEmpty(dataDirectoryEnvironmentVariable) ?
+    new DirectoryInfo(Path.Combine(assemblyPath, "data")) :
+    new DirectoryInfo(dataDirectoryEnvironmentVariable);
+
+if (dataDirectory.Exists is false)
+{
+    dataDirectory.Create();
+}
+
+var configurationFileExist = dataDirectory.GetFiles("appsettings.json").Length == 1;
+
+if (configurationFileExist is false)
+{
+    var appSettingString = await File.ReadAllTextAsync(Path.Combine(assemblyPath, "appsettings.json"));
+    appSettingString = appSettingString.Replace("{{DATA DIRECTORY}}", dataDirectory.FullName);
+    await File.WriteAllTextAsync(Path.Combine(dataDirectory.FullName, "appsettings.json"), appSettingString);
+    Console.WriteLine($"配置文件不存在, 已复制新的 appsettings.json 至 {dataDirectory.FullName} 路径, 请修改配置文件");
+    Environment.Exit(0);
+}
+
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    if (File.Exists(Path.Combine(assemblyPath, "appsettings.Development.json")) &&
+        File.Exists(Path.Combine(dataDirectory.FullName, "appsettings.Development.json")) is false)
+    {
+        File.Copy(Path.Combine(assemblyPath, "appsettings.Development.json"),
+            Path.Combine(dataDirectory.FullName, "appsettings.Development.json"));
+    }
+}
+
+#endregion
+
 #region Build configuration and logger
 
 var configurationBuilder = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .AddJsonFile("appsettings.Development.json", true);
+    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.json"))
+    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
 
-var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("AZURE-APP-CONFIGURATION");
+var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAA_DS_AZURE_APP_CONFIGURATION");
 
 if (azureAppConfigurationConnectionString is not null or "")
 {
@@ -124,7 +162,7 @@ foreach (var scriptDirectory in scriptDirectories)
 
     try
     {
-        using var configFileStream = File.OpenRead(configurationFile);
+        await using var configFileStream = File.OpenRead(configurationFile);
         var configObj = JsonSerializer.Deserialize<ComponentConfiguration>(configFileStream);
         componentConfigurations.Add(configObj);
     }
@@ -190,6 +228,26 @@ if (File.Exists(
     dbContext!.Database.Migrate();
     Log.Logger.Information("数据库创建完成");
 }
+
+var dbCaches = await dbContext!.DatabaseCaches.ToListAsync();
+dbContext!.DatabaseCaches.RemoveRange(dbCaches);
+
+#endregion
+
+#region Add component name and description
+
+var componentInfosDbCache = componentConfigurations
+    .Select(x => new ComponentDto(x.Name, x.Description))
+    .Select(x => JsonSerializer.Serialize(x))
+    .Select(x => new DatabaseCache { Id = Guid.NewGuid(), QueryId = "Component", Value = x })
+    .ToList();
+
+await dbContext!.DatabaseCaches.AddRangeAsync(componentInfosDbCache);
+await dbContext!.SaveChangesAsync();
+
+Log.Logger.Information("已添加 {c} 个 Component", componentInfosDbCache.Count);
+
+await dbContext!.DisposeAsync();
 
 #endregion
 

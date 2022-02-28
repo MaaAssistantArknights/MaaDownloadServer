@@ -12,6 +12,7 @@ public static class PlatformArchParser
             "linux" => Platform.linux,
             "macos" => Platform.macos,
             "osx" => Platform.macos,
+            "no_platform" => Platform.NoPlatform,
             _ => Platform.UnSupported
         };
     }
@@ -23,6 +24,7 @@ public static class PlatformArchParser
         {
             "x64" => Architecture.x64,
             "arm64" => Architecture.arm64,
+            "no_arch" => Architecture.NoArch,
             _ => Architecture.UnSupported
         };
     }
