@@ -229,6 +229,26 @@ if (File.Exists(
     Log.Logger.Information("数据库创建完成");
 }
 
+var dbCaches = await dbContext!.DatabaseCaches.ToListAsync();
+dbContext!.DatabaseCaches.RemoveRange(dbCaches);
+
+#endregion
+
+#region Add component name and description
+
+var componentInfosDbCache = componentConfigurations
+    .Select(x => new ComponentDto(x.Name, x.Description))
+    .Select(x => JsonSerializer.Serialize(x))
+    .Select(x => new DatabaseCache { Id = Guid.NewGuid(), QueryId = "Component", Value = x })
+    .ToList();
+
+await dbContext!.DatabaseCaches.AddRangeAsync(componentInfosDbCache);
+await dbContext!.SaveChangesAsync();
+
+Log.Logger.Information("已添加 {c} 个 Component", componentInfosDbCache.Count);
+
+await dbContext!.DisposeAsync();
+
 #endregion
 
 app.UseIpRateLimiting();
