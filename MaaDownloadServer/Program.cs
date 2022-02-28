@@ -38,6 +38,16 @@ if (configurationFileExist is false)
     Environment.Exit(0);
 }
 
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    if (File.Exists(Path.Combine(assemblyPath, "appsettings.Development.json")) &&
+        File.Exists(Path.Combine(dataDirectory.FullName, "appsettings.Development.json")) is false)
+    {
+        File.Copy(Path.Combine(assemblyPath, "appsettings.Development.json"),
+            Path.Combine(dataDirectory.FullName, "appsettings.Development.json"));
+    }
+}
+
 #endregion
 
 #region Build configuration and logger
@@ -152,7 +162,7 @@ foreach (var scriptDirectory in scriptDirectories)
 
     try
     {
-        using var configFileStream = File.OpenRead(configurationFile);
+        await using var configFileStream = File.OpenRead(configurationFile);
         var configObj = JsonSerializer.Deserialize<ComponentConfiguration>(configFileStream);
         componentConfigurations.Add(configObj);
     }
