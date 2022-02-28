@@ -5,5 +5,6 @@ public enum Architecture
 {
     x64,
     arm64,
+    NoArch,
     UnSupported
 }
