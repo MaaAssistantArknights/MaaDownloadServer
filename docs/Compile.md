@@ -17,10 +17,26 @@
 
 运行格式：`./publish.sh [options]` 或者 `./publish.ps1 [options]`
 
-Options 格式：`--<option> <value>`
+Options 格式：`--<option>=<value>`
 
 ### 可用参数
 
 * `--configuration` 选项指定编译配置，可选 `Release` 或 `Debug`，默认为 `Release`
 * `--rid` 选项指定编译平台，可选项请参考 [RID 列表](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog) ，默认编译为 `Portable`
 * `--framework` 选定 .NET 版本，目前仅在 `net6.0` 下测试过，默认为 `net6.0`，变更此选项需要更改 `csproj` 文件
+
+
+## 示例
+
+1. 发布 Linux x64 Release 版本
+    ```shell
+    ./publish.sh --rid=linux-x64
+    ```
+2. 发布 MacOS Monterey arm64 Debug 版本
+    ```shell
+   ./publish.sh --rid=osx.12-arm64 --configuration=Debug
+   ```
+3. 发布 Windows 10/11 x64 Release 版本
+    ```shell
+   ./publish.sh --rid=win10-x64
+   ```

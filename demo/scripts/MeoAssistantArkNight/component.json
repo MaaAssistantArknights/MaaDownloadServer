@@ -1,0 +1,37 @@
+{
+    "name": "MeoAssistantArkNight",
+    "description": "Maa 核心 (MaaDS 测试用)",
+    "metadata_urls": [
+        "https://api.github.com/repos/LiamSho/MAA_Download_Test/releases/{version}"
+    ],
+    "default_url_placeholder": {
+        "version": "latest"
+    },
+    "after_download_process": {
+        "operation": "Unzip",
+        "args": {}
+    },
+    "before_add_process": {
+        "operation": "Zip",
+        "args": {
+            "zip": [
+                {
+                    "name": "resource",
+                    "files": [],
+                    "folders": [
+                        "resource"
+                    ]
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "get_download_info": "get_download_info.py",
+        "after_download_process": "",
+        "before_add_process": "",
+        "relative_path_calculation": ""
+    },
+    "use_proxy": true,
+    "pack_update_package": true,
+    "interval": 120
+}
