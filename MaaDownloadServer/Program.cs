@@ -53,8 +53,12 @@ if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development
 #region Build configuration and logger
 
 var configurationBuilder = new ConfigurationBuilder()
-    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.json"))
-    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
+    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.json"));
+
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    configurationBuilder.AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
+}
 
 var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAA_DS_AZURE_APP_CONFIGURATION");
 
@@ -193,8 +197,10 @@ var builder = WebApplication.CreateBuilder(args);
 var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
 builder.WebHost.UseUrls(url);
 
-#region Services
+#region Web application builder
+
 builder.Host.UseSerilog();
+builder.Configuration.AddConfiguration(configuration);
 builder.Services.AddOptions();
 builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
 builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
