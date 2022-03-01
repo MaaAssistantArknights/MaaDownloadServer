@@ -33,6 +33,7 @@ public class ArkItemService : IArkItemService
 
         if (item is not null)
         {
+            _cacheService.Add(cacheKey, item, GameDataType.Item);
             return EntityToDto(item);
         }
 

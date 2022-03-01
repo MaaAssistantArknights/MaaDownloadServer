@@ -21,7 +21,7 @@ public class ArkStageService : IArkStageService
 
     public async Task<GetStageDto> GetStage(string code)
     {
-        var cacheKey = _cacheService.GetGameDataKey(GameDataType.Item, code);
+        var cacheKey = _cacheService.GetGameDataKey(GameDataType.Stage, code);
         if (_cacheService.Contains(cacheKey))
         {
             var cachedItem = _cacheService.Get<ArkPenguinStage>(cacheKey);
@@ -30,11 +30,12 @@ public class ArkStageService : IArkStageService
         }
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
-        var item = await _dbContext.ArkPenguinStages.FirstOrDefaultAsync(x => x.StageCode == code);
+        var stage = await _dbContext.ArkPenguinStages.FirstOrDefaultAsync(x => x.StageCode == code);
 
-        if (item is not null)
+        if (stage is not null)
         {
-            return EntityToDto(item);
+            _cacheService.Add(cacheKey, stage, GameDataType.Stage);
+            return EntityToDto(stage);
         }
 
         _cacheService.Add(cacheKey, ("NotExist", DateTime.Now), GameDataType.Item);
