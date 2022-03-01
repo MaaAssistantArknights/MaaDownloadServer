@@ -255,7 +255,18 @@ public class PackageUpdateJob : IJob
                     }
                     break;
                 case AfterDownloadProcessOperation.None:
-                    _logger.LogDebug("[{id}] 执行AfterDownloadProcess：无操作", jobId);
+                    _logger.LogDebug("[{id}] 执行AfterDownloadProcess：移动文件", jobId);
+                    foreach (var downloadContentInfo in downloadContentInfos)
+                    {
+                        var filePath = Path.Combine(_downloadDirectory.FullName,
+                            $"{downloadContentInfo.Id}.{downloadContentInfo.FileExtension}");
+                        var target = Path.Combine(_tempDirectory.FullName, downloadContentInfo.Id.ToString());
+                        if (Directory.Exists(target) is false)
+                        {
+                            Directory.CreateDirectory(target);
+                        }
+                        File.Copy(filePath, target);
+                    }
                     break;
                 case AfterDownloadProcessOperation.Custom:
                     _logger.LogDebug("[{id}] 执行AfterDownloadProcess：自定义", jobId);
@@ -268,7 +279,7 @@ public class PackageUpdateJob : IJob
                     foreach (var dci in downloadContentInfos)
                     {
                         var target = Path.Combine(_tempDirectory.FullName, dci.Id.ToString());
-                        var source = Path.Combine(_downloadDirectory.FullName, dci.Id.ToString() + "." + dci.FileExtension);
+                        var source = Path.Combine(_downloadDirectory.FullName, dci.Id + "." + dci.FileExtension);
                         Directory.CreateDirectory(target);
                         Python.Run(_pyLogger, pyExecutable, afterDownloadProcessScript,
                             new[] { afterDownloadProcessArgs, source, target });
@@ -460,26 +471,33 @@ public class PackageUpdateJob : IJob
 
             #region STEP 13: 获取近期3个版本的包对象，比对Resource并打包更新包
 
-            _logger.LogInformation("[{id}] STEP 13: 获取近期3个版本的包对象，比对Resource并打包更新包", jobId);
-            var recentVersionPackages = new List<Package>();
-            foreach (var package in packages)
+            if (componentConfiguration.PackUpdatePackage)
             {
-                var recentPackages = (await _dbContext.Packages
-                        .AsNoTracking()
-                        .Include(x => x.Resources)
-                        .Where(x => x.Component == package.Component)
-                        .Where(x => x.Platform == package.Platform && x.Architecture == package.Architecture)
-                        .ToListAsync())
-                    .Where(x => SemVersion.Parse(x.Version) < SemVersion.Parse(package.Version))
-                    .OrderByDescending(x => SemVersion.Parse(x.Version))
-                    .Take(3)
-                    .ToList();
-                recentVersionPackages.AddRange(recentPackages);
+                _logger.LogInformation("[{id}] STEP 13: 获取近期3个版本的包对象，比对Resource并打包更新包", jobId);
+                var recentVersionPackages = new List<Package>();
+                foreach (var package in packages)
+                {
+                    var recentPackages = (await _dbContext.Packages
+                            .AsNoTracking()
+                            .Include(x => x.Resources)
+                            .Where(x => x.Component == package.Component)
+                            .Where(x => x.Platform == package.Platform && x.Architecture == package.Architecture)
+                            .ToListAsync())
+                        .Where(x => SemVersion.Parse(x.Version) < SemVersion.Parse(package.Version))
+                        .OrderByDescending(x => SemVersion.Parse(x.Version))
+                        .Take(3)
+                        .ToList();
+                    recentVersionPackages.AddRange(recentPackages);
+                }
+
+                var diffs = GetUpdateDiffs(packages, recentVersionPackages, jobId.ToString());
+
+                await _fileSystemService.AddUpdatePackages(diffs);
             }
-
-            var diffs = GetUpdateDiffs(packages, recentVersionPackages, jobId.ToString());
-
-            await _fileSystemService.AddUpdatePackages(diffs);
+            else
+            {
+                _logger.LogInformation("[{id}] STEP 13: 配置文件指定不进行更新包的打包", jobId);
+            }
 
             #endregion
 
