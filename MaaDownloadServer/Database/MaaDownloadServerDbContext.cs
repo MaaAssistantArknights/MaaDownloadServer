@@ -18,7 +18,9 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<Package> Packages { get; set; }
     public DbSet<Resource> Resources { get; set; }
     public DbSet<PublicContent> PublicContents { get; set; }
+    public DbSet<ArkPenguinZone> ArkPenguinZones { get; set; }
     public DbSet<ArkPenguinStage> ArkPenguinStages { get; set; }
+    public DbSet<ArkPenguinItem> ArkPenguinItems { get; set; }
     public DbSet<ArkPrtsItem> ArkPrtsItems { get; set; }
     public DbSet<DatabaseCache> DatabaseCaches { get; set; }
 
@@ -67,6 +69,14 @@ public class MaaDownloadServerDbContext : DbContext
         modelBuilder
             .Entity<Resource>()
             .HasMany(x => x.Packages);
+
+        modelBuilder
+            .Entity<ArkPenguinZone>()
+            .HasMany(x => x.Stages);
+
+        modelBuilder
+            .Entity<ArkPenguinStage>()
+            .HasMany(x => x.DropItems);
 
         #endregion
     }
