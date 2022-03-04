@@ -4,28 +4,17 @@ public static class GameDataUpdateUtil
 {
     public static List<ArkPenguinZone> BuildZones(
         IEnumerable<ApiPenguinZone> apiZones,
-        IEnumerable<ApiPenguinStage> apiStages,
-        IEnumerable<ApiPenguinItem> apiItems)
+        IEnumerable<ApiPenguinStage> apiStages)
     {
         var zones = apiZones.Select(x => x.ToArkPenguinZone()).ToList();
         var stages = apiStages.Select(x => x.ToArkPenguinStage()).ToList();
-        var items = apiItems.Select(x => x.ToArkPenguinItem()).ToList();
-
-        // Include stage DropItem
-        for (var i = 0; i < stages.Count; i++)
-        {
-            var dropItemIds = stages[i].Item2;
-            var dropItems = items.Where(x => dropItemIds.Contains(x.ItemId)).ToList();
-            stages[i].Item1.DropItems.AddRange(dropItems);
-        }
 
         // Include zone Stages
         for (var i = 0; i < zones.Count; i++)
         {
             var containedStageIds = zones[i].Item2;
             var containedStages = stages
-                .Where(x => containedStageIds.Contains(x.Item1.StageId))
-                .Select(x => x.Item1)
+                .Where(x => containedStageIds.Contains(x.StageId))
                 .ToList();
             zones[i].Item1.Stages.AddRange(containedStages);
         }
@@ -33,7 +22,7 @@ public static class GameDataUpdateUtil
         return zones.Select(x => x.Item1).ToList();
     }
 
-    private static ArkPenguinItem ToArkPenguinItem(this ApiPenguinItem apiItem)
+    public static ArkPenguinItem ToArkPenguinItem(this ApiPenguinItem apiItem)
     {
         return new ArkPenguinItem
         {
@@ -53,8 +42,17 @@ public static class GameDataUpdateUtil
         };
     }
 
-    private static (ArkPenguinStage, List<string>) ToArkPenguinStage(this ApiPenguinStage apiStage)
+    private static ArkPenguinStage ToArkPenguinStage(this ApiPenguinStage apiStage)
     {
+        var items = new List<string>();
+        if (apiStage.DropInfos is not null)
+        {
+            items = apiStage.DropInfos
+                .Where(x => string.IsNullOrEmpty(x.ItemId) is false)
+                .Select(x => x.ItemId)
+                .ToList();
+        }
+
         var stage = new ArkPenguinStage
         {
             StageId = apiStage.StageId,
@@ -78,19 +76,9 @@ public static class GameDataUpdateUtil
             KrCloseTime = apiStage.Existence.Kr.CloseTime.ToDateTime(GameRegion.Korea),
             CnOpenTime = apiStage.Existence.Cn.OpenTime.ToDateTime(GameRegion.China),
             CnCloseTime = apiStage.Existence.Cn.CloseTime.ToDateTime(GameRegion.China),
-            DropItems = new List<ArkPenguinItem>()
+            DropItemIds = items
         };
-
-        if (apiStage.DropInfos is null)
-        {
-            return (stage, new List<string>());
-        }
-
-        var items = apiStage.DropInfos
-            .Where(x => string.IsNullOrEmpty(x.ItemId) is false)
-            .Select(x => x.ItemId)
-            .ToList();
-        return (stage, items);
+        return stage;
     }
 
     private static (ArkPenguinZone, List<string>) ToArkPenguinZone(this ApiPenguinZone apiZone)

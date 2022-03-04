@@ -115,4 +115,18 @@ public sealed record ArkPenguinZone
 
         return equalCount == Stages.Count;
     }
+
+    public override string ToString()
+    {
+        var original = base.ToString();
+        if (Stages is null)
+        {
+            return original + " with Null";
+        }
+
+        var strList = Stages.Select(x => x.ToString()).ToList();
+        var str = string.Join("; ", strList);
+
+        return original + " with " + str;
+    }
 }

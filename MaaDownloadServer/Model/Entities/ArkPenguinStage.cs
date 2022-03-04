@@ -136,8 +136,11 @@ public sealed record ArkPenguinStage
     [Column("cn_close_time")]
     public DateTime? CnCloseTime { get; set; }
 
+    /// <summary>
+    /// 掉落物 Id
+    /// </summary>
     [Column("drop_items")]
-    public List<ArkPenguinItem> DropItems { get; set; }
+    public List<string> DropItemIds { get; set; }
 
     public bool EqualTo(ArkPenguinStage other)
     {
@@ -146,22 +149,22 @@ public sealed record ArkPenguinStage
             return false;
         }
 
-        var thisWithNoDropItems = this with { DropItems = null };
-        var otherWithNoDropItems = other with { DropItems = null };
+        var thisWithNoDropItems = this with { DropItemIds = null };
+        var otherWithNoDropItems = other with { DropItemIds = null };
 
-        if (thisWithNoDropItems != otherWithNoDropItems)
+        return thisWithNoDropItems == otherWithNoDropItems && DropItemIds.SequenceEqual(other.DropItemIds);
+    }
+
+    public override string ToString()
+    {
+        var original = base.ToString();
+
+        if (DropItemIds is null)
         {
-            return false;
+            return original + "with Null";
         }
 
-        if (DropItems.Count != other.DropItems.Count)
-        {
-            return false;
-        }
-
-        var equalCount = DropItems
-            .Count(item => other.DropItems.Any(item.EqualTo));
-
-        return equalCount == DropItems.Count;
+        var str = string.Join("; ", DropItemIds);
+        return original + " with " + str;
     }
 }

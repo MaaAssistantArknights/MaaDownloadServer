@@ -87,9 +87,4 @@ public sealed record ArkPenguinItem
     /// </summary>
     [Column("ko_name")]
     public string KoNameI18N { get; set; }
-
-    public bool EqualTo(ArkPenguinItem other)
-    {
-        return this == other;
-    }
 }
