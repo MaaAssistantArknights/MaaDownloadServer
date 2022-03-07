@@ -35,22 +35,10 @@ public sealed record ArkPenguinStage
     public int StageApCost { get; set; }
 
     /// <summary>
-    /// 区域 ID
+    /// 最短通关时间
     /// </summary>
-    [Column("zone_id")]
-    public string ZoneId { get; set; }
-
-    /// <summary>
-    /// 区域名
-    /// </summary>
-    [Column("zone_name")]
-    public string ZoneName { get; set; }
-
-    /// <summary>
-    /// 区域类型
-    /// </summary>
-    [Column("zone_type")]
-    public string ZoneType { get; set; }
+    [Column("min_clear_time")]
+    public long MinClearTime { get; set; }
 
     /// <summary>
     /// 美服是否存在
@@ -101,30 +89,6 @@ public sealed record ArkPenguinStage
     public string ZhStageCodeI18N { get; set; }
 
     /// <summary>
-    /// 韩语区域名
-    /// </summary>
-    [Column("ko_zone_name")]
-    public string KoZoneNameI18N { get; set; }
-
-    /// <summary>
-    /// 日语区域名
-    /// </summary>
-    [Column("ja_zone_name")]
-    public string JaZoneNameI18N { get; set; }
-
-    /// <summary>
-    /// 英语区域名
-    /// </summary>
-    [Column("en_zone_name")]
-    public string EnZoneNameI18N { get; set; }
-
-    /// <summary>
-    /// 汉语区域名
-    /// </summary>
-    [Column("zh_zone_name")]
-    public string ZhZoneNameI18N { get; set; }
-
-    /// <summary>
     /// 美服开启时间
     /// </summary>
     [Column("us_open_time")]
@@ -171,4 +135,36 @@ public sealed record ArkPenguinStage
     /// </summary>
     [Column("cn_close_time")]
     public DateTime? CnCloseTime { get; set; }
+
+    /// <summary>
+    /// 掉落物 Id
+    /// </summary>
+    [Column("drop_items")]
+    public List<string> DropItemIds { get; set; }
+
+    public bool EqualTo(ArkPenguinStage other)
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        var thisWithNoDropItems = this with { DropItemIds = null };
+        var otherWithNoDropItems = other with { DropItemIds = null };
+
+        return thisWithNoDropItems == otherWithNoDropItems && DropItemIds.SequenceEqual(other.DropItemIds);
+    }
+
+    public override string ToString()
+    {
+        var original = base.ToString();
+
+        if (DropItemIds is null)
+        {
+            return original + "with Null";
+        }
+
+        var str = string.Join("; ", DropItemIds);
+        return original + " with " + str;
+    }
 }
