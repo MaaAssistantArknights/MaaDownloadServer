@@ -79,8 +79,8 @@ public sealed record ArkPenguinItem
     /// <summary>
     /// 日语名称
     /// </summary>
-    [Column("jp_name")]
-    public string JpNameI18N { get; set; }
+    [Column("ja_name")]
+    public string JaNameI18N { get; set; }
 
     /// <summary>
     /// 韩语名称
