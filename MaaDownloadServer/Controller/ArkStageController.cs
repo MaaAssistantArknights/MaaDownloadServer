@@ -14,11 +14,11 @@ public class ArkStageController : ControllerBase
         _arkStageService = arkStageService;
     }
 
-    [HttpGet("{stage_code}")]
+    [HttpGet("{stage_code_or_id}")]
     // ReSharper disable once InconsistentNaming
-    public async Task<ActionResult<GetStageDto>> GetArkStage(string stage_code)
+    public async Task<ActionResult<GetStageDto>> GetArkStage(string stage_code_or_id)
     {
-        var dto = await _arkStageService.GetStage(stage_code);
+        var dto = await _arkStageService.GetStage(stage_code_or_id);
 
         if (dto is null)
         {

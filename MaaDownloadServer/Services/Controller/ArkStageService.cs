@@ -30,7 +30,8 @@ public class ArkStageService : IArkStageService
         }
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
-        var stage = await _dbContext.ArkPenguinStages.FirstOrDefaultAsync(x => x.StageCode == code);
+        var stage = await _dbContext.ArkPenguinStages.FirstOrDefaultAsync(x => x.StageId == code) ??
+                    await _dbContext.ArkPenguinStages.FirstOrDefaultAsync(x => x.StageCode == code);
 
         if (stage is not null)
         {
@@ -41,7 +42,8 @@ public class ArkStageService : IArkStageService
                     .Where(x => stage.DropItemIds.Contains(x.ItemId))
                     .ToList();
             }
-            _cacheService.Add(cacheKey, (stage, items), GameDataType.Stage);
+            _cacheService.Add(_cacheService.GetGameDataKey(GameDataType.Stage, stage.StageId), (stage, items), GameDataType.Stage);
+            _cacheService.Add(_cacheService.GetGameDataKey(GameDataType.Stage, stage.StageCode), (stage, items), GameDataType.Stage);
             return EntityToDto(stage, items);
         }
 
