@@ -30,15 +30,19 @@ public class ArkZoneService : IArkZoneService
         }
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+        var zone = await _dbContext.ArkPenguinZones
+            .Include(x => x.Stages)
+            .FirstOrDefaultAsync(x => x.ZoneId == zoneId);
 
-        var stages = await _dbContext.ArkPenguinStages
-            .Where(x => x.ZoneId == zoneId)
-            .ToListAsync();
+        if (zone is not null)
+        {
+            var dto = EntityToDto(zone);
+            _cacheService.Add(cacheKey, dto, GameDataType.Zone);
+            return dto;
+        }
 
-        var zone = EntityToDto(stages);
-        _cacheService.Add(cacheKey, zone, GameDataType.Zone);
-
-        return zone;
+        _cacheService.Add(cacheKey, ("NotExist", DateTime.Now), GameDataType.Item);
+        return null;
     }
 
     public async Task<QueryZoneDto> QueryZones(IReadOnlyDictionary<string, string> query)
@@ -66,7 +70,7 @@ public class ArkZoneService : IArkZoneService
 
         var validQuerySection = new List<string> { $"page={page}", $"limit={limit}" };
 
-        Expression<Func<ArkPenguinStage, bool>> expression = x => true;
+        Expression<Func<ArkPenguinZone, bool>> expression = x => true;
         foreach (var (k, v) in query)
         {
             switch (k)
@@ -134,56 +138,36 @@ public class ArkZoneService : IArkZoneService
 
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
 
-        var allData = await _dbContext.ArkPenguinStages
+        var count = await _dbContext.ArkPenguinZones.CountAsync(expression);
+        var allData = await _dbContext.ArkPenguinZones
             .AsNoTracking()
+            .Include(x => x.Stages)
             .Where(expression)
-            .OrderBy(x => x.StageCode)
+            .OrderBy(x => x.ZoneId)
+            .Skip((page - 1) * limit)
+            .Take(limit)
             .ToListAsync();
-        var data = allData
-            .DistinctBy(x => x.ZoneId)
-            .ToList();
 
-        var items = new List<GetZoneDto>();
+        var dtos = allData.Select(EntityToDto).ToList();
+        _cacheService.Add(cacheKey, (dtos, count), GameDataType.Zone);
 
-        foreach (var zone in data)
-        {
-            var stages = await _dbContext.ArkPenguinStages
-                .Where(x => x.ZoneId == zone.ZoneId)
-                .ToListAsync();
-
-            items.Add(EntityToDto(stages));
-        }
-
-        var itemTakes = items.Skip((page - 1) * limit).Take(limit).ToList();
-
-        _cacheService.Add(cacheKey, (itemTakes, items.Count), GameDataType.Zone);
-
-        return new QueryZoneDto(itemTakes, items.Count, limit, page);
+        return new QueryZoneDto(dtos, count, limit, page);
     }
 
-    private static GetZoneDto EntityToDto(IReadOnlyList<ArkPenguinStage> stages)
+    private static GetZoneDto EntityToDto(ArkPenguinZone zone)
     {
-        if (stages.Count <= 0)
-        {
-            return null;
-        }
-
-        var s = stages[0];
-
-        var stageMetadata = stages
-            .Select(x => new StageMetadata(x.StageId, s.StageType, s.StageCode, s.StageApCost))
-            .ToList();
-
         var dto = new GetZoneDto(
-            new ZoneMetadata(s.ZoneId, s.ZoneName, s.ZoneType),
             new Existence(
-                new ExistenceContent(s.CnExist, s.CnOpenTime, s.CnCloseTime),
-                new ExistenceContent(s.JpExist, s.JpOpenTime, s.JpCloseTime),
-                new ExistenceContent(s.KrExist, s.KrOpenTime, s.KrCloseTime),
-                new ExistenceContent(s.UsExist, s.UsOpenTime, s.UsCloseTime)),
-            new ArkI18N(s.ZhZoneNameI18N, s.KoZoneNameI18N, s.JaZoneNameI18N, s.EnZoneNameI18N),
-            stageMetadata);
-
+                new ExistenceContent(zone.CnExist, null, null),
+                new ExistenceContent(zone.JpExist, null, null),
+                new ExistenceContent(zone.KrExist, null, null),
+                new ExistenceContent(zone.UsExist, null, null)),
+            new ArkI18N(zone.ZhZoneNameI18N, zone.KoZoneNameI18N, zone.JaZoneNameI18N, zone.EnZoneNameI18N),
+            zone.Stages.Select(stage =>
+                new StageMetadata(stage.StageId, stage.StageType, stage.StageCode, stage.StageApCost, stage.MinClearTime))
+                .ToList(),
+            new ZoneMetadata(zone.ZoneId, zone.ZoneName, zone.ZoneType,
+                string.IsNullOrEmpty(zone.Background) ? null : zone.BackgroundFileName));
         return dto;
     }
 

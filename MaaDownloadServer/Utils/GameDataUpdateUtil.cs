@@ -37,7 +37,7 @@ public static class GameDataUpdateUtil
             CnExist = apiItem.Existence.Cn.Exist,
             ZhNameI18N = apiItem.NameI18N.Chinese,
             EnNameI18N = apiItem.NameI18N.English,
-            JpNameI18N = apiItem.NameI18N.Japanese,
+            JaNameI18N = apiItem.NameI18N.Japanese,
             KoNameI18N = apiItem.NameI18N.Korean
         };
     }
