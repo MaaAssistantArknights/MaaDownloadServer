@@ -17,11 +17,73 @@ namespace MaaDownloadServer.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
 
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkPenguinItem", b =>
+                {
+                    b.Property<string>("ItemId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("item_id");
+
+                    b.Property<bool>("CnExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("cn_exist");
+
+                    b.Property<string>("EnNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("en_name");
+
+                    b.Property<string>("ItemType")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("item_type");
+
+                    b.Property<string>("JaNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ja_name");
+
+                    b.Property<bool>("JpExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("jp_exist");
+
+                    b.Property<string>("KoNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ko_name");
+
+                    b.Property<bool>("KrExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("kr_exist");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("rarity");
+
+                    b.Property<int>("SortId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("sort_id");
+
+                    b.Property<bool>("UsExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("us_exist");
+
+                    b.Property<string>("ZhNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("zh_name");
+
+                    b.HasKey("ItemId");
+
+                    b.ToTable("ark_penguin_item");
+                });
+
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkPenguinStage", b =>
                 {
                     b.Property<string>("StageId")
                         .HasColumnType("TEXT")
                         .HasColumnName("stage_id");
+
+                    b.Property<string>("ArkPenguinZoneZoneId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("CnCloseTime")
                         .HasColumnType("TEXT")
@@ -35,21 +97,17 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("cn_open_time");
 
+                    b.Property<string>("DropItemIds")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("drop_items");
+
                     b.Property<string>("EnStageCodeI18N")
                         .HasColumnType("TEXT")
                         .HasColumnName("en_stage_code");
 
-                    b.Property<string>("EnZoneNameI18N")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("en_zone_name");
-
                     b.Property<string>("JaStageCodeI18N")
                         .HasColumnType("TEXT")
                         .HasColumnName("ja_stage_code");
-
-                    b.Property<string>("JaZoneNameI18N")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("ja_zone_name");
 
                     b.Property<DateTime?>("JpCloseTime")
                         .HasColumnType("TEXT")
@@ -67,10 +125,6 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("ko_stage_code");
 
-                    b.Property<string>("KoZoneNameI18N")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("ko_zone_name");
-
                     b.Property<DateTime?>("KrCloseTime")
                         .HasColumnType("TEXT")
                         .HasColumnName("kr_close_time");
@@ -82,6 +136,10 @@ namespace MaaDownloadServer.Migrations
                     b.Property<DateTime?>("KrOpenTime")
                         .HasColumnType("TEXT")
                         .HasColumnName("kr_open_time");
+
+                    b.Property<long>("MinClearTime")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("min_clear_time");
 
                     b.Property<int>("StageApCost")
                         .HasColumnType("INTEGER")
@@ -111,13 +169,58 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("zh_stage_code");
 
-                    b.Property<string>("ZhZoneNameI18N")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("zh_zone_name");
+                    b.HasKey("StageId");
 
+                    b.HasIndex("ArkPenguinZoneZoneId");
+
+                    b.ToTable("ark_penguin_stage");
+                });
+
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkPenguinZone", b =>
+                {
                     b.Property<string>("ZoneId")
                         .HasColumnType("TEXT")
                         .HasColumnName("zone_id");
+
+                    b.Property<string>("Background")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("background");
+
+                    b.Property<string>("BackgroundFileName")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("background_file_name");
+
+                    b.Property<bool>("CnExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("cn_exist");
+
+                    b.Property<string>("EnZoneNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("en_zone_name");
+
+                    b.Property<string>("JaZoneNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ja_zone_name");
+
+                    b.Property<bool>("JpExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("jp_exist");
+
+                    b.Property<string>("KoZoneNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("ko_zone_name");
+
+                    b.Property<bool>("KrExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("kr_exist");
+
+                    b.Property<bool>("UsExist")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("us_exist");
+
+                    b.Property<string>("ZhZoneNameI18N")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("zh_zone_name");
 
                     b.Property<string>("ZoneName")
                         .HasColumnType("TEXT")
@@ -127,9 +230,9 @@ namespace MaaDownloadServer.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("zone_type");
 
-                    b.HasKey("StageId");
+                    b.HasKey("ZoneId");
 
-                    b.ToTable("ark_penguin_stage");
+                    b.ToTable("ark_penguin_zone");
                 });
 
             modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkPrtsItem", b =>
@@ -309,6 +412,13 @@ namespace MaaDownloadServer.Migrations
                     b.ToTable("PackageResource");
                 });
 
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkPenguinStage", b =>
+                {
+                    b.HasOne("MaaDownloadServer.Model.Entities.ArkPenguinZone", null)
+                        .WithMany("Stages")
+                        .HasForeignKey("ArkPenguinZoneZoneId");
+                });
+
             modelBuilder.Entity("PackageResource", b =>
                 {
                     b.HasOne("MaaDownloadServer.Model.Entities.Package", null)
@@ -322,6 +432,11 @@ namespace MaaDownloadServer.Migrations
                         .HasForeignKey("ResourcesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MaaDownloadServer.Model.Entities.ArkPenguinZone", b =>
+                {
+                    b.Navigation("Stages");
                 });
 #pragma warning restore 612, 618
         }

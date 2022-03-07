@@ -215,6 +215,15 @@ builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
 });
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 #endregion
 
@@ -258,6 +267,8 @@ await dbContext!.DisposeAsync();
 #endregion
 
 app.UseIpRateLimiting();
+
+app.UseCors();
 
 #region File server middleware
 
