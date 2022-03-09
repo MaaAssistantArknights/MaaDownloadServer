@@ -18,14 +18,20 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<Package> Packages { get; set; }
     public DbSet<Resource> Resources { get; set; }
     public DbSet<PublicContent> PublicContents { get; set; }
+    public DbSet<ArkPenguinZone> ArkPenguinZones { get; set; }
     public DbSet<ArkPenguinStage> ArkPenguinStages { get; set; }
+    public DbSet<ArkPenguinItem> ArkPenguinItems { get; set; }
     public DbSet<ArkPrtsItem> ArkPrtsItems { get; set; }
+    public DbSet<DatabaseCache> DatabaseCaches { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var connectionString = $"Data Source={Path.Combine(_configuration["MaaServer:DataDirectories:RootPath"], _configuration["MaaServer:DataDirectories:SubDirectories:Database"], "data.db")};";
         optionsBuilder.UseSqlite(connectionString, builder =>
             builder.MigrationsAssembly("MaaDownloadServer"));
+
+        optionsBuilder.EnableSensitiveDataLogging();
+        optionsBuilder.EnableDetailedErrors();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -42,18 +48,24 @@ public class MaaDownloadServerDbContext : DbContext
             .Property(x => x.Platform)
             .HasConversion<EnumToStringConverter<Platform>>();
 
-        var arkItemCategoryStringListConverter = new ValueConverter<List<string>, string>(
+        var stringEnumerableConverter = new ValueConverter<List<string>, string>(
             v => string.Join(";;", v),
             v => v.Split(";;", StringSplitOptions.RemoveEmptyEntries).ToList());
-        var arkItemCategoryValueCompare = new ValueComparer<List<string>>(
+        var stringEnumerableValueCompare = new ValueComparer<List<string>>(
             (v, k) => v.EqualWith(k),
             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())));
 
         modelBuilder.Entity<ArkPrtsItem>()
             .Property(x => x.Category)
-            .HasConversion(arkItemCategoryStringListConverter)
+            .HasConversion(stringEnumerableConverter)
             .Metadata
-            .SetValueComparer(arkItemCategoryValueCompare);
+            .SetValueComparer(stringEnumerableValueCompare);
+
+        modelBuilder.Entity<ArkPenguinStage>()
+            .Property(x => x.DropItemIds)
+            .HasConversion(stringEnumerableConverter)
+            .Metadata
+            .SetValueComparer(stringEnumerableValueCompare);
 
         #endregion
 
@@ -66,6 +78,10 @@ public class MaaDownloadServerDbContext : DbContext
         modelBuilder
             .Entity<Resource>()
             .HasMany(x => x.Packages);
+
+        modelBuilder
+            .Entity<ArkPenguinZone>()
+            .HasMany(x => x.Stages);
 
         #endregion
     }

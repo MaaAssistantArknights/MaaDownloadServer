@@ -15,4 +15,4 @@ MAA 更新和下载服务器
 
 * [编译和打包](./docs/Compile.md)
 * [运行配置](./docs/Run.md)
-* [API 文档](./docs/Api.md)
+* [Component 和 Python 脚本](./docs/ComponentAndPythonScript.md)

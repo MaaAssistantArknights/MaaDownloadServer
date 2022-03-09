@@ -14,11 +14,11 @@ public class ArkStageController : ControllerBase
         _arkStageService = arkStageService;
     }
 
-    [HttpGet("{stage_code}")]
+    [HttpGet("{stage_code_or_id}")]
     // ReSharper disable once InconsistentNaming
-    public async Task<ActionResult<GetStageDto>> GetArkStage(string stage_code)
+    public async Task<ActionResult<GetStageDto>> GetArkStage(string stage_code_or_id)
     {
-        var dto = await _arkStageService.GetStage(stage_code);
+        var dto = await _arkStageService.GetStage(stage_code_or_id);
 
         if (dto is null)
         {
@@ -36,9 +36,6 @@ public class ArkStageController : ControllerBase
         [FromQuery] string stage_code,
         [FromQuery] string ap_cost_lower_limit,
         [FromQuery] string ap_cost_up_limit,
-        [FromQuery] string zone_id,
-        [FromQuery] string zone_name,
-        [FromQuery] string zone_type,
         [FromQuery] string available_cn,
         [FromQuery] string available_kr,
         [FromQuery] string available_us,
@@ -56,9 +53,6 @@ public class ArkStageController : ControllerBase
             { "stage_code", stage_code },
             { "ap_cost_lower_limit", ap_cost_lower_limit },
             { "ap_cost_up_limit", ap_cost_up_limit },
-            { "zone_id", zone_id },
-            { "zone_name", zone_name },
-            { "zone_type", zone_type },
             { "available_cn", available_cn },
             { "available_kr", available_kr },
             { "available_us", available_us },

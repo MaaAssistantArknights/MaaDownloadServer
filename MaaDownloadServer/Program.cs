@@ -38,13 +38,27 @@ if (configurationFileExist is false)
     Environment.Exit(0);
 }
 
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    if (File.Exists(Path.Combine(assemblyPath, "appsettings.Development.json")) &&
+        File.Exists(Path.Combine(dataDirectory.FullName, "appsettings.Development.json")) is false)
+    {
+        File.Copy(Path.Combine(assemblyPath, "appsettings.Development.json"),
+            Path.Combine(dataDirectory.FullName, "appsettings.Development.json"));
+    }
+}
+
 #endregion
 
 #region Build configuration and logger
 
 var configurationBuilder = new ConfigurationBuilder()
-    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.json"))
-    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
+    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.json"));
+
+if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    configurationBuilder.AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
+}
 
 var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAA_DS_AZURE_APP_CONFIGURATION");
 
@@ -152,7 +166,7 @@ foreach (var scriptDirectory in scriptDirectories)
 
     try
     {
-        using var configFileStream = File.OpenRead(configurationFile);
+        await using var configFileStream = File.OpenRead(configurationFile);
         var configObj = JsonSerializer.Deserialize<ComponentConfiguration>(configFileStream);
         componentConfigurations.Add(configObj);
     }
@@ -183,8 +197,10 @@ var builder = WebApplication.CreateBuilder(args);
 var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
 builder.WebHost.UseUrls(url);
 
-#region Services
+#region Web application builder
+
 builder.Host.UseSerilog();
+builder.Configuration.AddConfiguration(configuration);
 builder.Services.AddOptions();
 builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
 builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
@@ -198,6 +214,15 @@ builder.Services.AddQuartzFetchGithubReleaseJob(configuration, componentConfigur
 builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
+});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
 
 #endregion
@@ -219,9 +244,31 @@ if (File.Exists(
     Log.Logger.Information("数据库创建完成");
 }
 
+var dbCaches = await dbContext!.DatabaseCaches.ToListAsync();
+dbContext!.DatabaseCaches.RemoveRange(dbCaches);
+
+#endregion
+
+#region Add component name and description
+
+var componentInfosDbCache = componentConfigurations
+    .Select(x => new ComponentDto(x.Name, x.Description))
+    .Select(x => JsonSerializer.Serialize(x))
+    .Select(x => new DatabaseCache { Id = Guid.NewGuid(), QueryId = "Component", Value = x })
+    .ToList();
+
+await dbContext!.DatabaseCaches.AddRangeAsync(componentInfosDbCache);
+await dbContext!.SaveChangesAsync();
+
+Log.Logger.Information("已添加 {c} 个 Component", componentInfosDbCache.Count);
+
+await dbContext!.DisposeAsync();
+
 #endregion
 
 app.UseIpRateLimiting();
+
+app.UseCors();
 
 #region File server middleware
 

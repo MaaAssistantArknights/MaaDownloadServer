@@ -33,6 +33,7 @@ public class ArkItemService : IArkItemService
 
         if (item is not null)
         {
+            _cacheService.Add(cacheKey, item, GameDataType.Item);
             return EntityToDto(item);
         }
 
@@ -54,7 +55,7 @@ public class ArkItemService : IArkItemService
         _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
         var count = _dbContext.ArkPrtsItems.Count(x => x.Name.Contains(name));
         var pagedItems = await _dbContext.ArkPrtsItems
-            .Where(x => x.Name.Contains(name))
+            .Where(x => string.IsNullOrEmpty(name) || x.Name.Contains(name))
             .OrderBy(x => x.Id)
             .Skip((page - 1) * limit)
             .Take(limit)
