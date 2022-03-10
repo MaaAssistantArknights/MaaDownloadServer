@@ -194,8 +194,16 @@ foreach (var scriptDirectory in scriptDirectories)
 #endregion
 
 var builder = WebApplication.CreateBuilder(args);
-var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
-builder.WebHost.UseUrls(url);
+
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") is not "true")
+{
+    var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
+    builder.WebHost.UseUrls(url);
+}
+else
+{
+    Log.Logger.Information("在 Docker Container 中运行，忽略 MaaServer:Server:Host 和 MaaServer:Server:Port 配置项");
+}
 
 #region Web application builder
 

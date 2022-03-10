@@ -4,6 +4,7 @@ using Cake.Frosting;
 namespace MaaDownloadServer.Build.Tasks;
 
 [TaskName("Clean")]
+[IsDependentOn(typeof(LoggingTask))]
 public sealed class CleanTask : FrostingTask<BuildContext>
 {
     public override void Run(BuildContext context)
