@@ -25,18 +25,11 @@ jobs:
         with:
           dotnet-version: "6.0.x"
 
-      - name: "Format version string"
-        uses: bluwy/substitute-string-action@v1
-        id: strf
-        with:
-          _input-text: ${{ github.event.release.tag_name }}
-          v: ""
-
       - name: "Echo current version number"
-        run: echo "Current version is ${{ steps.strf.outputs.result }}"
+        run: echo "Current version is ${{ github.event.release.tag_name }}"
 
       - name: "Run publish docker script"
-        run: ./publish-docker.sh ${{ steps.strf.outputs.result }}
+        run: ./publish-docker.sh ${{ github.event.release.tag_name }}
 
       - name: "Login to Docker Hub"
         uses: docker/login-action@v1
@@ -45,7 +38,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: "Push image to Docker Hub"
-        run: ./push-docker.sh ${{ steps.strf.outputs.result }} alisaqaq
+        run: ./push-docker.sh ${{ github.event.release.tag_name }} alisaqaq
 
       - name: "Login to Tencent Cloud TCR"
         uses: docker/login-action@v1
@@ -55,4 +48,4 @@ jobs:
           password: ${{ secrets.TENCENT_CLOUD_TOKEN }}
 
       - name: "Push image to Tencent Cloud TCR"
-        run: ./push-docker.sh ${{ steps.strf.outputs.result }} ccr.ccs.tencentyun.com/alisaqaq
+        run: ./push-docker.sh ${{ github.event.release.tag_name }} ccr.ccs.tencentyun.com/alisaqaq
