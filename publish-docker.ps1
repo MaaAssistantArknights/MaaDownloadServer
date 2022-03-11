@@ -28,10 +28,10 @@ foreach ($Arch in $Arches) {
 
   Write-Output ">>>>> Build $arch Docker image..."
   if ($Arch -eq "arm/v7") {
-    docker buildx build --platform linux/"$arch" -t maa-download-server:"$VersionTag"-arm-v7 .
+    docker buildx build --load --platform linux/"$arch" -t maa-download-server:"$VersionTag"-arm-v7 .
   }
   else {
-    docker buildx build --platform linux/"$arch" -t maa-download-server:"$VersionTag"-"$arch" .
+    docker buildx build --load --platform linux/"$arch" -t maa-download-server:"$VersionTag"-"$arch" .
   }
 
   Write-Output ">>>>> Remove $arch artifacts"

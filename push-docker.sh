@@ -14,7 +14,7 @@ docker manifest create $2/maa-download-server:$1 \
 
 docker manifest push $2/maa-download-server:$1
 
-docker manifest create $2/maa-download-server:latest \
+docker manifest create --amend $2/maa-download-server:latest \
   $2/maa-download-server:$1-amd64 \
   $2/maa-download-server:$1-arm64 \
   $2/maa-download-server:$1-arm-v7

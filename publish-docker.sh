@@ -15,9 +15,8 @@ echo ">>>>> Publish..."
 /bin/bash ./publish.sh --docker=true --docker-arches="$docker_arches"
 
 IFS=','
-read -ra arches <<< "$docker_arches"
-for arch in "${arches[@]}";
-do
+read -ra arches <<<"$docker_arches"
+for arch in "${arches[@]}"; do
 
   echo ""
   echo "Build Docker image with arch $arch"
@@ -28,9 +27,9 @@ do
 
   echo ">>>>> Build $arch Docker image..."
   if [ "$arch" == "arm/v7" ]; then
-    docker buildx build --platform linux/"$arch" -t maa-download-server:"$1"-arm-v7 .
+    docker buildx build --load --platform linux/"$arch" -t maa-download-server:"$1"-arm-v7 .
   else
-    docker buildx build --platform linux/"$arch" -t maa-download-server:"$1"-"$arch" .
+    docker buildx build --load --platform linux/"$arch" -t maa-download-server:"$1"-"$arch" .
   fi
 
   echo ">>>>> Remove $arch artifacts"
