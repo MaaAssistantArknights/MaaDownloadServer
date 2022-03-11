@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd MaaDownloadServer.Build || exit
 
 CakeBuildArgs=""
@@ -5,7 +7,7 @@ i=1
 
 while [ -n "${!i}" ]; do
   CakeBuildArgs="$CakeBuildArgs ${!i}"
-  i=$((i+1))
+  i=$((i + 1))
 done
 
 echo "Running Restore..."

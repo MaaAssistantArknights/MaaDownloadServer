@@ -38,6 +38,10 @@ WantedBy=multi-user.target
 * 运行 `sudo systemctl daemon-reload`
 * 启动服务：`sudo systemctl start MaaDownloadServer`
 
+### Docker
+
+请参考 [Docker Hub 上的文档](https://hub.docker.com/r/alisaqaq/maa-download-server)
+
 ## 支持的环境变量
 
 * `MAADS_DATA_DIRECTORY`: 数据文件目录，第一次运行时，会将配置文件拷贝到这个目录，并设置数据目录为这个环境变量指定的目录
