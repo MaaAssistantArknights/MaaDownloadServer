@@ -48,7 +48,7 @@ jobs:
         run: ./push-docker.sh ${{ steps.strf.outputs.result }} ${{ secrets.DOCKERHUB_IMAGE_ }}
 
       - name: "Login to Tencent Cloud TCR"
-        uses: tencent/login-action@v1
+        uses: docker/login-action@v1
         with:
           registry: ccr.ccs.tencentyun.com
           username: ${{ secrets.TENCENT_CLOUD_USERNAME }}
