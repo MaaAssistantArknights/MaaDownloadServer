@@ -1,4 +1,4 @@
-name: build-test
+name: publish-docker
 on:
   release:
     types: [published]
