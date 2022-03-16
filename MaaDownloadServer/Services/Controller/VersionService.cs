@@ -45,13 +45,13 @@ public class VersionService : IVersionService
         if (_cacheService.Contains(cacheKey))
         {
             var (cachedVersionString, cachedVersionPublishTime) = _cacheService.Get<(string, DateTime)>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
             return cachedVersionString == "NotExist"
                 ? (null, cachedVersionPublishTime)
                 : (cachedVersionString, cachedVersionPublishTime);
         }
 
-        _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+        _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
         var package = await _dbContext.Packages
             .Where(x => x.Component == componentName)
             .Where(x => x.Platform == platform && x.Architecture == architecture)
@@ -80,11 +80,11 @@ public class VersionService : IVersionService
         if (_cacheService.Contains(cacheKey))
         {
             var cachedPackage = _cacheService.Get<Package>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
             return cachedPackage;
         }
 
-        _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+        _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
         var package = await _dbContext.Packages
             .Include(x => x.Resources)
             .Where(x => x.Component == componentName)
@@ -110,11 +110,11 @@ public class VersionService : IVersionService
         if (_cacheService.Contains(cacheKey))
         {
             var cachedSupportedPlatforms = _cacheService.Get<List<Platform>>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
             return cachedSupportedPlatforms;
         }
 
-        _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+        _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
         var supportedPlatforms = await _dbContext.Packages
             .Where(x => x.Component == componentName)
             .Select(x => x.Platform)
@@ -136,11 +136,11 @@ public class VersionService : IVersionService
         if (_cacheService.Contains(cacheKey))
         {
             var cachedSupportedArchitectures = _cacheService.Get<List<Architecture>>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
             return cachedSupportedArchitectures;
         }
 
-        _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+        _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
         var supportedArchitectures = await _dbContext.Packages
             .Where(x => x.Component == componentName)
             .Where(x => x.Platform == platform)
@@ -165,11 +165,11 @@ public class VersionService : IVersionService
         if (_cacheService.Contains(cacheKey))
         {
             var cachedVersions = _cacheService.Get<Dictionary<string, DateTime>>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
             return cachedVersions;
         }
 
-        _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+        _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
         var versions = await _dbContext.Packages
             .Where(x => x.Component == componentName)
             .Where(x => x.Platform == platform && x.Architecture == architecture)

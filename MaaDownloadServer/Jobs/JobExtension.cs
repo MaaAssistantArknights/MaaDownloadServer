@@ -1,5 +1,4 @@
-﻿using MaaDownloadServer.Model.External;
-using Quartz;
+﻿using Quartz;
 
 namespace MaaDownloadServer.Jobs;
 

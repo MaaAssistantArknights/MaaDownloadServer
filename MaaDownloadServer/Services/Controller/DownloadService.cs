@@ -29,11 +29,11 @@ public class DownloadService : IDownloadService
         if (_cacheService.Contains(cacheKey))
         {
             pc = _cacheService.Get<PublicContent>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
         }
         else
         {
-            _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+            _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
             var tag = new PublicContentTag(PublicContentTagType.FullPackage, platform, architecture, componentName, version).ParseToTagString();
             pc = await _dbContext.PublicContents.FirstOrDefaultAsync(x => x.Tag == tag);
             if (pc is not null)
@@ -51,11 +51,11 @@ public class DownloadService : IDownloadService
         if (_cacheService.Contains(cacheKey))
         {
             pc = _cacheService.Get<PublicContent>(cacheKey);
-            _logger.LogDebug("Cache 命中 - {cacheKey}", cacheKey);
+            _logger.LogDebug("Cache 命中 - {CacheKey}", cacheKey);
         }
         else
         {
-            _logger.LogWarning("Cache 未命中 - {cacheKey}", cacheKey);
+            _logger.LogWarning("Cache 未命中 - {CacheKey}", cacheKey);
             var tag = new PublicContentTag(PublicContentTagType.UpdatePackage, platform, architecture, componentName, from, to).ParseToTagString();
             pc = await _dbContext.PublicContents.FirstOrDefaultAsync(x => x.Tag == tag);
             var fromVersion = from.ToString();
