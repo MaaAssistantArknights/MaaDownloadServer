@@ -2,7 +2,6 @@
 using System.Net;
 using System.Text.Json;
 using MaaDownloadServer.External;
-using MaaDownloadServer.Model.External;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Semver;
@@ -24,6 +23,7 @@ public class PackageUpdateJob : IJob
 
     public PackageUpdateJob(
         ILogger<PackageUpdateJob> logger,
+        // ReSharper disable once ContextualLoggerProblem
         ILogger<Python> pyLogger,
         IFileSystemService fileSystemService,
         IConfiguration configuration,
@@ -54,13 +54,13 @@ public class PackageUpdateJob : IJob
 
         var jobId = Guid.NewGuid();
 
-        _logger.LogInformation("开始组件包 {name} 更新检查任务，操作ID：{id}", componentConfiguration.Name, jobId);
+        _logger.LogInformation("开始组件包 {Name} 更新检查任务，操作ID：{Id}", componentConfiguration.Name, jobId);
 
         try
         {
             #region STEP 0: 准备
 
-            _logger.LogInformation("[{id}] STEP 0: 准备", jobId);
+            _logger.LogInformation("[{Id}] STEP 0: 准备", jobId);
 
             var pyExecutable = Path.Combine(
                 _configuration["MaaServer:DataDirectories:RootPath"],
@@ -80,19 +80,19 @@ public class PackageUpdateJob : IJob
 
             #region STEP 1: 请求 Metadata API
 
-            _logger.LogInformation("[{id}] STEP 1: 请求 Metadata API", jobId);
+            _logger.LogInformation("[{Id}] STEP 1: 请求 Metadata API", jobId);
             var apis = componentConfiguration.MetadataUrl;
             foreach (var (k, vo) in componentConfiguration.UrlPlaceholder)
             {
                 if (vo is not JsonElement element)
                 {
-                    _logger.LogCritical("[{id}] 在 Metadata API 请求中，参数 {key} 的值无法转换为 JsonElement，无法执行任务", jobId, k);
+                    _logger.LogCritical("[{Id}] 在 Metadata API 请求中，参数 {Key} 的值无法转换为 JsonElement，无法执行任务", jobId, k);
                     return;
                 }
 
                 if (element.ValueKind is not JsonValueKind.String)
                 {
-                    _logger.LogCritical("[{id}] 在 Metadata API 请求中，参数 {key} 的值不是 String，无法执行任务", jobId, k);
+                    _logger.LogCritical("[{Id}] 在 Metadata API 请求中，参数 {Key} 的值不是 String，无法执行任务", jobId, k);
                     return;
                 }
 
@@ -140,7 +140,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 2: 运行Python脚本获取下载信息列表
 
-            _logger.LogInformation("[{id}] STEP 2: 获取下载元数据", jobId);
+            _logger.LogInformation("[{Id}] STEP 2: 获取下载元数据", jobId);
             var getMetadataScript = Path.Combine(
                 _configuration["MaaServer:DataDirectories:RootPath"],
                 _configuration["MaaServer:DataDirectories:SubDirectories:Scripts"],
@@ -157,7 +157,7 @@ public class PackageUpdateJob : IJob
             var allDownloadContentInfos = JsonSerializer.Deserialize<List<DownloadContentInfo>>(getMetadataScriptResponse);
             if (allDownloadContentInfos is null)
             {
-                _logger.LogError("[{id}] 解析下载元数据失败，原始字符串：{str}", jobId, getMetadataScriptResponse);
+                _logger.LogError("[{Id}] 解析下载元数据失败，原始字符串：{Str}", jobId, getMetadataScriptResponse);
                 throw new Exception("解析下载元数据失败");
             }
 
@@ -165,14 +165,14 @@ public class PackageUpdateJob : IJob
 
             #region STEP 3: 检查版本号，检查数据库
 
-            _logger.LogInformation("[{id}] STEP 3: 检查版本号，检查数据库", jobId);
+            _logger.LogInformation("[{Id}] STEP 3: 检查版本号，检查数据库", jobId);
             var downloadContentInfos = new List<DownloadContentInfo>();
             foreach (var downloadContentInfo in allDownloadContentInfos)
             {
                 var semVerParsed = SemVersion.TryParse(downloadContentInfo.Version, out var semVer);
                 if (semVerParsed is false)
                 {
-                    _logger.LogError("[{id}] 无法解析版本号 {version}", jobId, downloadContentInfo.Version);
+                    _logger.LogError("[{Id}] 无法解析版本号 {Version}", jobId, downloadContentInfo.Version);
                     throw new Exception("无法解析版本号");
                 }
 
@@ -189,7 +189,7 @@ public class PackageUpdateJob : IJob
 
             if (downloadContentInfos.Count == 0)
             {
-                _logger.LogInformation("[{id}] 组件 {cName} 无版本变更, 退出更新任务", jobId, componentConfiguration.Name);
+                _logger.LogInformation("[{Id}] 组件 {CName} 无版本变更, 退出更新任务", jobId, componentConfiguration.Name);
                 return;
             }
 
@@ -197,7 +197,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 4, 5: 下载文件 & 校验文件，校验失败则返回重试，最多尝试下载3次
 
-            _logger.LogInformation("[{id}] STEP 4, 5: 下载文件 & 校验文件", jobId);
+            _logger.LogInformation("[{Id}] STEP 4, 5: 下载文件 & 校验文件", jobId);
             var pendingDownloadContents = downloadContentInfos.ToList();
 
             var downloadRetryTimes = 3;
@@ -217,7 +217,7 @@ public class PackageUpdateJob : IJob
                         var hash = HashUtil.ComputeFileHash(info.ChecksumType, downloadedContent).ToLower();
                         if (hash != info.Checksum.ToLower())
                         {
-                            _logger.LogError("[{id}] 文件 {file} 校验失败，原始文件哈希值：{hash}，校验值：{checksum}", jobId,
+                            _logger.LogError("[{Id}] 文件 {File} 校验失败，原始文件哈希值：{Hash}，校验值：{Checksum}", jobId,
                                 downloadedContent, hash, info.Checksum);
                             File.Delete(downloadedContent);
                         }
@@ -234,7 +234,7 @@ public class PackageUpdateJob : IJob
 
             if (pendingDownloadContents.Count != 0)
             {
-                _logger.LogError("[{id}] 下载失败，未下载的文件：{files}", jobId, string.Join(", ", pendingDownloadContents.Select(x => $"[{x.Id}]{x.DownloadUrl}")));
+                _logger.LogError("[{Id}] 下载失败，未下载的文件：{Files}", jobId, string.Join(", ", pendingDownloadContents.Select(x => $"[{x.Id}]{x.DownloadUrl}")));
                 throw new Exception("下载失败");
             }
 
@@ -242,11 +242,11 @@ public class PackageUpdateJob : IJob
 
             #region STEP 6: 执行AfterDownloadProcess
 
-            _logger.LogInformation("[{id}] STEP 6: 执行AfterDownloadProcess", jobId);
+            _logger.LogInformation("[{Id}] STEP 6: 执行AfterDownloadProcess", jobId);
             switch (componentConfiguration.AfterDownloadProcess.Operation)
             {
                 case AfterDownloadProcessOperation.Unzip:
-                    _logger.LogDebug("[{id}] 执行AfterDownloadProcess：解压", jobId);
+                    _logger.LogDebug("[{Id}] 执行AfterDownloadProcess：解压", jobId);
                     foreach (var downloadContentInfo in downloadContentInfos)
                     {
                         var filePath = Path.Combine(_downloadDirectory.FullName, $"{downloadContentInfo.Id}.zip");
@@ -255,7 +255,7 @@ public class PackageUpdateJob : IJob
                     }
                     break;
                 case AfterDownloadProcessOperation.None:
-                    _logger.LogDebug("[{id}] 执行AfterDownloadProcess：移动文件", jobId);
+                    _logger.LogDebug("[{Id}] 执行AfterDownloadProcess：移动文件", jobId);
                     foreach (var downloadContentInfo in downloadContentInfos)
                     {
                         var filePath = Path.Combine(_downloadDirectory.FullName,
@@ -269,7 +269,7 @@ public class PackageUpdateJob : IJob
                     }
                     break;
                 case AfterDownloadProcessOperation.Custom:
-                    _logger.LogDebug("[{id}] 执行AfterDownloadProcess：自定义", jobId);
+                    _logger.LogDebug("[{Id}] 执行AfterDownloadProcess：自定义", jobId);
                     var afterDownloadProcessArgs = JsonSerializer.Serialize(componentConfiguration.AfterDownloadProcess.Args);
                     var afterDownloadProcessScript = Path.Combine(
                         _configuration["MaaServer:DataDirectories:RootPath"],
@@ -293,7 +293,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 7: 将完整包加入PublicContent
 
-            _logger.LogInformation("[{id}] STEP 7: 将完整包加入PublicContent", jobId);
+            _logger.LogInformation("[{Id}] STEP 7: 将完整包加入PublicContent", jobId);
             foreach (var downloadContentInfo in downloadContentInfos)
             {
                 await _fileSystemService.AddFullPackage(jobId, componentConfiguration.Name, downloadContentInfo);
@@ -303,11 +303,11 @@ public class PackageUpdateJob : IJob
 
             #region STEP 8: 执行BeforeAddProcess
 
-            _logger.LogInformation("[{id}] STEP 8: 执行BeforeAddProcess", jobId);
+            _logger.LogInformation("[{Id}] STEP 8: 执行BeforeAddProcess", jobId);
             switch (componentConfiguration.BeforeAddProcess.Operation)
             {
                 case BeforeAddProcessOperation.Zip:
-                    _logger.LogDebug("[{id}] 执行BeforeAddProcess：压缩", jobId);
+                    _logger.LogDebug("[{Id}] 执行BeforeAddProcess：压缩", jobId);
                     var zipArgs = componentConfiguration.BeforeAddProcess.Args;
                     var pendingZippedArgs = zipArgs.GetProperty("zip").EnumerateArray().ToList();
                     var pendingZippedList = new Dictionary<string, (List<string>, List<string>)>();
@@ -347,10 +347,10 @@ public class PackageUpdateJob : IJob
                     }
                     break;
                 case BeforeAddProcessOperation.None:
-                    _logger.LogDebug("[{id}] 执行BeforeAddProcess：不执行", jobId);
+                    _logger.LogDebug("[{Id}] 执行BeforeAddProcess：不执行", jobId);
                     break;
                 case BeforeAddProcessOperation.Custom:
-                    _logger.LogDebug("[{id}] 执行BeforeAddProcess：自定义", jobId);
+                    _logger.LogDebug("[{Id}] 执行BeforeAddProcess：自定义", jobId);
                     var beforeAddProcessArgs = JsonSerializer.Serialize(componentConfiguration.BeforeAddProcess.Args);
                     var beforeAddProcessScript = Path.Combine(
                         _configuration["MaaServer:DataDirectories:RootPath"],
@@ -372,7 +372,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 9: 遍历资源，计算MD5 Hash建立ResourceInfo，可能需要运行Python脚本计算相对路径，第一次去除重复
 
-            _logger.LogInformation("[{id}] STEP 9: 遍历资源，计算MD5 Hash建立ResourceInfo", jobId);
+            _logger.LogInformation("[{Id}] STEP 9: 遍历资源，计算MD5 Hash建立ResourceInfo", jobId);
             var packageToResources = new Dictionary<Guid, List<ResourceInfo>>();
             foreach (var downloadContentInfo in downloadContentInfos)
             {
@@ -389,7 +389,7 @@ public class PackageUpdateJob : IJob
                     var fileHash = HashUtil.ComputeFileMd5Hash(file.FullName);
                     if (componentConfiguration.Scripts.RelativePathCalculation is not "" or null)
                     {
-                        _logger.LogInformation("[{id}] 运行 Python 脚本进行相对路径计算", jobId);
+                        _logger.LogInformation("[{Id}] 运行 Python 脚本进行相对路径计算", jobId);
                         var relativePathCalculationScript = Path.Combine(
                             _configuration["MaaServer:DataDirectories:RootPath"],
                             _configuration["MaaServer:DataDirectories:SubDirectories:Scripts"],
@@ -413,7 +413,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 10: Resource与数据库比对，去除重复
 
-            _logger.LogInformation("[{id}] STEP 10: Resource与数据库比对，去除重复", jobId);
+            _logger.LogInformation("[{Id}] STEP 10: Resource与数据库比对，去除重复", jobId);
             var resourceInfosNoDuplicate = new List<ResourceInfo>();
             foreach (var resourceInfo in resourceInfos)
             {
@@ -429,14 +429,14 @@ public class PackageUpdateJob : IJob
 
             #region STEP 11: 添加Resource进入数据库
 
-            _logger.LogInformation("[{id}] STEP 11: 添加Resource进入数据库", jobId);
+            _logger.LogInformation("[{Id}] STEP 11: 添加Resource进入数据库", jobId);
             await _fileSystemService.AddNewResources(resourceInfosNoDuplicate);
 
             #endregion
 
             #region STEP 12: 根据RelativePath，FileName和Hash从数据库检索包文件并建立包对象添加进入数据库
 
-            _logger.LogInformation("[{id}] STEP 12: 根据RelativePath，FileName和Hash从数据库检索包文件并建立包对象添加进入数据库", jobId);
+            _logger.LogInformation("[{Id}] STEP 12: 根据RelativePath，FileName和Hash从数据库检索包文件并建立包对象添加进入数据库", jobId);
             var packages = new List<Package>();
 
             foreach (var (id, ris) in packageToResources)
@@ -454,7 +454,7 @@ public class PackageUpdateJob : IJob
                         .FirstOrDefaultAsync(x => x.Hash == hash && x.Path == relativePath);
                     if (r is null)
                     {
-                        _logger.LogError("[{id}] 找不到资源文件：{fn}({hash}) 位于 {rPath}",
+                        _logger.LogError("[{Id}] 找不到资源文件：{Fn}({Hash}) 位于 {RPath}",
                             jobId, new FileInfo(path).Name, hash, relativePath);
                         throw new Exception("找不到资源文件");
                     }
@@ -473,7 +473,7 @@ public class PackageUpdateJob : IJob
 
             if (componentConfiguration.PackUpdatePackage)
             {
-                _logger.LogInformation("[{id}] STEP 13: 获取近期3个版本的包对象，比对Resource并打包更新包", jobId);
+                _logger.LogInformation("[{Id}] STEP 13: 获取近期3个版本的包对象，比对Resource并打包更新包", jobId);
                 var recentVersionPackages = new List<Package>();
                 foreach (var package in packages)
                 {
@@ -496,14 +496,14 @@ public class PackageUpdateJob : IJob
             }
             else
             {
-                _logger.LogInformation("[{id}] STEP 13: 配置文件指定不进行更新包的打包", jobId);
+                _logger.LogInformation("[{Id}] STEP 13: 配置文件指定不进行更新包的打包", jobId);
             }
 
             #endregion
 
             #region STEP 14: 删缓存
 
-            _logger.LogInformation("[{id}] STEP 14: 删缓存", jobId);
+            _logger.LogInformation("[{Id}] STEP 14: 删缓存", jobId);
 
             // 删除 所有组件 缓存
             _cacheService.Remove(_cacheService.GetAllComponentsKey());
@@ -515,14 +515,14 @@ public class PackageUpdateJob : IJob
 
             #region STEP 15: 完成
 
-            _logger.LogInformation("[{id}] STEP 15: 完成", jobId);
+            _logger.LogInformation("[{Id}] STEP 15: 完成", jobId);
             CleanUp();
 
             #endregion
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "组件包 {name} 更新检查任务执行失败", componentConfiguration.Name);
+            _logger.LogError(ex, "组件包 {Name} 更新检查任务执行失败", componentConfiguration.Name);
             CleanUp();
         }
     }
@@ -569,14 +569,14 @@ public class PackageUpdateJob : IJob
                     continue;
                 }
 
-                _logger.LogDebug("开始计算 Diff {C}-{P}-{A} {V1} -> {V2} ，JobId：{jobId}",
+                _logger.LogDebug("开始计算 Diff {C}-{P}-{A} {V1} -> {V2} ，JobId：{JobId}",
                     thisVersionPackage.Component, thisVersionPackage.Platform, thisVersionPackage.Architecture,
                     recentVersionPackage.Version, thisVersionPackage.Version, jobId);
                 // 新资源包括了 旧版本和新版本中同路径、同文件名但是 Hash 不同的文件；旧版本不存在但是新版本存在的文件
                 // 路径、文件名、Hash 三者任意一个不同，这 ID 不同，因此匹配 ID 即可
                 var diff = _fileSystemService.GetUpdateDiff(recentVersionPackage, thisVersionPackage);
                 updateDiffs.Add(diff);
-                _logger.LogInformation("从 {C}-{P}-{A} {V1} -> {V2} 的 Diff 计算完成，新增 {New}，移除 {Remove}，JobId：{jobId}",
+                _logger.LogInformation("从 {C}-{P}-{A} {V1} -> {V2} 的 Diff 计算完成，新增 {New}，移除 {Remove}，JobId：{JobId}",
                     thisVersionPackage.Component, thisVersionPackage.Platform, thisVersionPackage.Architecture,
                     recentVersionPackage.Version, thisVersionPackage.Version,
                     diff.NewResources.Count, diff.UnNeededResources.Count, jobId);

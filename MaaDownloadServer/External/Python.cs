@@ -15,7 +15,7 @@ public class Python
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            logger.LogInformation("运行 {cmd}", pythonVersionProcessStartInfo.FileName + " " + pythonVersionProcessStartInfo.Arguments);
+            logger.LogInformation("运行 {Cmd}", pythonVersionProcessStartInfo.FileName + " " + pythonVersionProcessStartInfo.Arguments);
             var pythonVersionProcess = Process.Start(pythonVersionProcessStartInfo);
             if (pythonVersionProcess is null)
             {
@@ -45,7 +45,7 @@ public class Python
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            logger.LogInformation("运行 {cmd}", pipProcessStartInfo.FileName + " " + pipProcessStartInfo.Arguments);
+            logger.LogInformation("运行 {Cmd}", pipProcessStartInfo.FileName + " " + pipProcessStartInfo.Arguments);
             var pipProcess = Process.Start(pipProcessStartInfo);
             if (pipProcess is null)
             {
@@ -77,7 +77,7 @@ public class Python
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             };
-            logger.LogInformation("运行 {cmd}", virtualenvProcessStartInfo.FileName + " " + virtualenvProcessStartInfo.Arguments);
+            logger.LogInformation("运行 {Cmd}", virtualenvProcessStartInfo.FileName + " " + virtualenvProcessStartInfo.Arguments);
             var virtualenvProcess = Process.Start(virtualenvProcessStartInfo);
             if (virtualenvProcess is null)
             {
@@ -126,7 +126,7 @@ public class Python
             {
                 RedirectStandardError = true
             };
-            logger.LogInformation("运行 {cmd}", virtualenvProcessStartInfo.FileName + " " + virtualenvProcessStartInfo.Arguments);
+            logger.LogInformation("运行 {Cmd}", virtualenvProcessStartInfo.FileName + " " + virtualenvProcessStartInfo.Arguments);
             var virtualenvProcess = Process.Start(virtualenvProcessStartInfo);
             if (virtualenvProcess is null)
             {
@@ -160,7 +160,7 @@ public class Python
             {
                 RedirectStandardError = true
             };
-            logger.LogInformation("运行 {cmd}", pipProcessStartInfo.FileName + " " + pipProcessStartInfo.Arguments);
+            logger.LogInformation("运行 {Cmd}", pipProcessStartInfo.FileName + " " + pipProcessStartInfo.Arguments);
             var pipProcess = Process.Start(pipProcessStartInfo);
             if (pipProcess is null)
             {
@@ -210,7 +210,7 @@ public class Python
                 RedirectStandardOutput = true,
                 UseShellExecute = false
             };
-            logger.LogDebug("运行 {cmd}", pythonStartInfo.FileName + " " + pythonStartInfo.Arguments);
+            logger.LogDebug("运行 {Cmd}", pythonStartInfo.FileName + " " + pythonStartInfo.Arguments);
             var pythonProcess = Process.Start(pythonStartInfo);
             if (pythonProcess is null)
             {

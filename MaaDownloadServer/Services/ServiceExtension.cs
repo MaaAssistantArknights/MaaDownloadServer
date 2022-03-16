@@ -17,9 +17,6 @@ public static class ServiceExtension
         // Controller
         serviceCollection.AddScoped<IVersionService, VersionService>();
         serviceCollection.AddScoped<IDownloadService, DownloadService>();
-        serviceCollection.AddScoped<IArkItemService, ArkItemService>();
-        serviceCollection.AddScoped<IArkStageService, ArkStageService>();
-        serviceCollection.AddScoped<IArkZoneService, ArkZoneService>();
         serviceCollection.AddScoped<IComponentService, ComponentService>();
     }
 }

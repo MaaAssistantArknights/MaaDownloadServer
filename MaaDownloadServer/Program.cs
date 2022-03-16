@@ -5,7 +5,6 @@ using System.Web;
 using AspNetCoreRateLimit;
 using MaaDownloadServer.External;
 using MaaDownloadServer.Jobs;
-using MaaDownloadServer.Model.External;
 using MaaDownloadServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -99,7 +98,6 @@ if (configuration.GetValue<bool>("no-data-directory-check") is false)
         (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
         (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:GameData"], false)
     };
 
     foreach (var (subDirectory, initRequired) in subDirectories)
@@ -185,7 +183,7 @@ foreach (var scriptDirectory in scriptDirectories)
         var pyVenvCreateStatus = Python.CreateVirtualEnvironment(logger, basePythonInterpreter, venvDirectory, requirements?.FullName);
         if (pyVenvCreateStatus is false)
         {
-            logger.LogCritical("Python 虚拟环境创建失败，venvDirectory: {venvDirectory}", venvDirectory);
+            logger.LogCritical("Python 虚拟环境创建失败，venvDirectory: {VenvDirectory}", venvDirectory);
             Environment.Exit(-1);
         }
     }
@@ -268,7 +266,7 @@ var componentInfosDbCache = componentConfigurations
 await dbContext!.DatabaseCaches.AddRangeAsync(componentInfosDbCache);
 await dbContext!.SaveChangesAsync();
 
-Log.Logger.Information("已添加 {c} 个 Component", componentInfosDbCache.Count);
+Log.Logger.Information("已添加 {C} 个 Component", componentInfosDbCache.Count);
 
 await dbContext!.DisposeAsync();
 
@@ -300,18 +298,7 @@ app.UseFileServer(new FileServerOptions
     },
     FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
             configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
-    RequestPath = "/files/maa",
-    EnableDirectoryBrowsing = false,
-    EnableDefaultFiles = false,
-    RedirectToAppendTrailingSlash = false,
-});
-
-app.UseFileServer(new FileServerOptions
-{
-    StaticFileOptions = { DefaultContentType = "image/png", },
-    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
-        configuration["MaaServer:DataDirectories:SubDirectories:GameData"])),
-    RequestPath = "/files/game-data",
+    RequestPath = "/files",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,
