@@ -60,23 +60,6 @@ public static class JobExtension
             {
                 job.WithIdentity("Public-Content-Check-Job", "Database");
             });
-
-            // Game Data 更新任务
-            q.ScheduleJob<GameDataUpdateJob>(trigger =>
-            {
-                trigger.WithIdentity("GameData-Update-Trigger", "GameData")
-                    .WithCalendarIntervalSchedule(schedule =>
-                    {
-                        schedule.WithIntervalInMinutes(
-                            Convert.ToInt32(configuration["MaaServer:GameData:UpdateJobInterval"]));
-                        schedule.InTimeZone(TimeZoneInfo.Local);
-                        schedule.WithMisfireHandlingInstructionDoNothing();
-                    })
-                    .StartAt(DateTimeOffset.Now.AddMinutes(1));
-            }, job =>
-            {
-                job.WithIdentity("GameData-Update-Job", "GameData");
-            });
         });
     }
 }

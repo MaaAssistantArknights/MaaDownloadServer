@@ -4,12 +4,10 @@ public interface ICacheService
 {
     void Add<T>(string key, T value);
     void Add<T>(string key, T value, string group);
-    void Add<T>(string key, T value, GameDataType gameDataType);
     void Add(string key, PublicContent pc, PublicContentTagType type);
     void RemoveAll();
     void RemoveAll(string group);
     void RemoveAll(PublicContentTagType type);
-    void RemoveAll(GameDataType gameDataType);
     void Remove(string key);
     bool Contains(string key);
     T Get<T>(string key);
@@ -21,6 +19,5 @@ public interface ICacheService
     string GetPlatformSupportedArchitecturesKey(string componentName, Platform p);
     string GetDownloadFullPackageKey(string componentName, Platform p, Architecture a, string version);
     string GetDownloadUpdatePackageKey(string componentName, Platform p, Architecture a, string from, string to);
-    string GetGameDataKey(GameDataType type, string identifier);
     string GetAllComponentsKey();
 }
