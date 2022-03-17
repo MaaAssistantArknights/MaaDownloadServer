@@ -190,6 +190,7 @@ public class PackageUpdateJob : IJob
             if (downloadContentInfos.Count == 0)
             {
                 _logger.LogInformation("[{Id}] 组件 {CName} 无版本变更, 退出更新任务", jobId, componentConfiguration.Name);
+                CleanUp();
                 return;
             }
 
@@ -542,18 +543,6 @@ public class PackageUpdateJob : IJob
             using var fileStream = File.Create(filePath);
             memStream.CopyTo(fileStream);
         });
-
-        // if (downloadTaskPool.All(x => x.IsCompletedSuccessfully) is false)
-        // {
-        //     var failedUrls = downloadTaskPool
-        //         .Where(x => x.IsCompletedSuccessfully is false)
-        //         .Select(x => x.Id)
-        //         .Select(x => taskIdToFileIdIndex[x])
-        //         .Select(x => downloadContentInfos.First(y => y.Id == x))
-        //         .Select(x => x.DownloadUrl)
-        //         .Aggregate((x, y) => $"{x}; {y}");
-        //     throw new Exception($"下载失败：{failedUrls}");
-        // }
     }
 
     private List<UpdateDiff> GetUpdateDiffs(IEnumerable<Package> thisVersionPackages, IReadOnlyCollection<Package> recentVersionPackages, string jobId)
