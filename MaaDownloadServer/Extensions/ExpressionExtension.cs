@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 
-namespace MaaDownloadServer.Utils;
+namespace MaaDownloadServer.Extensions;
 
-public static class ExpressionExtensionUtil
+public static class ExpressionExtension
 {
     public static Expression<Func<T, bool>> AndAlso<T>(this Expression<Func<T, bool>> expr1,
         Expression<Func<T, bool>> expr2)
