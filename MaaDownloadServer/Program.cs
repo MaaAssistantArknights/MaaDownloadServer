@@ -220,7 +220,7 @@ builder.Services.AddHttpClients(configuration);
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-builder.Services.AddQuartzFetchGithubReleaseJob(configuration, componentConfigurations);
+builder.Services.AddQuartzJobs(configuration, componentConfigurations);
 builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
