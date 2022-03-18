@@ -5,6 +5,7 @@ using System.Web;
 using AspNetCoreRateLimit;
 using MaaDownloadServer.External;
 using MaaDownloadServer.Jobs;
+using MaaDownloadServer.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
@@ -280,6 +281,8 @@ await dbContext!.DisposeAsync();
 app.UseIpRateLimiting();
 
 app.UseCors();
+
+app.UseMiddleware<DownloadCountMiddleware>();
 
 #region File server middleware
 
