@@ -5,7 +5,6 @@ using System.Web;
 using AspNetCoreRateLimit;
 using MaaDownloadServer.External;
 using MaaDownloadServer.Jobs;
-using MaaDownloadServer.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
@@ -207,15 +206,20 @@ else
 
 builder.Host.UseSerilog();
 builder.Configuration.AddConfiguration(configuration);
+
 builder.Services.AddOptions();
 builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
 builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
+
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
 builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
+builder.Services.AddHttpClients(configuration);
+
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
 builder.Services.AddQuartzFetchGithubReleaseJob(configuration, componentConfigurations);
 builder.Services.AddQuartzServer(options =>
 {

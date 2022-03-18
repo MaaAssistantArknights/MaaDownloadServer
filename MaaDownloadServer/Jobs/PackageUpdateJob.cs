@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using System.Net;
 using System.Text.Json;
 using MaaDownloadServer.External;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +14,7 @@ public class PackageUpdateJob : IJob
     private readonly IFileSystemService _fileSystemService;
     private readonly IConfiguration _configuration;
     private readonly IConfigurationService _configurationService;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ICacheService _cacheService;
     private readonly MaaDownloadServerDbContext _dbContext;
 
@@ -28,6 +28,7 @@ public class PackageUpdateJob : IJob
         IFileSystemService fileSystemService,
         IConfiguration configuration,
         IConfigurationService configurationService,
+        IHttpClientFactory httpClientFactory,
         ICacheService cacheService,
         MaaDownloadServerDbContext dbContext)
     {
@@ -36,6 +37,7 @@ public class PackageUpdateJob : IJob
         _fileSystemService = fileSystemService;
         _configuration = configuration;
         _configurationService = configurationService;
+        _httpClientFactory = httpClientFactory;
         _cacheService = cacheService;
         _dbContext = dbContext;
     }
@@ -76,6 +78,8 @@ public class PackageUpdateJob : IJob
             _downloadDirectory.Create();
             _tempDirectory.Create();
 
+            var clientName = componentConfiguration.UseProxy ? "Proxy" : "NoProxy";
+
             #endregion
 
             #region STEP 1: 请求 Metadata API
@@ -101,38 +105,21 @@ public class PackageUpdateJob : IJob
                 apis = apis.Select(x => x.Replace("{" + k + "}", v)).ToList();
             }
 
-            var proxyUrl = "";
-            if (componentConfiguration.UseProxy)
-            {
-                var proxy = _configuration["MaaServer:Network:Proxy"];
-                if (proxy is not null or "")
-                {
-                    proxyUrl = proxy;
-                }
-            }
-
-            using var client = proxyUrl is ""
-                ? new HttpClient()
-                : new HttpClient(new HttpClientHandler() { Proxy = new WebProxy(proxyUrl), UseProxy = true });
-            client.DefaultRequestHeaders.Add("User-Agent",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.62");
+            var client = _httpClientFactory.CreateClient(clientName);
 
             var packageInfos = new List<string>();
             foreach (var api in apis)
             {
-                var retryCount = 3;
-                while (retryCount != 0)
-                {
-                    var response = await client.GetAsync(api);
-                    if (response.IsSuccessStatusCode is false)
-                    {
-                        retryCount--;
-                        continue;
-                    }
+                var response = await client.GetAsync(api);
+                var payload = await response.Content.ReadAsStringAsync();
 
-                    var payload = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
                     packageInfos.Add(payload);
-                    break;
+                }
+                else
+                {
+                    throw new HttpRequestException($"请求 Metadata API ({api}) 失败，状态码：{response.StatusCode}，内容: {payload}");
                 }
             }
 
@@ -205,7 +192,7 @@ public class PackageUpdateJob : IJob
             while (downloadRetryTimes > 0)
             {
                 downloadRetryTimes--;
-                Download(pendingDownloadContents);
+                Download(pendingDownloadContents, clientName);
 
                 var downloadedContents = Directory.GetFiles(_downloadDirectory.FullName);
                 foreach (var downloadedContent in downloadedContents)
@@ -528,12 +515,9 @@ public class PackageUpdateJob : IJob
         }
     }
 
-    private void Download(IEnumerable<DownloadContentInfo> downloadContentInfos)
+    private void Download(IEnumerable<DownloadContentInfo> downloadContentInfos, string clientName)
     {
-        var proxy = _configuration["MaaServer:Network:Proxy"];
-        var httpClient = proxy is null or ""
-            ? new HttpClient()
-            : new HttpClient(new HttpClientHandler { Proxy = new WebProxy(proxy) });
+        var httpClient = _httpClientFactory.CreateClient(clientName);
 
         downloadContentInfos.AsParallel().ForAll(info =>
         {
