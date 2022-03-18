@@ -1,6 +1,6 @@
-namespace MaaDownloadServer.Utils;
+namespace MaaDownloadServer.Extensions;
 
-public static class PlatformArchParser
+public static class PlatformArchExtension
 {
     public static Platform ParseToPlatform(this string platformString)
     {

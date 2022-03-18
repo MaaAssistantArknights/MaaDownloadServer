@@ -1,7 +1,7 @@
 using MaaDownloadServer.Services.Base;
 using MaaDownloadServer.Services.Controller;
 
-namespace MaaDownloadServer.Services;
+namespace MaaDownloadServer.Extensions;
 
 public static class ServiceExtension
 {

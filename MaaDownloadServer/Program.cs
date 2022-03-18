@@ -5,7 +5,7 @@ using System.Web;
 using AspNetCoreRateLimit;
 using MaaDownloadServer.External;
 using MaaDownloadServer.Jobs;
-using MaaDownloadServer.Services;
+using MaaDownloadServer.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Quartz;
@@ -97,6 +97,7 @@ if (configuration.GetValue<bool>("no-data-directory-check") is false)
         (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
         (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Static"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false),
     };
 
@@ -207,16 +208,21 @@ else
 
 builder.Host.UseSerilog();
 builder.Configuration.AddConfiguration(configuration);
+
 builder.Services.AddOptions();
 builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
 builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
+
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
 builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
+builder.Services.AddHttpClients(configuration);
+
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
-builder.Services.AddQuartzFetchGithubReleaseJob(configuration, componentConfigurations);
+
+builder.Services.AddQuartzJobs(configuration, componentConfigurations);
 builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
@@ -276,6 +282,8 @@ app.UseIpRateLimiting();
 
 app.UseCors();
 
+app.UseMiddleware<DownloadCountMiddleware>();
+
 #region File server middleware
 
 app.UseFileServer(new FileServerOptions
@@ -299,6 +307,32 @@ app.UseFileServer(new FileServerOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
             configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
     RequestPath = "/files",
+    EnableDirectoryBrowsing = false,
+    EnableDefaultFiles = false,
+    RedirectToAppendTrailingSlash = false,
+});
+
+app.UseFileServer(new FileServerOptions
+{
+    StaticFileOptions =
+    {
+        DefaultContentType = "application/octet-stream",
+        OnPrepareResponse = context =>
+        {
+            var fn = context.File.Name;
+
+            if (fn is null)
+            {
+                return;
+            }
+
+            var encodedName = HttpUtility.UrlEncode(fn, Encoding.UTF8);
+            context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
+        }
+    },
+    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+        configuration["MaaServer:DataDirectories:SubDirectories:Static"])),
+    RequestPath = "/static",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,

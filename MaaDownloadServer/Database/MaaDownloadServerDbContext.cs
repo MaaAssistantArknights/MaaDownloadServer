@@ -18,6 +18,7 @@ public class MaaDownloadServerDbContext : DbContext
     public DbSet<Resource> Resources { get; set; }
     public DbSet<PublicContent> PublicContents { get; set; }
     public DbSet<DatabaseCache> DatabaseCaches { get; set; }
+    public DbSet<DownloadCount> DownloadCounts { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

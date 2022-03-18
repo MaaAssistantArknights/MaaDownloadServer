@@ -1,6 +1,6 @@
-namespace MaaDownloadServer.Utils;
+namespace MaaDownloadServer.Extensions;
 
-public static class CacheServiceUtil
+public static class CacheServiceExtension
 {
     internal static string ReplacePlatform(this string o, Platform p)
     {

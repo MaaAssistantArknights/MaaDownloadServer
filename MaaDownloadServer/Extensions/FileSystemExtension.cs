@@ -1,6 +1,6 @@
-namespace MaaDownloadServer.Utils;
+namespace MaaDownloadServer.Extensions;
 
-public static class FileSystemUtil
+public static class FileSystemExtension
 {
     public static void CopyTo(this DirectoryInfo srcPath, string destPath)
     {

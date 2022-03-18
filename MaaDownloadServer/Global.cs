@@ -8,3 +8,4 @@ global using MaaDownloadServer.Model.General;
 global using MaaDownloadServer.Model.Dto;
 global using MaaDownloadServer.Model.External;
 global using MaaDownloadServer.Database;
+global using MaaDownloadServer.Extensions;

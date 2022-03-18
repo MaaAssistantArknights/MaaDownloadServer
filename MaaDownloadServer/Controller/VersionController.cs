@@ -1,4 +1,3 @@
-using MaaDownloadServer.Services.Controller;
 using Microsoft.AspNetCore.Mvc;
 using Semver;
 
@@ -9,9 +8,9 @@ namespace MaaDownloadServer.Controller;
 public class VersionController : ControllerBase
 {
     private readonly IVersionService _versionService;
-    private readonly ILogger<VersionService> _logger;
+    private readonly ILogger<VersionController> _logger;
 
-    public VersionController(IVersionService versionService, ILogger<VersionService> logger)
+    public VersionController(IVersionService versionService, ILogger<VersionController> logger)
     {
         _versionService = versionService;
         _logger = logger;
@@ -36,7 +35,7 @@ public class VersionController : ControllerBase
         var pf = platform.ParseToPlatform();
         if (pf is Platform.UnSupported)
         {
-            _logger.LogWarning("传入 Platform 值 {platform} 解析为不受支持", platform);
+            _logger.LogWarning("传入 Platform 值 {Platform} 解析为不受支持", platform);
             return NotFound();
         }
         var arch = await _versionService.GetSupportedArchitectures(component, pf);
@@ -54,14 +53,14 @@ public class VersionController : ControllerBase
     {
         if (page < 1)
         {
-            _logger.LogWarning("传入 page 值 {page} 不合法", page);
+            _logger.LogWarning("传入 page 值 {Page} 不合法", page);
             return NotFound();
         }
         var pf = platform.ParseToPlatform();
         var a = arch.ParseToArchitecture();
         if (pf is Platform.UnSupported || a is Architecture.UnSupported)
         {
-            _logger.LogWarning("传入 Platform 值 {platform} 或 Arch 值 {arch} 解析为不受支持", platform, arch);
+            _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
         var versions = await _versionService.GetVersions(component, pf, a, page);
@@ -81,13 +80,13 @@ public class VersionController : ControllerBase
         var a = arch.ParseToArchitecture();
         if (pf is Platform.UnSupported || a is Architecture.UnSupported)
         {
-            _logger.LogWarning("传入 Platform 值 {platform} 或 Arch 值 {arch} 解析为不受支持", platform, arch);
+            _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
         var semVerParsed = SemVersion.TryParse(version, out var semVer);
         if (semVerParsed is false)
         {
-            _logger.LogWarning("传入 version 值 {version} 解析失败", version);
+            _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
             return NotFound();
         }
         var package = await _versionService.GetVersion(component, pf, a, semVer);
