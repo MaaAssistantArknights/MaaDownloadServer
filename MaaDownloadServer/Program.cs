@@ -96,6 +96,7 @@ if (configuration.GetValue<bool>("no-data-directory-check") is false)
         (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
         (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
+        (configuration["MaaServer:DataDirectories:SubDirectories:Static"], false),
         (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false),
     };
 
@@ -303,6 +304,32 @@ app.UseFileServer(new FileServerOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
             configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
     RequestPath = "/files",
+    EnableDirectoryBrowsing = false,
+    EnableDefaultFiles = false,
+    RedirectToAppendTrailingSlash = false,
+});
+
+app.UseFileServer(new FileServerOptions
+{
+    StaticFileOptions =
+    {
+        DefaultContentType = "application/octet-stream",
+        OnPrepareResponse = context =>
+        {
+            var fn = context.File.Name;
+
+            if (fn is null)
+            {
+                return;
+            }
+
+            var encodedName = HttpUtility.UrlEncode(fn, Encoding.UTF8);
+            context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
+        }
+    },
+    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
+        configuration["MaaServer:DataDirectories:SubDirectories:Static"])),
+    RequestPath = "/static",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,
