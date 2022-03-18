@@ -26,13 +26,13 @@ public class DownloadController : ControllerBase
         var a = arch.ParseToArchitecture();
         if (pf is Platform.UnSupported || a is Architecture.UnSupported)
         {
-            _logger.LogWarning("传入 Platform 值 {platform} 或 Arch 值 {arch} 解析为不受支持", platform, arch);
+            _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
         var semVerParsed = SemVersion.TryParse(version, out var semVer);
         if (semVerParsed is false)
         {
-            _logger.LogWarning("传入 version 值 {version} 解析失败", version);
+            _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
             return NotFound();
         }
         var pc = await _downloadService.GetFullPackage(component, pf, a, semVer);
@@ -53,14 +53,14 @@ public class DownloadController : ControllerBase
         var a = arch.ParseToArchitecture();
         if (pf is Platform.UnSupported || a is Architecture.UnSupported)
         {
-            _logger.LogWarning("传入 Platform 值 {platform} 或 Arch 值 {arch} 解析为不受支持", platform, arch);
+            _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
         var semVerParsed1 = SemVersion.TryParse(from, out var fromSemVer);
         var semVerParsed2 = SemVersion.TryParse(to, out var toSemVer);
         if (semVerParsed1 is false || semVerParsed2 is false)
         {
-            _logger.LogWarning("传入 version 值 {from} 或 {to} 解析失败", from, to);
+            _logger.LogWarning("传入 version 值 {From} 或 {To} 解析失败", from, to);
             return NotFound();
         }
         var pc = await _downloadService.GetUpdatePackage(component, pf, a, fromSemVer, toSemVer);

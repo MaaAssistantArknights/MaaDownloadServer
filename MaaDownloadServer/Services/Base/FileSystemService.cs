@@ -148,7 +148,7 @@ public class FileSystemService : IFileSystemService
         {
             var id = Guid.NewGuid();
             var name = Path.GetFileName(path);
-            _logger.LogDebug("添加新的资源文件 [{id}] {Path} ({Hash})", id, name, hash);
+            _logger.LogDebug("添加新的资源文件 [{Id}] {Path} ({Hash})", id, name, hash);
             resources.Add(new Resource(id, name, relativePath, hash));
             Debug.Assert(path != null, "r.Path != null");
             File.Move(path, Path.Combine(
@@ -167,7 +167,7 @@ public class FileSystemService : IFileSystemService
             return;
         }
 
-        _logger.LogInformation("正在清理下载目录 Job = {jobId}", jobId);
+        _logger.LogInformation("正在清理下载目录 Job = {JobId}", jobId);
         di.Delete(true);
     }
 
