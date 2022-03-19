@@ -280,6 +280,11 @@ await dbContext!.DisposeAsync();
 
 #endregion
 
+app.UseSerilogRequestLogging(config =>
+{
+    config.IncludeQueryInRequestPath = true;
+});
+
 app.UseIpRateLimiting();
 
 app.UseCors();
@@ -358,8 +363,5 @@ app.Use(async (context, next) =>
 #endregion
 
 app.MapControllers();
-
-GC.Collect();
-GC.WaitForPendingFinalizers();
 
 app.Run();
