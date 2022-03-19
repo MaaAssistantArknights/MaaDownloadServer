@@ -8,6 +8,7 @@ using MaaDownloadServer.Jobs;
 using MaaDownloadServer.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Net.Http.Headers;
 using Quartz;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -218,6 +219,7 @@ builder.Services.AddControllers();
 builder.Services.AddMaaServices();
 builder.Services.AddHttpClients(configuration);
 builder.Services.AddMemoryCache();
+builder.Services.AddResponseCaching();
 
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -336,6 +338,21 @@ app.UseFileServer(new FileServerOptions
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,
+});
+
+#endregion
+
+#region Response Caching
+
+app.UseResponseCaching();
+app.Use(async (context, next) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+        new CacheControlHeaderValue { Public = true, MaxAge = TimeSpan.FromMinutes(5) };
+    context.Response.Headers[HeaderNames.Vary] =
+        new[] { "Accept-Encoding" };
+
+    await next(context);
 });
 
 #endregion
