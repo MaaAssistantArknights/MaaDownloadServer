@@ -1,4 +1,4 @@
-# 运行配置
+# 本地运行配置
 
 ## 必要条件
 
@@ -38,14 +38,10 @@ WantedBy=multi-user.target
 * 运行 `sudo systemctl daemon-reload`
 * 启动服务：`sudo systemctl start MaaDownloadServer`
 
-### Docker
-
-请参考 [Docker Hub 上的文档](https://hub.docker.com/r/alisaqaq/maa-download-server)
-
 ## 支持的环境变量
 
-* `MAADS_DATA_DIRECTORY`: 数据文件目录，第一次运行时，会将配置文件拷贝到这个目录，并设置数据目录为这个环境变量指定的目录
-* `MAA_DS_AZURE_APP_CONFIGURATION`: 使用 Azure App Configuration，环境变量值为 Azure App Configuration 的 Connection String，推荐使用只读权限的连接字符串
+* `MAADS_DATA_DIRECTORY`：数据文件目录，第一次运行时，会将配置文件拷贝到这个目录，并设置数据目录为这个环境变量指定的目录
+* `MAADS_AZURE_APP_CONFIGURATION`：使用 Azure App Configuration，环境变量值为 Azure App Configuration 的 Connection String，推荐使用只读权限的连接字符串
 
 ## 配置文件 appsettings.json
 
@@ -70,11 +66,8 @@ WantedBy=multi-user.target
 
 ##### Network
 
-* `Proxy`: 网络代理地址，留空为不使用代理
-
-##### GameData
-
-* `UpdateJobInterval`: 游戏数据更新任务时间间隔，单位为分钟，默认为 120 分钟
+* `Proxy`：网络代理地址，留空为不使用代理
+* `UserAgent`：进行 HTTP 请求时使用的用户代理
 
 ##### DataDirectories
 
@@ -82,20 +75,20 @@ WantedBy=multi-user.target
 
 ###### SubDirectories
 
-* `Download`: 下载保存临时目录
-* `Public`: 公共可访问下载的文件保存目录
-* `Resources`: 资源文件目录
-* `Database`: 数据库文件目录
-* `Temp`: 临时文件目录
-* `GameData`: 游戏数据目录
-* `Scripts`: Component Python 脚本目录
-* `VirtualEnvironments`: Python 虚拟环境目录
+* `Download`：下载保存临时目录
+* `Public`：公共可访问下载的文件保存目录
+* `Resources`：资源文件目录
+* `Database`：数据库文件目录
+* `Temp`：临时文件目录
+* `Static`：静态通用文件服务器目录
+* `Scripts`：Component Python 脚本目录
+* `VirtualEnvironments`：Python 虚拟环境目录
 
 ##### PublicContent
 
-* `OutdatedCheckInterval`: 公共资源过期确认时间，单位为分钟，默认为 60 分钟
-* `DefaultDuration`: 公共资源默认过期时间，单位为天，默认为 30 天
-* `AutoBundledDuration`: 自动打包的公共资源过期时间，单位为天，默认为 60 天
+* `OutdatedCheckInterval`：公共资源过期确认时间，单位为分钟，默认为 60 分钟
+* `DefaultDuration`：公共资源默认过期时间，单位为天，默认为 30 天
+* `AutoBundledDuration`：自动打包的公共资源过期时间，单位为天，默认为 60 天
 
 ##### MemoryCache
 
@@ -103,7 +96,7 @@ WantedBy=multi-user.target
 
 ##### ScriptEngine
 
-* `Python`: Python 解释器路径，请确保安装了 pip 和 virtualenv
+* `Python`：Python 解释器路径，请确保安装了 pip 和 virtualenv
 
 #### IpRateLimiting 限流组件的配置
 

@@ -8,6 +8,7 @@ using MaaDownloadServer.Jobs;
 using MaaDownloadServer.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Net.Http.Headers;
 using Quartz;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -59,7 +60,7 @@ if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development
     configurationBuilder.AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
 }
 
-var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAA_DS_AZURE_APP_CONFIGURATION");
+var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAADS_AZURE_APP_CONFIGURATION");
 
 if (azureAppConfigurationConnectionString is not null or "")
 {
@@ -215,9 +216,10 @@ builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRate
 
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
-builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
 builder.Services.AddHttpClients(configuration);
+builder.Services.AddMemoryCache();
+builder.Services.AddResponseCaching();
 
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
@@ -336,6 +338,21 @@ app.UseFileServer(new FileServerOptions
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
     RedirectToAppendTrailingSlash = false,
+});
+
+#endregion
+
+#region Response Caching
+
+app.UseResponseCaching();
+app.Use(async (context, next) =>
+{
+    context.Response.GetTypedHeaders().CacheControl =
+        new CacheControlHeaderValue { Public = true, MaxAge = TimeSpan.FromMinutes(5) };
+    context.Response.Headers[HeaderNames.Vary] =
+        new[] { "Accept-Encoding" };
+
+    await next(context);
 });
 
 #endregion

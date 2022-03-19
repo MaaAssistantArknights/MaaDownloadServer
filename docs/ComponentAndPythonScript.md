@@ -188,6 +188,4 @@ Python 脚本应在标准输出流中输出处理结果，示例 Json 字符串�
 
 获取近期 3 个版本的包对象，比对 Resource 打包成增量更新包，加入 `Public Content`
 
-### STEP 14: 删缓存
-
-### STEP 15: 完成
+### STEP 14: 完成
