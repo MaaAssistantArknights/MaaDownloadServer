@@ -16,63 +16,6 @@ public class VersionController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("getPlatform")]
-    public async Task<ActionResult<GetSupportedPlatformDto>> GetSupportedPlatforms([FromQuery] string component)
-    {
-        var platforms = await _versionService.GetSupportedPlatforms(component);
-        if (platforms is null)
-        {
-            _logger.LogInformation("GetSupportedPlatforms() returned null");
-            return NotFound();
-        }
-        var platformStr = platforms.Select(x => x.ToString()).ToList();
-        return Ok(new GetSupportedPlatformDto(platformStr));
-    }
-
-    [HttpGet("{platform}/getArch")]
-    public async Task<ActionResult<GetSupportedArchDto>> GetSupportedArchitectures(string platform, [FromQuery] string component)
-    {
-        var pf = platform.ParseToPlatform();
-        if (pf is Platform.UnSupported)
-        {
-            _logger.LogWarning("传入 Platform 值 {Platform} 解析为不受支持", platform);
-            return NotFound();
-        }
-        var arch = await _versionService.GetSupportedArchitectures(component, pf);
-        if (arch is null)
-        {
-            _logger.LogWarning("GetSupportedArchitectures() returned null");
-            return NotFound();
-        }
-        var archStr = arch.Select(x => x.ToString()).ToList();
-        return Ok(new GetSupportedArchDto(platform, archStr));
-    }
-
-    [HttpGet("{platform}/{arch}/getVersion")]
-    public async Task<ActionResult<GetVersionsDto>> GetVersionList(string platform, string arch, [FromQuery] int page, [FromQuery] string component)
-    {
-        if (page < 1)
-        {
-            _logger.LogWarning("传入 page 值 {Page} 不合法", page);
-            return NotFound();
-        }
-        var pf = platform.ParseToPlatform();
-        var a = arch.ParseToArchitecture();
-        if (pf is Platform.UnSupported || a is Architecture.UnSupported)
-        {
-            _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
-            return NotFound();
-        }
-        var versions = await _versionService.GetVersions(component, pf, a, page);
-        if (versions is null)
-        {
-            _logger.LogWarning("GetVersions() returned null");
-            return NotFound();
-        }
-        var versionMetadataList = versions.Select(x => new VersionMetadata(x.Key, x.Value)).ToList();
-        return Ok(new GetVersionsDto(platform, arch, versionMetadataList));
-    }
-
     [HttpGet("{platform}/{arch}/{version}")]
     public async Task<ActionResult<GetVersionDto>> GetVersion(string platform, string arch, string version, [FromQuery] string component)
     {

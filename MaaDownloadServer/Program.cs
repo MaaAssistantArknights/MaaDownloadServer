@@ -215,9 +215,9 @@ builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRate
 
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
-builder.Services.AddLazyCache();
 builder.Services.AddMaaServices();
 builder.Services.AddHttpClients(configuration);
+builder.Services.AddMemoryCache();
 
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();

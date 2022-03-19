@@ -24,4 +24,34 @@ public class ComponentService : IComponentService
 
         return componentInfos;
     }
+
+    public async Task<GetComponentDetailDto> GetComponentDetail(string component, int limit, int page)
+    {
+        var allComponents = await GetAllComponents();
+        var componentMetaInfo = allComponents.FirstOrDefault(x => x.Name == component);
+
+        if (componentMetaInfo is null)
+        {
+            return null;
+        }
+
+        var components = (await _dbContext.Packages
+            .Where(x => x.Component == component)
+            .OrderByDescending(x => x.PublishTime)
+            .ToListAsync())
+            .GroupBy(x => x.Version.ToString())
+            .Skip((page - 1) * limit)
+            .Take(limit)
+            .ToList();
+
+        var versions = (from c in components
+                        let packages = c.ToList()
+                        select new ComponentVersions(c.Key, packages[0].PublishTime, packages[0].UpdateLog,
+                    packages.Select(x => new ComponentSupport
+                            (x.Platform.ToString(), x.Architecture.ToString())).ToList()))
+                .ToList();
+
+        var dto = new GetComponentDetailDto(componentMetaInfo.Name, componentMetaInfo.Description, versions, page, limit);
+        return dto;
+    }
 }

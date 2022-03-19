@@ -15,7 +15,6 @@ public class PackageUpdateJob : IJob
     private readonly IConfiguration _configuration;
     private readonly IConfigurationService _configurationService;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ICacheService _cacheService;
     private readonly MaaDownloadServerDbContext _dbContext;
 
     private DirectoryInfo _downloadDirectory;
@@ -29,7 +28,6 @@ public class PackageUpdateJob : IJob
         IConfiguration configuration,
         IConfigurationService configurationService,
         IHttpClientFactory httpClientFactory,
-        ICacheService cacheService,
         MaaDownloadServerDbContext dbContext)
     {
         _logger = logger;
@@ -38,7 +36,6 @@ public class PackageUpdateJob : IJob
         _configuration = configuration;
         _configurationService = configurationService;
         _httpClientFactory = httpClientFactory;
-        _cacheService = cacheService;
         _dbContext = dbContext;
     }
 
@@ -489,21 +486,9 @@ public class PackageUpdateJob : IJob
 
             #endregion
 
-            #region STEP 14: 删缓存
+            #region STEP 14: 完成
 
-            _logger.LogInformation("[{Id}] STEP 14: 删缓存", jobId);
-
-            // 删除 所有组件 缓存
-            _cacheService.Remove(_cacheService.GetAllComponentsKey());
-
-            // 删除 组件名Group 缓存
-            _cacheService.RemoveAll(componentConfiguration.Name);
-
-            #endregion
-
-            #region STEP 15: 完成
-
-            _logger.LogInformation("[{Id}] STEP 15: 完成", jobId);
+            _logger.LogInformation("[{Id}] STEP 14: 完成", jobId);
             CleanUp();
 
             #endregion

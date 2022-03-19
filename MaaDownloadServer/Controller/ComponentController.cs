@@ -17,6 +17,28 @@ public class ComponentController : ControllerBase
     public async Task<ActionResult<List<ComponentDto>>> GetComponents()
     {
         var dtos = await _componentService.GetAllComponents();
-        return dtos;
+        return Ok(dtos);
+    }
+
+    [HttpGet("getInfo")]
+    public async Task<ActionResult<GetComponentDetailDto>> GetComponentDetail([FromQuery] string component,
+        [FromQuery] int page = 1, [FromQuery] int limit = 10)
+    {
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        if (limit < 1)
+        {
+            limit = 10;
+        }
+
+        var dto = await _componentService.GetComponentDetail(component, limit, page);
+        if (dto is null)
+        {
+            return NotFound();
+        }
+        return Ok(dto);
     }
 }
