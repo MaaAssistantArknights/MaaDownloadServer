@@ -25,6 +25,10 @@ public class DownloadService : IDownloadService
 
     public async Task<PublicContent> GetUpdatePackage(string componentName, Platform platform, Architecture architecture, SemVersion from, SemVersion to)
     {
+        if (from == to)
+        {
+            return null;
+        }
         var tag = new PublicContentTag(PublicContentTagType.UpdatePackage, platform, architecture, componentName, from, to).ParseToTagString();
         var pc = await _dbContext.PublicContents.FirstOrDefaultAsync(x => x.Tag == tag);
         var fromVersion = from.ToString();
