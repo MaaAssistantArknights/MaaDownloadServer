@@ -26,13 +26,25 @@ public class VersionController : ControllerBase
             _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
-        var semVerParsed = SemVersion.TryParse(version, out var semVer);
-        if (semVerParsed is false)
+
+        _logger.LogInformation(version);
+
+        Package package;
+        if (version is "latest")
         {
-            _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
-            return NotFound();
+            package = await _versionService.GetLatestVersion(component, pf, a);
         }
-        var package = await _versionService.GetVersion(component, pf, a, semVer);
+        else
+        {
+            var semVerParsed = SemVersion.TryParse(version, out var semVer);
+            if (semVerParsed is false)
+            {
+                _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
+                return NotFound();
+            }
+            package = await _versionService.GetVersion(component, pf, a, semVer);
+        }
+
         if (package is not null)
         {
             return Ok(new GetVersionDto(platform, arch,

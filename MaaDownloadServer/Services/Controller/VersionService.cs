@@ -31,4 +31,23 @@ public class VersionService : IVersionService
             .FirstOrDefaultAsync();
         return package;
     }
+
+    /// <summary>
+    /// 获取最新版本
+    /// </summary>
+    /// <param name="componentName">组件名</param>
+    /// <param name="platform">平台</param>
+    /// <param name="architecture">架构</param>
+    /// <returns></returns>
+    public async Task<Package> GetLatestVersion(string componentName, Platform platform, Architecture architecture)
+    {
+        var package = (await _dbContext.Packages
+            .Include(x => x.Resources)
+            .Where(x => x.Component == componentName)
+            .Where(x => x.Platform == platform && x.Architecture == architecture)
+            .ToListAsync())
+            .OrderByDescending(x => SemVersion.Parse(x.Version))
+            .FirstOrDefault();
+        return package;
+    }
 }
