@@ -9,13 +9,15 @@ public class DownloadController : ControllerBase
 {
     private readonly ILogger<DownloadController> _logger;
     private readonly IDownloadService _downloadService;
+    private readonly IVersionService _versionService;
     private readonly IConfiguration _configuration;
 
-    public DownloadController(ILogger<DownloadController> logger, IDownloadService downloadService, IConfiguration configuration)
+    public DownloadController(ILogger<DownloadController> logger, IDownloadService downloadService, IConfiguration configuration, IVersionService versionService)
     {
         _logger = logger;
         _downloadService = downloadService;
         _configuration = configuration;
+        _versionService = versionService;
     }
 
     [HttpGet("{version}")]
@@ -29,13 +31,32 @@ public class DownloadController : ControllerBase
             _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
-        var semVerParsed = SemVersion.TryParse(version, out var semVer);
-        if (semVerParsed is false)
+
+        PublicContent pc;
+
+        if (version is "latest")
         {
-            _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
-            return NotFound();
+            var latestVersion = await _versionService.GetLatestVersion(component, pf, a);
+
+            if (latestVersion is null)
+            {
+                return NotFound();
+            }
+
+            pc = await _downloadService.GetFullPackage(component, pf, a, latestVersion.Version);
         }
-        var pc = await _downloadService.GetFullPackage(component, pf, a, semVer);
+        else
+        {
+            var semVerParsed = SemVersion.TryParse(version, out var semVer);
+            if (semVerParsed is false)
+            {
+                _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
+                return NotFound();
+            }
+
+            pc = await _downloadService.GetFullPackage(component, pf, a, semVer);
+        }
+
         if (pc is null)
         {
             return NotFound();
