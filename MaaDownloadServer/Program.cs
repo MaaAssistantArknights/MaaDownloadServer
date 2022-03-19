@@ -60,7 +60,7 @@ if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development
     configurationBuilder.AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
 }
 
-var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAA_DS_AZURE_APP_CONFIGURATION");
+var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAADS_AZURE_APP_CONFIGURATION");
 
 if (azureAppConfigurationConnectionString is not null or "")
 {
