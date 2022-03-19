@@ -26,6 +26,7 @@ MAA 更新和下载服务器
 
 ## 文档
 
+* [API 文档 (ApiFox)](https://www.apifox.cn/apidoc/shared-e9acdf71-e5e6-4198-aaa7-5417e1304335)
 * [编译和打包](./docs/Compile.md)
 * [本地运行配置](./docs/RunNative.md)
 * [Docker 运行配置](./docs/RunDocker.md)
