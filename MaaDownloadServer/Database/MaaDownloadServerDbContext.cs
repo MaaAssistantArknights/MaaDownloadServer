@@ -25,9 +25,6 @@ public class MaaDownloadServerDbContext : DbContext
         var connectionString = $"Data Source={Path.Combine(_configuration["MaaServer:DataDirectories:RootPath"], _configuration["MaaServer:DataDirectories:SubDirectories:Database"], "data.db")};";
         optionsBuilder.UseSqlite(connectionString, builder =>
             builder.MigrationsAssembly("MaaDownloadServer"));
-
-        optionsBuilder.EnableSensitiveDataLogging();
-        optionsBuilder.EnableDetailedErrors();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
