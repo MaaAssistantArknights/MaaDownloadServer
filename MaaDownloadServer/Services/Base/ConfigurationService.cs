@@ -1,4 +1,4 @@
-namespace MaaDownloadServer.Services.Base;
+﻿namespace MaaDownloadServer.Services.Base;
 
 public class ConfigurationService : IConfigurationService
 {
@@ -35,13 +35,6 @@ public class ConfigurationService : IConfigurationService
         return Path.Combine(
             _configuration["MaaServer:DataDirectories:RootPath"],
             _configuration["MaaServer:DataDirectories:SubDirectories:Temp"]);
-    }
-
-    public string GetGameDataDirectory()
-    {
-        return Path.Combine(
-            _configuration["MaaServer:DataDirectories:RootPath"],
-            _configuration["MaaServer:DataDirectories:SubDirectories:GameData"]);
     }
 
     public int GetPublicContentDefaultDuration()

@@ -258,7 +258,9 @@ if (File.Exists(
     Log.Logger.Information("数据库创建完成");
 }
 
-var dbCaches = await dbContext!.DatabaseCaches.ToListAsync();
+var dbCaches = await dbContext!.DatabaseCaches
+    .Where(x => x.QueryId.StartsWith("persist_") == false)
+    .ToListAsync();
 dbContext!.DatabaseCaches.RemoveRange(dbCaches);
 
 #endregion

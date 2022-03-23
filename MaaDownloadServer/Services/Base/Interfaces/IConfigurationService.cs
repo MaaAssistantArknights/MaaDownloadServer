@@ -1,4 +1,4 @@
-namespace MaaDownloadServer.Services.Base.Interfaces;
+﻿namespace MaaDownloadServer.Services.Base.Interfaces;
 
 public interface IConfigurationService
 {
@@ -6,7 +6,6 @@ public interface IConfigurationService
     string GetDownloadDirectory();
     string GetResourcesDirectory();
     string GetTempDirectory();
-    string GetGameDataDirectory();
     int GetPublicContentDefaultDuration();
     int GetPublicContentAutoBundledDuration();
 }

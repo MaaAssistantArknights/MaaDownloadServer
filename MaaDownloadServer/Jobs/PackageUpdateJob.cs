@@ -15,6 +15,7 @@ public class PackageUpdateJob : IJob
     private readonly IConfiguration _configuration;
     private readonly IConfigurationService _configurationService;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IAnnounceService _announceService;
     private readonly MaaDownloadServerDbContext _dbContext;
 
     private DirectoryInfo _downloadDirectory;
@@ -28,6 +29,7 @@ public class PackageUpdateJob : IJob
         IConfiguration configuration,
         IConfigurationService configurationService,
         IHttpClientFactory httpClientFactory,
+        IAnnounceService announceService,
         MaaDownloadServerDbContext dbContext)
     {
         _logger = logger;
@@ -36,6 +38,7 @@ public class PackageUpdateJob : IJob
         _configuration = configuration;
         _configurationService = configurationService;
         _httpClientFactory = httpClientFactory;
+        _announceService = announceService;
         _dbContext = dbContext;
     }
 
@@ -492,10 +495,29 @@ public class PackageUpdateJob : IJob
             CleanUp();
 
             #endregion
+
+            #region STEP 15: 添加 Announce
+
+            _logger.LogInformation("[{Id}] STEP 15: 添加 Announce", jobId);
+
+            var versionSynced = downloadContentInfos
+                .Select(x => $"{x.Version} ({x.Platform}-{x.Architecture})")
+                .ToArray();
+
+            var versionSyncedString = string.Join("，", versionSynced);
+            var message = $"组件包 {componentConfiguration.Name} 更新检查任务执行成功，任务 ID：{jobId}，新增版本：{versionSyncedString}";
+
+            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", message);
+
+            #endregion
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "组件包 {Name} 更新检查任务执行失败", componentConfiguration.Name);
+
+            var message = $"组件包 {componentConfiguration.Name} 更新检查任务执行失败，任务 ID：{jobId}，发生错误：{ex.GetType().FullName ?? "未知类型的错误"}";
+            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", message, AnnounceLevel.Error);
+
             CleanUp();
         }
     }

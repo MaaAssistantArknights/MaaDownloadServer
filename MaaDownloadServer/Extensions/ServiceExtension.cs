@@ -10,6 +10,7 @@ public static class ServiceExtension
         // Scoped
         serviceCollection.AddScoped<IConfigurationService, ConfigurationService>();
         serviceCollection.AddScoped<IFileSystemService, FileSystemService>();
+        serviceCollection.AddScoped<IAnnounceService, AnnounceService>();
 
         // Controller
         serviceCollection.AddScoped<IVersionService, VersionService>();
