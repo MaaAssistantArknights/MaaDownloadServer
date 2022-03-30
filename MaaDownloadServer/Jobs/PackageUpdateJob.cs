@@ -480,7 +480,7 @@ public class PackageUpdateJob : IJob
 
                 var diffs = GetUpdateDiffs(packages, recentVersionPackages, jobId.ToString());
 
-                await _fileSystemService.AddUpdatePackages(diffs);
+                await _fileSystemService.AddUpdatePackages(componentConfiguration.Name, diffs);
             }
             else
             {

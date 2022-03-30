@@ -46,7 +46,7 @@ public class DownloadService : IDownloadService
             return null;
         }
         var diff = _fileSystemService.GetUpdateDiff(fromPackage, toPackage);
-        var pcs = await _fileSystemService.AddUpdatePackages(new List<UpdateDiff> { diff });
+        var pcs = await _fileSystemService.AddUpdatePackages(componentName, new List<UpdateDiff> { diff });
         var npc = pcs.First();
         return npc;
     }

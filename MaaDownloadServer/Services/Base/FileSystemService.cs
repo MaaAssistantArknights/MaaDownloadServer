@@ -192,7 +192,7 @@ public class FileSystemService : IFileSystemService
     }
 
     /// <inheritdoc />
-    public async Task<List<PublicContent>> AddUpdatePackages(List<UpdateDiff> diffs)
+    public async Task<List<PublicContent>> AddUpdatePackages(string componentName, List<UpdateDiff> diffs)
     {
         var pcs = new List<PublicContent>();
         foreach (var diff in diffs)
@@ -203,7 +203,7 @@ public class FileSystemService : IFileSystemService
             var tempFolder = new DirectoryInfo(Path.Combine(_configurationService.GetTempDirectory(), id.ToString()));
             tempFolder.Create();
             var pcTag = new PublicContentTag(PublicContentTagType.UpdatePackage, diff.Platform, diff.Architecture,
-                diff.StartVersion, diff.TargetVersion).ParseToTagString();
+                componentName, diff.StartVersion, diff.TargetVersion).ParseToTagString();
             foreach (var newResource in diff.NewResources)
             {
                 File.Copy(Path.Combine(_configurationService.GetResourcesDirectory(), newResource.Hash),
