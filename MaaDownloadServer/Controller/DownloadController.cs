@@ -36,7 +36,7 @@ public class DownloadController : ControllerBase
 
         if (version is "latest")
         {
-            var latestVersion = await _versionService.GetLatestVersion(component, pf, a);
+            var latestVersion = await GetLatestVersion(component, pf, a);
 
             if (latestVersion is null)
             {
@@ -77,8 +77,25 @@ public class DownloadController : ControllerBase
             _logger.LogWarning("传入 Platform 值 {Platform} 或 Arch 值 {Arch} 解析为不受支持", platform, arch);
             return NotFound();
         }
+
+        string realTo;
+        if (to == "latest")
+        {
+            var latestVersion = await GetLatestVersion(component, pf, a);
+            if (latestVersion is null)
+            {
+                return null;
+            }
+
+            realTo = latestVersion.Version;
+        }
+        else
+        {
+            realTo = to;
+        }
+
         var semVerParsed1 = SemVersion.TryParse(from, out var fromSemVer);
-        var semVerParsed2 = SemVersion.TryParse(to, out var toSemVer);
+        var semVerParsed2 = SemVersion.TryParse(realTo, out var toSemVer);
         if (semVerParsed1 is false || semVerParsed2 is false)
         {
             _logger.LogWarning("传入 version 值 {From} 或 {To} 解析失败", from, to);
@@ -92,5 +109,10 @@ public class DownloadController : ControllerBase
         var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
         var dto = new GetDownloadUrlDto(platform, arch, $"{from} -> {to}", dUrl, pc.Hash);
         return Ok(dto);
+    }
+
+    private async Task<Package> GetLatestVersion(string component, Platform pf, Architecture a)
+    {
+        return await _versionService.GetLatestVersion(component, pf, a);
     }
 }
