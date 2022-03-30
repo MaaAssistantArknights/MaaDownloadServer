@@ -549,6 +549,14 @@ public class PackageUpdateJob : IJob
                     continue;
                 }
 
+                var thisVersionParsed = SemVersion.Parse(thisVersionPackage.Version);
+                var targetVersionParsed = SemVersion.Parse(recentVersionPackage.Version);
+
+                if (thisVersionParsed <= targetVersionParsed)
+                {
+                    continue;
+                }
+
                 _logger.LogDebug("开始计算 Diff {C}-{P}-{A} {V1} -> {V2} ，JobId：{JobId}",
                     thisVersionPackage.Component, thisVersionPackage.Platform, thisVersionPackage.Architecture,
                     recentVersionPackage.Version, thisVersionPackage.Version, jobId);
