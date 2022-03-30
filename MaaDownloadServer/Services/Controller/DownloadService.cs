@@ -6,13 +6,16 @@ namespace MaaDownloadServer.Services.Controller;
 public class DownloadService : IDownloadService
 {
     private readonly IFileSystemService _fileSystemService;
+    private readonly IComponentService _componentService;
     private readonly MaaDownloadServerDbContext _dbContext;
 
     public DownloadService(
         IFileSystemService fileSystemService,
+        IComponentService componentService,
         MaaDownloadServerDbContext dbContext)
     {
         _fileSystemService = fileSystemService;
+        _componentService = componentService;
         _dbContext = dbContext;
     }
 
@@ -25,6 +28,13 @@ public class DownloadService : IDownloadService
 
     public async Task<PublicContent> GetUpdatePackage(string componentName, Platform platform, Architecture architecture, SemVersion from, SemVersion to)
     {
+        var allComponents = await _componentService.GetAllComponents();
+        var componentExist = allComponents.Exists(x => x.Name == componentName);
+        if (componentExist is false)
+        {
+            return null;
+        }
+
         if (from == to)
         {
             return null;
@@ -46,7 +56,7 @@ public class DownloadService : IDownloadService
             return null;
         }
         var diff = _fileSystemService.GetUpdateDiff(fromPackage, toPackage);
-        var pcs = await _fileSystemService.AddUpdatePackages(new List<UpdateDiff> { diff });
+        var pcs = await _fileSystemService.AddUpdatePackages(componentName, new List<UpdateDiff> { diff });
         var npc = pcs.First();
         return npc;
     }

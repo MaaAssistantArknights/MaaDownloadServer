@@ -58,7 +58,8 @@ public interface IFileSystemService
     /// <summary>
     /// 创建更新包
     /// </summary>
+    /// <param name="componentName">组件名</param>
     /// <param name="diffs">更新 Diff 列表</param>
     /// <returns>PublicContent 实体 List</returns>
-    public Task<List<PublicContent>> AddUpdatePackages(List<UpdateDiff> diffs);
+    public Task<List<PublicContent>> AddUpdatePackages(string componentName, List<UpdateDiff> diffs);
 }

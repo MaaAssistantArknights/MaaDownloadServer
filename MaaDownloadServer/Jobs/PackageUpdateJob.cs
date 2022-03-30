@@ -480,7 +480,7 @@ public class PackageUpdateJob : IJob
 
                 var diffs = GetUpdateDiffs(packages, recentVersionPackages, jobId.ToString());
 
-                await _fileSystemService.AddUpdatePackages(diffs);
+                await _fileSystemService.AddUpdatePackages(componentConfiguration.Name, diffs);
             }
             else
             {
@@ -545,6 +545,14 @@ public class PackageUpdateJob : IJob
             {
                 if (thisVersionPackage.Architecture != recentVersionPackage.Architecture ||
                     thisVersionPackage.Platform != recentVersionPackage.Platform)
+                {
+                    continue;
+                }
+
+                var thisVersionParsed = SemVersion.Parse(thisVersionPackage.Version);
+                var targetVersionParsed = SemVersion.Parse(recentVersionPackage.Version);
+
+                if (thisVersionParsed <= targetVersionParsed)
                 {
                     continue;
                 }

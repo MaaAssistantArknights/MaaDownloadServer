@@ -22,7 +22,7 @@ public static class JobExtension
             var componentCount = 1;
             foreach (var componentConfiguration in componentConfigurations)
             {
-                var startDelay = 1 + componentCount * 0.5;
+                var startDelay = 0 + componentCount * 0.5;
                 q.ScheduleJob<PackageUpdateJob>(trigger =>
                 {
                     trigger.WithIdentity($"Package-{componentConfiguration.Name}-Update-Trigger", "Package-Update-Trigger")
