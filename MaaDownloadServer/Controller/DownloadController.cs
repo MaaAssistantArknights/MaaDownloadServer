@@ -34,6 +34,7 @@ public class DownloadController : ControllerBase
 
         PublicContent pc;
 
+        string realVersion;
         if (version is "latest")
         {
             var latestVersion = await GetLatestVersion(component, pf, a);
@@ -44,6 +45,7 @@ public class DownloadController : ControllerBase
             }
 
             pc = await _downloadService.GetFullPackage(component, pf, a, latestVersion.Version);
+            realVersion = latestVersion.Version;
         }
         else
         {
@@ -55,6 +57,7 @@ public class DownloadController : ControllerBase
             }
 
             pc = await _downloadService.GetFullPackage(component, pf, a, semVer);
+            realVersion = version;
         }
 
         if (pc is null)
@@ -62,7 +65,7 @@ public class DownloadController : ControllerBase
             return NotFound();
         }
         var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
-        var dto = new GetDownloadUrlDto(platform, arch, version, dUrl, pc.Hash);
+        var dto = new GetDownloadUrlDto(platform, arch, realVersion, dUrl, pc.Hash);
         return Ok(dto);
     }
 
@@ -107,7 +110,7 @@ public class DownloadController : ControllerBase
             return NotFound();
         }
         var dUrl = $"{_configuration["MaaServer:Server:ApiFullUrl"]}/files/{pc.Id}.{pc.FileExtension}";
-        var dto = new GetDownloadUrlDto(platform, arch, $"{from} -> {to}", dUrl, pc.Hash);
+        var dto = new GetDownloadUrlDto(platform, arch, $"{from} -> {realTo}", dUrl, pc.Hash);
         return Ok(dto);
     }
 
