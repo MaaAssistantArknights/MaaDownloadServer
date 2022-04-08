@@ -3,7 +3,6 @@ using System.Text.Json;
 using MaaDownloadServer.External;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Semver;
 
 namespace MaaDownloadServer.Jobs;
 

@@ -1,14 +1,15 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Options;
 using Polly;
 
 namespace MaaDownloadServer.Extensions;
 
 public static class HttpClientFactoryExtension
 {
-    public static void AddHttpClients(this IServiceCollection service, IConfiguration configuration)
+    public static void AddHttpClients(this IServiceCollection service, IOptions<NetworkOption> option)
     {
-        var userAgent = configuration.GetValue<string>("MaaServer:Network:UserAgent");
-        var proxyUrl = configuration.GetValue<string>("MaaServer:Network:Proxy");
+        var userAgent = option.Value.UserAgent;
+        var proxyUrl = option.Value.Proxy;
         var proxy = string.IsNullOrEmpty(proxyUrl) ? null : new WebProxy(proxyUrl);
 
         service.AddHttpClient("NoProxy", client =>
