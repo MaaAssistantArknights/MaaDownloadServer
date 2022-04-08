@@ -156,7 +156,7 @@ public class PackageUpdateJob : IJob
             var downloadContentInfos = new List<DownloadContentInfo>();
             foreach (var downloadContentInfo in allDownloadContentInfos)
             {
-                var semVerParsed = SemVersion.TryParse(downloadContentInfo.Version, out var semVer);
+                var semVerParsed = downloadContentInfo.Version.TryParseToSemVer(out var semVer);
                 if (semVerParsed is false)
                 {
                     _logger.LogError("[{Id}] 无法解析版本号 {Version}", jobId, downloadContentInfo.Version);
@@ -471,8 +471,8 @@ public class PackageUpdateJob : IJob
                             .Where(x => x.Component == package.Component)
                             .Where(x => x.Platform == package.Platform && x.Architecture == package.Architecture)
                             .ToListAsync())
-                        .Where(x => SemVersion.Parse(x.Version) < SemVersion.Parse(package.Version))
-                        .OrderByDescending(x => SemVersion.Parse(x.Version))
+                        .Where(x => x.Version.ParseToSemVer() < package.Version.ParseToSemVer())
+                        .OrderByDescending(x => x.Version.ParseToSemVer())
                         .Take(3)
                         .ToList();
                     recentVersionPackages.AddRange(recentPackages);
@@ -549,8 +549,8 @@ public class PackageUpdateJob : IJob
                     continue;
                 }
 
-                var thisVersionParsed = SemVersion.Parse(thisVersionPackage.Version);
-                var targetVersionParsed = SemVersion.Parse(recentVersionPackage.Version);
+                var thisVersionParsed = thisVersionPackage.Version.ParseToSemVer();
+                var targetVersionParsed = recentVersionPackage.Version.ParseToSemVer();
 
                 if (thisVersionParsed <= targetVersionParsed)
                 {

@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Semver;
 
 namespace MaaDownloadServer.Controller;
 
@@ -44,12 +43,12 @@ public class DownloadController : ControllerBase
                 return NotFound();
             }
 
-            pc = await _downloadService.GetFullPackage(component, pf, a, latestVersion.Version);
+            pc = await _downloadService.GetFullPackage(component, pf, a, latestVersion.Version.ParseToSemVer());
             realVersion = latestVersion.Version;
         }
         else
         {
-            var semVerParsed = SemVersion.TryParse(version, out var semVer);
+            var semVerParsed = version.TryParseToSemVer(out var semVer);
             if (semVerParsed is false)
             {
                 _logger.LogWarning("传入 version 值 {Version} 解析失败", version);
@@ -97,8 +96,8 @@ public class DownloadController : ControllerBase
             realTo = to;
         }
 
-        var semVerParsed1 = SemVersion.TryParse(from, out var fromSemVer);
-        var semVerParsed2 = SemVersion.TryParse(realTo, out var toSemVer);
+        var semVerParsed1 = from.TryParseToSemVer(out var fromSemVer);
+        var semVerParsed2 = realTo.TryParseToSemVer(out var toSemVer);
         if (semVerParsed1 is false || semVerParsed2 is false)
         {
             _logger.LogWarning("传入 version 值 {From} 或 {To} 解析失败", from, to);

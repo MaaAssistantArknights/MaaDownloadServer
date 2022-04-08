@@ -46,7 +46,7 @@ public class VersionService : IVersionService
             .Where(x => x.Component == componentName)
             .Where(x => x.Platform == platform && x.Architecture == architecture)
             .ToListAsync())
-            .OrderByDescending(x => SemVersion.Parse(x.Version))
+            .OrderByDescending(x => x.Version.ParseToSemVer())
             .FirstOrDefault();
         return package;
     }
