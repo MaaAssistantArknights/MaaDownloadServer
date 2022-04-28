@@ -2,5 +2,5 @@
 
 public interface IAnnounceService
 {
-    Task AddAnnounce(string issuer, string message, AnnounceLevel level = AnnounceLevel.Information);
+    Task AddAnnounce(string issuer, string title, string message, AnnounceLevel level = AnnounceLevel.Information);
 }

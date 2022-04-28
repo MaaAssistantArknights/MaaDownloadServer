@@ -1,5 +1,3 @@
-using Semver;
-
 namespace MaaDownloadServer.Utils;
 
 // Tag Example
@@ -20,7 +18,7 @@ public static class PublicContentTagUtil
         var component = tagParts[1];
         var platformObj = Enum.Parse<Platform>(tagParts[2]);
         var archObj = Enum.Parse<Architecture>(tagParts[3]);
-        var versionObj = SemVersion.Parse(tagParts[4]);
+        var versionObj = tagParts[4].ParseToSemVer();
 
         if (typeObj is PublicContentTagType.FullPackage)
         {
@@ -32,7 +30,7 @@ public static class PublicContentTagUtil
             throw new ArgumentException("Invalid tag string");
         }
 
-        var targetObj = SemVersion.Parse(tagParts[5]);
+        var targetObj = tagParts[5].ParseToSemVer();
         return new PublicContentTag(typeObj, platformObj, archObj, component, versionObj, targetObj);
     }
 

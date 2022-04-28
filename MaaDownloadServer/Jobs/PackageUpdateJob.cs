@@ -3,7 +3,6 @@ using System.Text.Json;
 using MaaDownloadServer.External;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-using Semver;
 
 namespace MaaDownloadServer.Jobs;
 
@@ -56,13 +55,13 @@ public class PackageUpdateJob : IJob
 
         var jobId = Guid.NewGuid();
 
-        _logger.LogInformation("开始组件包 {Name} 更新检查任务，操作ID：{Id}", componentConfiguration.Name, jobId);
+        _logger.LogInformation("[{Id}] 开始组件包 {Name} 更新检查任务", jobId, componentConfiguration.Name);
 
         try
         {
             #region STEP 0: 准备
 
-            _logger.LogInformation("[{Id}] STEP 0: 准备", jobId);
+            _logger.LogDebug("[{Id}] STEP 0: 准备", jobId);
 
             var pyExecutable = Path.Combine(
                 _configuration["MaaServer:DataDirectories:RootPath"],
@@ -84,7 +83,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 1: 请求 Metadata API
 
-            _logger.LogInformation("[{Id}] STEP 1: 请求 Metadata API", jobId);
+            _logger.LogDebug("[{Id}] STEP 1: 请求 Metadata API", jobId);
             var apis = componentConfiguration.MetadataUrl;
             foreach (var (k, vo) in componentConfiguration.UrlPlaceholder)
             {
@@ -127,7 +126,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 2: 运行Python脚本获取下载信息列表
 
-            _logger.LogInformation("[{Id}] STEP 2: 获取下载元数据", jobId);
+            _logger.LogDebug("[{Id}] STEP 2: 获取下载元数据", jobId);
             var getMetadataScript = Path.Combine(
                 _configuration["MaaServer:DataDirectories:RootPath"],
                 _configuration["MaaServer:DataDirectories:SubDirectories:Scripts"],
@@ -152,11 +151,11 @@ public class PackageUpdateJob : IJob
 
             #region STEP 3: 检查版本号，检查数据库
 
-            _logger.LogInformation("[{Id}] STEP 3: 检查版本号，检查数据库", jobId);
+            _logger.LogDebug("[{Id}] STEP 3: 检查版本号，检查数据库", jobId);
             var downloadContentInfos = new List<DownloadContentInfo>();
             foreach (var downloadContentInfo in allDownloadContentInfos)
             {
-                var semVerParsed = SemVersion.TryParse(downloadContentInfo.Version, out var semVer);
+                var semVerParsed = downloadContentInfo.Version.TryParseToSemVer(out var semVer);
                 if (semVerParsed is false)
                 {
                     _logger.LogError("[{Id}] 无法解析版本号 {Version}", jobId, downloadContentInfo.Version);
@@ -471,8 +470,8 @@ public class PackageUpdateJob : IJob
                             .Where(x => x.Component == package.Component)
                             .Where(x => x.Platform == package.Platform && x.Architecture == package.Architecture)
                             .ToListAsync())
-                        .Where(x => SemVersion.Parse(x.Version) < SemVersion.Parse(package.Version))
-                        .OrderByDescending(x => SemVersion.Parse(x.Version))
+                        .Where(x => x.Version.ParseToSemVer() < package.Version.ParseToSemVer())
+                        .OrderByDescending(x => x.Version.ParseToSemVer())
                         .Take(3)
                         .ToList();
                     recentVersionPackages.AddRange(recentPackages);
@@ -507,7 +506,7 @@ public class PackageUpdateJob : IJob
             var versionSyncedString = string.Join("，", versionSynced);
             var message = $"组件包 {componentConfiguration.Name} 更新检查任务执行成功，任务 ID：{jobId}，新增版本：{versionSyncedString}";
 
-            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", message);
+            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", "组件包更新完成", message);
 
             #endregion
         }
@@ -516,7 +515,7 @@ public class PackageUpdateJob : IJob
             _logger.LogError(ex, "组件包 {Name} 更新检查任务执行失败", componentConfiguration.Name);
 
             var message = $"组件包 {componentConfiguration.Name} 更新检查任务执行失败，任务 ID：{jobId}，发生错误：{ex.GetType().FullName ?? "未知类型的错误"}";
-            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", message, AnnounceLevel.Error);
+            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", "组件包更新失败", message, AnnounceLevel.Error);
 
             CleanUp();
         }
@@ -549,8 +548,8 @@ public class PackageUpdateJob : IJob
                     continue;
                 }
 
-                var thisVersionParsed = SemVersion.Parse(thisVersionPackage.Version);
-                var targetVersionParsed = SemVersion.Parse(recentVersionPackage.Version);
+                var thisVersionParsed = thisVersionPackage.Version.ParseToSemVer();
+                var targetVersionParsed = recentVersionPackage.Version.ParseToSemVer();
 
                 if (thisVersionParsed <= targetVersionParsed)
                 {

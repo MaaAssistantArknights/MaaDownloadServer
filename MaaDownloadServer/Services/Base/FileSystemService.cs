@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
-using Semver;
 
 namespace MaaDownloadServer.Services.Base;
 
@@ -122,7 +121,7 @@ public class FileSystemService : IFileSystemService
 
         var hash = HashUtil.ComputeFileMd5Hash(path);
         var publicContentTag = new PublicContentTag(PublicContentTagType.FullPackage, downloadContentInfo.Platform,
-            downloadContentInfo.Architecture, componentName, SemVersion.Parse(downloadContentInfo.Version));
+            downloadContentInfo.Architecture, componentName, downloadContentInfo.Version.ParseToSemVer());
 
         var pc = new PublicContent(
             downloadContentInfo.Id,
@@ -203,7 +202,7 @@ public class FileSystemService : IFileSystemService
             var tempFolder = new DirectoryInfo(Path.Combine(_configurationService.GetTempDirectory(), id.ToString()));
             tempFolder.Create();
             var pcTag = new PublicContentTag(PublicContentTagType.UpdatePackage, diff.Platform, diff.Architecture,
-                componentName, diff.StartVersion, diff.TargetVersion).ParseToTagString();
+                componentName, diff.StartVersion.ParseToSemVer(), diff.TargetVersion.ParseToSemVer()).ParseToTagString();
             foreach (var newResource in diff.NewResources)
             {
                 File.Copy(Path.Combine(_configurationService.GetResourcesDirectory(), newResource.Hash),

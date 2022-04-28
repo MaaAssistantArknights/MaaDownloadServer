@@ -1,6 +1,5 @@
 ﻿using Cake.Common.Tools.DotNet;
 using Cake.Common.Tools.DotNet.Publish;
-using Cake.Common.Tools.DotNetCore.MSBuild;
 using Cake.Core.Diagnostics;
 using Cake.Frosting;
 
@@ -21,8 +20,7 @@ public sealed class PublishTask : FrostingTask<BuildContext>
                 OutputDirectory = $"../publish/{context.Framework}-{context.PublishRid}-{context.MsBuildConfiguration}",
                 Framework = context.Framework,
                 Runtime = context.PublishRid is "portable" ? null : context.PublishRid,
-                MSBuildSettings = new DotNetCoreMSBuildSettings()
-                    .TreatAllWarningsAs(MSBuildTreatAllWarningsAs.Error)
+                MSBuildSettings = context.BuildSettings
             });
         }
         else
@@ -50,8 +48,7 @@ public sealed class PublishTask : FrostingTask<BuildContext>
                     OutputDirectory = $"../publish/net6.0-docker-{arch}-{context.MsBuildConfiguration}",
                     Framework = "net6.0",
                     Runtime = $"linux-{clrArch}",
-                    MSBuildSettings = new DotNetCoreMSBuildSettings()
-                        .TreatAllWarningsAs(MSBuildTreatAllWarningsAs.Error)
+                    MSBuildSettings = context.BuildSettings
                 });
             }
         }

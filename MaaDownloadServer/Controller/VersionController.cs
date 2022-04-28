@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Semver;
 
 namespace MaaDownloadServer.Controller;
 
@@ -27,8 +26,6 @@ public class VersionController : ControllerBase
             return NotFound();
         }
 
-        _logger.LogInformation(version);
-
         Package package;
         if (version is "latest")
         {
@@ -36,7 +33,7 @@ public class VersionController : ControllerBase
         }
         else
         {
-            var semVerParsed = SemVersion.TryParse(version, out var semVer);
+            var semVerParsed = version.TryParseToSemVer(out var semVer);
             if (semVerParsed is false)
             {
                 _logger.LogWarning("传入 version 值 {Version} 解析失败", version);

@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Web;
@@ -13,108 +12,51 @@ using Quartz;
 using Serilog;
 using Serilog.Extensions.Logging;
 
-#region First run
-
-var dataDirectoryEnvironmentVariable = Environment.GetEnvironmentVariable("MAADS_DATA_DIRECTORY");
-var assemblyPath = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory!.FullName;
-
-var dataDirectory = string.IsNullOrEmpty(dataDirectoryEnvironmentVariable) ?
-    new DirectoryInfo(Path.Combine(assemblyPath, "data")) :
-    new DirectoryInfo(dataDirectoryEnvironmentVariable);
-
-if (dataDirectory.Exists is false)
+var maaConfigurationProvider = MaaConfigurationProvider.GetProvider();
+if (maaConfigurationProvider is null)
 {
-    dataDirectory.Create();
+    Environment.Exit(ProgramExitCode.ConfigurationProviderIsNull);
 }
-
-var configurationFileExist = dataDirectory.GetFiles("appsettings.json").Length == 1;
-
-if (configurationFileExist is false)
-{
-    var appSettingString = await File.ReadAllTextAsync(Path.Combine(assemblyPath, "appsettings.json"));
-    appSettingString = appSettingString.Replace("{{DATA DIRECTORY}}", dataDirectory.FullName);
-    await File.WriteAllTextAsync(Path.Combine(dataDirectory.FullName, "appsettings.json"), appSettingString);
-    Console.WriteLine($"配置文件不存在, 已复制新的 appsettings.json 至 {dataDirectory.FullName} 路径, 请修改配置文件");
-    Environment.Exit(0);
-}
-
-if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-{
-    if (File.Exists(Path.Combine(assemblyPath, "appsettings.Development.json")) &&
-        File.Exists(Path.Combine(dataDirectory.FullName, "appsettings.Development.json")) is false)
-    {
-        File.Copy(Path.Combine(assemblyPath, "appsettings.Development.json"),
-            Path.Combine(dataDirectory.FullName, "appsettings.Development.json"));
-    }
-}
-
-#endregion
 
 #region Build configuration and logger
 
-var configurationBuilder = new ConfigurationBuilder()
-    .AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.json"));
-
-if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-{
-    configurationBuilder.AddJsonFile(Path.Combine(dataDirectory.FullName, "appsettings.Development.json"), true);
-}
-
-var azureAppConfigurationConnectionString = Environment.GetEnvironmentVariable("MAADS_AZURE_APP_CONFIGURATION");
-
-if (azureAppConfigurationConnectionString is not null or "")
-{
-    configurationBuilder.AddAzureAppConfiguration(azureAppConfigurationConnectionString);
-}
-
-configurationBuilder
-    .AddEnvironmentVariables("MAA:")
-    .AddCommandLine(args);
-
-var configuration = configurationBuilder.Build();
-
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration)
+    .ReadFrom.Configuration(maaConfigurationProvider.GetConfiguration())
     .CreateLogger();
 
 Log.Logger.Information("启动中...");
+Log.Logger.Information("程序集版本：{AssemblyVersion}",
+    maaConfigurationProvider.GetConfiguration().GetValue<string>("AssemblyVersion"));
 
 #endregion
 
 #region Data directories
 
-if (configuration.GetValue<bool>("no-data-directory-check") is false)
+var dataDirectoriesOption = maaConfigurationProvider.GetOption<DataDirectoriesOption>().Value;
+
+if (MaaConfigurationProvider.IsNoDataDirectoryCheck() is false)
 {
-    if (Directory.Exists(configuration["MaaServer:DataDirectories:RootPath"]) is false)
+    if (Directory.Exists(dataDirectoriesOption.RootPath) is false)
     {
-        Directory.CreateDirectory(configuration["MaaServer:DataDirectories:RootPath"]);
+        Directory.CreateDirectory(dataDirectoriesOption.RootPath);
     }
 
-    var subDirectories = new[]
+    var directoryCheck = (string path) =>
     {
-        (configuration["MaaServer:DataDirectories:SubDirectories:Downloads"], true),
-        (configuration["MaaServer:DataDirectories:SubDirectories:Public"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:Resources"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:Database"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:Temp"], true),
-        (configuration["MaaServer:DataDirectories:SubDirectories:Scripts"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:Static"], false),
-        (configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"], false),
+        if (Directory.Exists(path) is false)
+        {
+            Directory.CreateDirectory(path!);
+        }
     };
 
-    foreach (var (subDirectory, initRequired) in subDirectories)
-    {
-        var dir = Path.Combine(configuration["MaaServer:DataDirectories:RootPath"], subDirectory);
-        var di = new DirectoryInfo(dir);
-        if (initRequired && di.Exists)
-        {
-            di.Delete(true);
-        }
-        if (di.Exists is false)
-        {
-            di.Create();
-        }
-    }
+    directoryCheck.Invoke(dataDirectoriesOption.Downloads);
+    directoryCheck.Invoke(dataDirectoriesOption.Public);
+    directoryCheck.Invoke(dataDirectoriesOption.Resources);
+    directoryCheck.Invoke(dataDirectoriesOption.Database);
+    directoryCheck.Invoke(dataDirectoriesOption.Temp);
+    directoryCheck.Invoke(dataDirectoriesOption.Scripts);
+    directoryCheck.Invoke(dataDirectoriesOption.Static);
+    directoryCheck.Invoke(dataDirectoriesOption.VirtualEnvironments);
 }
 else
 {
@@ -125,35 +67,28 @@ else
 
 #region Python environment and script configuration
 
-var noCheckPythonEnvironment = configuration.GetValue<bool>("no-python-environment-check");
-if (noCheckPythonEnvironment)
+if (MaaConfigurationProvider.IsNoPythonCheck())
 {
     Log.Logger.Warning("跳过了 Python 环境检查");
 }
 
-var basePythonInterpreter = configuration["MaaServer:ScriptEngine:Python"];
+var scriptEngineOption = maaConfigurationProvider.GetOption<ScriptEngineOption>().Value;
+
 var logger = new SerilogLoggerFactory(Log.Logger).CreateLogger<Python>();
 
-if (noCheckPythonEnvironment is false)
+if (MaaConfigurationProvider.IsNoPythonCheck())
 {
     // Check Python Interpreter Exist
-    var pythonInterpreterExist = Python.EnvironmentCheck(logger, basePythonInterpreter);
+    var pythonInterpreterExist = Python.EnvironmentCheck(logger, scriptEngineOption.Python);
     if (pythonInterpreterExist is false)
     {
         Log.Logger.Fatal("Python 解释器不存在，请检查配置");
-        Environment.Exit(-1);
+        Environment.Exit(ProgramExitCode.NoPythonInterpreter);
     }
 }
 
 // Init Python environment
-var scriptRootDirectory = new DirectoryInfo(Path.Combine(
-    configuration["MaaServer:DataDirectories:RootPath"],
-    configuration["MaaServer:DataDirectories:SubDirectories:Scripts"]));
-var venvRootDirectory = new DirectoryInfo(Path.Combine(
-    configuration["MaaServer:DataDirectories:RootPath"],
-    configuration["MaaServer:DataDirectories:SubDirectories:VirtualEnvironments"]));
-
-var scriptDirectories = scriptRootDirectory.GetDirectories();
+var scriptDirectories = new DirectoryInfo(dataDirectoriesOption.Scripts).GetDirectories();
 
 var componentConfigurations = new List<ComponentConfiguration>();
 foreach (var scriptDirectory in scriptDirectories)
@@ -161,7 +96,7 @@ foreach (var scriptDirectory in scriptDirectories)
     var configurationFile = Path.Combine(scriptDirectory.FullName, "component.json");
     if (File.Exists(configurationFile) is false)
     {
-        Environment.Exit(-1);
+        Environment.Exit(ProgramExitCode.ScriptDoNotHaveConfigFile);
     }
 
     try
@@ -173,20 +108,20 @@ foreach (var scriptDirectory in scriptDirectories)
     catch (Exception ex)
     {
         logger.LogCritical(ex, "解析组件配置文件失败");
-        Environment.Exit(-1);
+        Environment.Exit(ProgramExitCode.FailedToParseScriptConfigFile);
     }
 
-    if (noCheckPythonEnvironment is false)
+    if (MaaConfigurationProvider.IsNoPythonCheck() is false)
     {
         var venvDirectory = Path.Combine(
-            venvRootDirectory.FullName,
+            dataDirectoriesOption.VirtualEnvironments,
             scriptDirectory.Name);
         var requirements = scriptDirectory.GetFiles().FirstOrDefault(x => x.Name == "requirements.txt");
-        var pyVenvCreateStatus = Python.CreateVirtualEnvironment(logger, basePythonInterpreter, venvDirectory, requirements?.FullName);
+        var pyVenvCreateStatus = Python.CreateVirtualEnvironment(logger, scriptEngineOption.Python, venvDirectory, requirements?.FullName);
         if (pyVenvCreateStatus is false)
         {
             logger.LogCritical("Python 虚拟环境创建失败，venvDirectory: {VenvDirectory}", venvDirectory);
-            Environment.Exit(-1);
+            Environment.Exit(ProgramExitCode.FailedToCreatePythonVenv);
         }
     }
 }
@@ -195,9 +130,10 @@ foreach (var scriptDirectory in scriptDirectories)
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") is not "true")
+if (MaaConfigurationProvider.IsInsideDocker())
 {
-    var url = $"http://{configuration["MaaServer:Server:Host"]}:{configuration["MaaServer:Server:Port"]}";
+    var serverOption = maaConfigurationProvider.GetOption<ServerOption>().Value;
+    var url = $"http://{serverOption.Host}:{serverOption.Port}";
     builder.WebHost.UseUrls(url);
 }
 else
@@ -208,23 +144,21 @@ else
 #region Web application builder
 
 builder.Host.UseSerilog();
-builder.Configuration.AddConfiguration(configuration);
+builder.Configuration.AddConfiguration(MaaConfigurationProvider.GetProvider().GetConfiguration());
 
-builder.Services.AddOptions();
-builder.Services.Configure<IpRateLimitOptions>(configuration.GetSection("IpRateLimiting"));
-builder.Services.Configure<IpRateLimitPolicies>(configuration.GetSection("IpRateLimitPolicies"));
+builder.Services.AddMaaOptions(MaaConfigurationProvider.GetProvider());
 
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
 builder.Services.AddMaaServices();
-builder.Services.AddHttpClients(configuration);
+builder.Services.AddHttpClients(MaaConfigurationProvider.GetProvider());
 builder.Services.AddMemoryCache();
 builder.Services.AddResponseCaching();
 
 builder.Services.AddInMemoryRateLimiting();
 builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
-builder.Services.AddQuartzJobs(configuration, componentConfigurations);
+builder.Services.AddQuartzJobs(maaConfigurationProvider.GetOption<PublicContentOption>(), componentConfigurations);
 builder.Services.AddQuartzServer(options =>
 {
     options.WaitForJobsToComplete = true;
@@ -248,10 +182,7 @@ var app = builder.Build();
 using var scope = app.Services.CreateScope();
 await using var dbContext = scope.ServiceProvider.GetService<MaaDownloadServerDbContext>();
 
-if (File.Exists(
-        Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
-            configuration["MaaServer:DataDirectories:SubDirectories:Database"],
-            "data.db")) is false)
+if (File.Exists(Path.Combine(dataDirectoriesOption.Database, "data.db")) is false)
 {
     Log.Logger.Information("数据库文件不存在，准备创建新的数据库文件");
     dbContext!.Database.Migrate();
@@ -313,8 +244,7 @@ app.UseFileServer(new FileServerOptions
             context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
         }
     },
-    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
-            configuration["MaaServer:DataDirectories:SubDirectories:Public"])),
+    FileProvider = new PhysicalFileProvider(dataDirectoriesOption.Public),
     RequestPath = "/files",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,
@@ -339,8 +269,7 @@ app.UseFileServer(new FileServerOptions
             context.Context.Response.Headers.Add("content-disposition", $"attachment; filename={encodedName}");
         }
     },
-    FileProvider = new PhysicalFileProvider(Path.Combine(configuration["MaaServer:DataDirectories:RootPath"],
-        configuration["MaaServer:DataDirectories:SubDirectories:Static"])),
+    FileProvider = new PhysicalFileProvider(dataDirectoriesOption.Static),
     RequestPath = "/static",
     EnableDirectoryBrowsing = false,
     EnableDefaultFiles = false,

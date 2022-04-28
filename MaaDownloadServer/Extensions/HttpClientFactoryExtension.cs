@@ -5,11 +5,14 @@ namespace MaaDownloadServer.Extensions;
 
 public static class HttpClientFactoryExtension
 {
-    public static void AddHttpClients(this IServiceCollection service, IConfiguration configuration)
+    public static void AddHttpClients(this IServiceCollection service, MaaConfigurationProvider provider)
     {
-        var userAgent = configuration.GetValue<string>("MaaServer:Network:UserAgent");
-        var proxyUrl = configuration.GetValue<string>("MaaServer:Network:Proxy");
+        var option = provider.GetOption<NetworkOption>();
+        var userAgent = option.Value.UserAgent;
+        var proxyUrl = option.Value.Proxy;
+        var version = provider.GetConfiguration().GetValue<string>("AssemblyVersion");
         var proxy = string.IsNullOrEmpty(proxyUrl) ? null : new WebProxy(proxyUrl);
+
 
         service.AddHttpClient("NoProxy", client =>
             {
@@ -28,5 +31,15 @@ public static class HttpClientFactoryExtension
                 new HttpClientHandler { Proxy = proxy, UseProxy = proxy is not null, AllowAutoRedirect = true })
             .AddTransientHttpErrorPolicy(builder =>
                 builder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(2000)));
+
+        service.AddHttpClient("ServerChan", client =>
+            {
+                client.DefaultRequestHeaders.Add("User-Agent", $"MaaDownloadServer/{version}");
+                client.BaseAddress = new Uri("https://sctapi.ftqq.com/");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new HttpClientHandler { AllowAutoRedirect = true })
+            .AddTransientHttpErrorPolicy(builder =>
+                builder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000)));
     }
 }

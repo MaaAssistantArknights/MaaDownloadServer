@@ -14,7 +14,7 @@ if ($args[1]) {
 }
 
 Write-Output ">>>>> Publish..."
-pwsh ./publish.ps1 --docker=true --docker-arches=$DockerArches
+pwsh ./publish.ps1 --docker=true --docker-arches=$DockerArches --maads-version=$VersionTag
 
 $Arches = $DockerArches.Split(",")
 

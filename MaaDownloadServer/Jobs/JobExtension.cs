@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Microsoft.Extensions.Options;
+using Quartz;
 
 namespace MaaDownloadServer.Jobs;
 
@@ -6,7 +7,7 @@ public static class JobExtension
 {
     public static void AddQuartzJobs(
         this IServiceCollection serviceCollection,
-        IConfiguration configuration,
+        IOptions<PublicContentOption> option,
         List<ComponentConfiguration> componentConfigurations)
     {
         serviceCollection.AddQuartz(q =>
@@ -49,8 +50,7 @@ public static class JobExtension
                 trigger.WithIdentity("Public-Content-Check-Trigger", "Database")
                     .WithCalendarIntervalSchedule(schedule =>
                     {
-                        schedule.WithIntervalInMinutes(
-                            Convert.ToInt32(configuration["MaaServer:PublicContent:OutdatedCheckInterval"]));
+                        schedule.WithIntervalInMinutes(option.Value.OutdatedCheckInterval);
                         schedule.InTimeZone(TimeZoneInfo.Local);
                         schedule.WithMisfireHandlingInstructionDoNothing();
                     })

@@ -7,5 +7,8 @@ global using MaaDownloadServer.Model.Entities;
 global using MaaDownloadServer.Model.General;
 global using MaaDownloadServer.Model.Dto;
 global using MaaDownloadServer.Model.External;
+global using MaaDownloadServer.Model.Attributes;
+global using MaaDownloadServer.Model.Options;
 global using MaaDownloadServer.Database;
 global using MaaDownloadServer.Extensions;
+global using MaaDownloadServer.Providers;
