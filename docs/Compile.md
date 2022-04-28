@@ -26,7 +26,7 @@ Options 格式：`--<option>=<value>`
 * `--configuration` 选项指定编译配置，可选 `Release` 或 `Debug`，默认为 `Release`
 * `--rid` 选项指定编译平台，可选项请参考 [RID 列表](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog) ，默认编译为 `Portable`
 * `--framework` 选定 .NET 版本，目前仅在 `net6.0` 下测试过，默认为 `net6.0`，变更此选项需要更改 `csproj` 文件
-
+* `--maads-version` MaaDS 版本号，SemVer 格式，将作为 `AssemblyVersion` `AssemblyInformationVersion` `FileVersion` 写入程序集，默认为 `0.0.0`
 
 ### 示例
 

@@ -3,7 +3,7 @@
 docker_arches="amd64,arm64,arm/v7"
 
 if [ -z "$1" ]; then
-  echo ">>>>> ERROR: Image tag could not be empty!"
+  echo ">>>>> ERROR: Version could not be empty!"
   exit
 fi
 
@@ -12,7 +12,7 @@ if [ -n "$2" ]; then
 fi
 
 echo ">>>>> Publish..."
-/bin/bash ./publish.sh --docker=true --docker-arches="$docker_arches"
+/bin/bash ./publish.sh --docker=true --docker-arches="$docker_arches" --maads-version="$1"
 
 IFS=','
 read -ra arches <<<"$docker_arches"

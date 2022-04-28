@@ -1,8 +1,6 @@
 ﻿using Cake.Common;
 using Cake.Common.Tools.DotNet;
 using Cake.Common.Tools.DotNet.Build;
-using Cake.Common.Tools.DotNet.MSBuild;
-using Cake.Common.Tools.DotNetCore.MSBuild;
 using Cake.Frosting;
 
 namespace MaaDownloadServer.Build.Tasks;
@@ -18,8 +16,7 @@ public sealed class BuildTask : FrostingTask<BuildContext>
             Configuration = context.MsBuildConfiguration,
             NoIncremental = context.HasArgument("rebuild"),
             Framework = context.Framework,
-            MSBuildSettings = new DotNetMSBuildSettings()
-                .TreatAllWarningsAs(MSBuildTreatAllWarningsAs.Error)
+            MSBuildSettings = context.BuildSettings
         });
     }
 }
