@@ -55,13 +55,13 @@ public class PackageUpdateJob : IJob
 
         var jobId = Guid.NewGuid();
 
-        _logger.LogInformation("开始组件包 {Name} 更新检查任务，操作ID：{Id}", componentConfiguration.Name, jobId);
+        _logger.LogInformation("[{Id}] 开始组件包 {Name} 更新检查任务", jobId, componentConfiguration.Name);
 
         try
         {
             #region STEP 0: 准备
 
-            _logger.LogInformation("[{Id}] STEP 0: 准备", jobId);
+            _logger.LogDebug("[{Id}] STEP 0: 准备", jobId);
 
             var pyExecutable = Path.Combine(
                 _configuration["MaaServer:DataDirectories:RootPath"],
@@ -83,7 +83,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 1: 请求 Metadata API
 
-            _logger.LogInformation("[{Id}] STEP 1: 请求 Metadata API", jobId);
+            _logger.LogDebug("[{Id}] STEP 1: 请求 Metadata API", jobId);
             var apis = componentConfiguration.MetadataUrl;
             foreach (var (k, vo) in componentConfiguration.UrlPlaceholder)
             {
@@ -126,7 +126,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 2: 运行Python脚本获取下载信息列表
 
-            _logger.LogInformation("[{Id}] STEP 2: 获取下载元数据", jobId);
+            _logger.LogDebug("[{Id}] STEP 2: 获取下载元数据", jobId);
             var getMetadataScript = Path.Combine(
                 _configuration["MaaServer:DataDirectories:RootPath"],
                 _configuration["MaaServer:DataDirectories:SubDirectories:Scripts"],
@@ -151,7 +151,7 @@ public class PackageUpdateJob : IJob
 
             #region STEP 3: 检查版本号，检查数据库
 
-            _logger.LogInformation("[{Id}] STEP 3: 检查版本号，检查数据库", jobId);
+            _logger.LogDebug("[{Id}] STEP 3: 检查版本号，检查数据库", jobId);
             var downloadContentInfos = new List<DownloadContentInfo>();
             foreach (var downloadContentInfo in allDownloadContentInfos)
             {
