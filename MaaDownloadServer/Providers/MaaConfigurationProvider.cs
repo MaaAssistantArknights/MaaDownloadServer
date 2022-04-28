@@ -29,11 +29,18 @@ public class MaaConfigurationProvider
         configurationBuilder.AddEnvironmentVariables("MAADS_");
         configurationBuilder.AddCommandLine(Environment.GetCommandLineArgs());
 
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        var versionString = "0.0.0";
+        if (version is not null)
+        {
+            versionString = $"{version.Major}.{version.Minor}.{version.Revision}";
+        }
         configurationBuilder.AddInMemoryCollection(new List<KeyValuePair<string, string>>
         {
             new("AssemblyPath", assemblyPath),
             new("ConfigurationFile", configFile),
-            new("DataDirectory", dataDirectory)
+            new("DataDirectory", dataDirectory),
+            new("AssemblyVersion", versionString)
         });
 
         if (IsDevelopment())

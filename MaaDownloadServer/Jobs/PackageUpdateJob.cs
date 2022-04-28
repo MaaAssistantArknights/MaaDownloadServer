@@ -506,7 +506,7 @@ public class PackageUpdateJob : IJob
             var versionSyncedString = string.Join("，", versionSynced);
             var message = $"组件包 {componentConfiguration.Name} 更新检查任务执行成功，任务 ID：{jobId}，新增版本：{versionSyncedString}";
 
-            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", message);
+            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", "组件包更新完成", message);
 
             #endregion
         }
@@ -515,7 +515,7 @@ public class PackageUpdateJob : IJob
             _logger.LogError(ex, "组件包 {Name} 更新检查任务执行失败", componentConfiguration.Name);
 
             var message = $"组件包 {componentConfiguration.Name} 更新检查任务执行失败，任务 ID：{jobId}，发生错误：{ex.GetType().FullName ?? "未知类型的错误"}";
-            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", message, AnnounceLevel.Error);
+            await _announceService.AddAnnounce($"package_update_job_{componentConfiguration.Name}", "组件包更新失败", message, AnnounceLevel.Error);
 
             CleanUp();
         }

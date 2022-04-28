@@ -25,6 +25,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 Log.Logger.Information("启动中...");
+Log.Logger.Information("程序集版本：{AssemblyVersion}",
+    maaConfigurationProvider.GetConfiguration().GetValue<string>("AssemblyVersion"));
 
 #endregion
 
@@ -149,7 +151,7 @@ builder.Services.AddMaaOptions(MaaConfigurationProvider.GetProvider());
 builder.Services.AddMaaDownloadServerDbContext();
 builder.Services.AddControllers();
 builder.Services.AddMaaServices();
-builder.Services.AddHttpClients(MaaConfigurationProvider.GetProvider().GetOption<NetworkOption>());
+builder.Services.AddHttpClients(MaaConfigurationProvider.GetProvider());
 builder.Services.AddMemoryCache();
 builder.Services.AddResponseCaching();
 

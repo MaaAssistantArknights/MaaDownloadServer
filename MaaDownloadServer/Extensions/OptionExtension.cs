@@ -16,6 +16,7 @@ public static class OptionExtension
         service.AddConfigureOption<PublicContentOption>(provider);
         service.AddConfigureOption<ScriptEngineOption>(provider);
         service.AddConfigureOption<ServerOption>(provider);
+        service.AddConfigureOption<AnnounceOption>(provider);
     }
 
     private static void AddConfigureOption<T>(this IServiceCollection service, MaaConfigurationProvider provider)
