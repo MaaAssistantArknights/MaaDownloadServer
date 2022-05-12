@@ -7,8 +7,4 @@
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\MaaDownloadServer\MaaDownloadServer.csproj" />
-    </ItemGroup>
-
 </Project>
