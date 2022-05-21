@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MaaDownloadServer.Data.Db.Postgres\MaaDownloadServer.Data.Db.Postgres.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\..\..\compose\docker-compose.yaml">
+        <Link>Docker\docker-compose.yaml</Link>
+      </Content>
+      <Content Include="..\..\..\scripts\add-pgsql-migration.ps1">
+        <Link>Scripts\add-pgsql-migration.ps1</Link>
+      </Content>
+      <Content Include="..\..\..\scripts\remove-pgsql-migration.ps1">
+        <Link>Scripts\remove-pgsql-migration.ps1</Link>
+      </Content>
+      <Content Include="..\..\..\scripts\ef-core-operator.ps1">
+        <Link>Scripts\ef-core-operator.ps1</Link>
+      </Content>
+    </ItemGroup>
+  
+</Project>

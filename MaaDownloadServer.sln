@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Worker.Fi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Tools.LocalCaller", "src\Tools\MaaDownloadServer.Tools.LocalCaller\MaaDownloadServer.Tools.LocalCaller.csproj", "{45FE11F6-996B-45F2-8465-519EDE0BF016}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Data.Migrations", "src\Data\MaaDownloadServer.Data.Migrations\MaaDownloadServer.Data.Migrations.csproj", "{15634A0B-1C6B-4E1B-B39C-A9CC88BCF48F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{7CF8CC54-EF91-4590-930E-5986E37D0702}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7CF8CC54-EF91-4590-930E-5986E37D0702}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CF8CC54-EF91-4590-930E-5986E37D0702}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E8E2ABC-0549-4F6F-AA4F-61A17BF04185}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4E8E2ABC-0549-4F6F-AA4F-61A17BF04185}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E8E2ABC-0549-4F6F-AA4F-61A17BF04185}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -114,6 +117,10 @@ Global
 		{45FE11F6-996B-45F2-8465-519EDE0BF016}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45FE11F6-996B-45F2-8465-519EDE0BF016}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45FE11F6-996B-45F2-8465-519EDE0BF016}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15634A0B-1C6B-4E1B-B39C-A9CC88BCF48F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15634A0B-1C6B-4E1B-B39C-A9CC88BCF48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15634A0B-1C6B-4E1B-B39C-A9CC88BCF48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15634A0B-1C6B-4E1B-B39C-A9CC88BCF48F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4E8E2ABC-0549-4F6F-AA4F-61A17BF04185} = {10353C2B-613D-4ABD-87E1-B8EF850424FA}
@@ -132,5 +139,6 @@ Global
 		{0903438A-EE4E-44EA-92C8-937BB1FF4394} = {7C841E9D-37F3-4233-8162-5A76DAE9DCCB}
 		{3BA24EDF-B2DD-41BD-BC9F-3F9C16A25D02} = {7C841E9D-37F3-4233-8162-5A76DAE9DCCB}
 		{45FE11F6-996B-45F2-8465-519EDE0BF016} = {B5C6DE68-509E-4D4E-9DEB-26B9E66D9F90}
+		{15634A0B-1C6B-4E1B-B39C-A9CC88BCF48F} = {D3CBFA81-9C25-4F96-8D8E-A755D9458128}
 	EndGlobalSection
 EndGlobal

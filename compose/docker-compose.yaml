@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+
+  pgsql:
+    image: postgres:14
+    container_name: maa-pgsql
+    environment:
+      POSTGRES_DB: maa
+      POSTGRES_PASSWORD: maa_db_p@ssw0rd
+      POSTGRES_USER: maa_admin
+    restart: unless-stopped
+    volumes:
+      - maa-pgsql:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  maa-pgsql:

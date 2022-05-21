@@ -10,4 +10,12 @@
       <ProjectReference Include="..\MaaDownloadServer.Data.Base\MaaDownloadServer.Data.Base.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Mappings" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
+    </ItemGroup>
+
 </Project>

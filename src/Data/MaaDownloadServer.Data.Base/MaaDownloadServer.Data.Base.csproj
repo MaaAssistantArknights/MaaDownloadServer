@@ -10,4 +10,12 @@
       <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Domain\MaaDownloadServer.Core.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Entities" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.5" />
+    </ItemGroup>
+
 </Project>
