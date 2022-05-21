@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Abstractions\MaaDownloadServer.Core.Abstractions.csproj" />
+      <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Context\MaaDownloadServer.Data.Context.csproj" />
+      <ProjectReference Include="..\..\Shared\MaaDownloadServer.Shared.Services\MaaDownloadServer.Shared.Services.csproj" />
+    </ItemGroup>
+
+</Project>

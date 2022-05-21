@@ -510,8 +510,5 @@ $RECYCLE.BIN/
 # Local History for Visual Studio Code
 .history/
 
-# Development configuration file
-*.Development.json
-
-# Database File
-*.db*
+# Nuke build tool temp file
+.nuke/temp

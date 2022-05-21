@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>dotnet-MaaDownloadServer.Worker.Updater-752F229B-2A1F-40EC-8AE0-1AE8D0E15CF0</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Domain\MaaDownloadServer.Core.Domain.csproj" />
+      <ProjectReference Include="..\..\Shared\MaaDownloadServer.Shared.Services\MaaDownloadServer.Shared.Services.csproj" />
+    </ItemGroup>
+</Project>

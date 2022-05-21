@@ -1,15 +1,11 @@
 # MaaDownloadServer
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MaaAssistantArknights/MaaDownloadServer/build-test?label=CI%3Abuild-test&logo=github)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MaaAssistantArknights/MaaDownloadServer/publish-docker?label=CI%3Apublish-docker&logo=github)
+***重构中***
+
 ![C Sharp](https://img.shields.io/badge/C%23-10-239120?logo=csharp)
 ![.NET](https://img.shields.io/badge/.NET-6.0-512BD4?logo=.net)
 ![GitHub](https://img.shields.io/github/license/MaaAssistantArknights/MaaDownloadServer)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/MaaAssistantArknights/MaaDownloadServer)
-
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/alisaqaq/maa-download-server?arch=amd64&label=Docker%20Image%20%28amd64%29&logo=docker)
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/alisaqaq/maa-download-server?arch=arm64&label=Docker%20Image%20%28arm64%29&logo=docker)
-![Docker Image Version (latest by date)](https://img.shields.io/docker/v/alisaqaq/maa-download-server?arch=arm&label=Docker%20Image%20%28arm%2Fv7%29&logo=docker)
 
 ## 关于
 
