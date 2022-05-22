@@ -1,4 +1,8 @@
-﻿using MaaDownloadServer.Data.Base.Entities.Base;
+﻿// This file is a part of MaaDownloadServer project.
+// MaaDownloadServer belongs to the MAA organization.
+// Licensed under the AGPL-3.0 license.
+
+using MaaDownloadServer.Data.Base.Entities.Base;
 using MaaDownloadServer.Data.Base.Entities.Modules;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Local

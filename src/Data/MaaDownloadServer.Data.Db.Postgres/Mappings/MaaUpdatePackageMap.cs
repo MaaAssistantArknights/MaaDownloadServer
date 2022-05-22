@@ -1,4 +1,8 @@
-﻿using MaaDownloadServer.Data.Base.Entities.Map;
+﻿// This file is a part of MaaDownloadServer project.
+// MaaDownloadServer belongs to the MAA organization.
+// Licensed under the AGPL-3.0 license.
+
+using MaaDownloadServer.Data.Base.Entities.Map;
 using MaaDownloadServer.Data.Base.Entities.Modules;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

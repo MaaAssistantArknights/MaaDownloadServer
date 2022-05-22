@@ -1,4 +1,8 @@
-﻿using MaaDownloadServer.Data.Base.Context;
+﻿// This file is a part of MaaDownloadServer project.
+// MaaDownloadServer belongs to the MAA organization.
+// Licensed under the AGPL-3.0 license.
+
+using MaaDownloadServer.Data.Base.Context;
 using MaaDownloadServer.Data.Db.Postgres;
 using Microsoft.EntityFrameworkCore;
 
