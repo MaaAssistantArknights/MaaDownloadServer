@@ -13,12 +13,13 @@ namespace MaaDownloadServer.Data.Base.Entities.Assets;
 /// </summary>
 public class Asset : EditableEntity
 {
-    public Asset(Blob blob, string url, bool isBundle, IReadOnlyList<Blob> blobs)
+    public Asset(Blob blob, string url, bool isBundle, IReadOnlyList<Blob> blobs, IReadOnlyList<AssetDownloadUrl> assetDownloadUrls)
     {
         Blob = blob;
         Url = url;
         IsBundle = isBundle;
         Files = blobs;
+        AssetDownloadUrls = assetDownloadUrls;
     }
 
 #pragma warning disable CS8618
@@ -56,4 +57,8 @@ public class Asset : EditableEntity
     /// 组合包资源所包含文件
     /// </summary>
     public IReadOnlyList<Blob> Files { get; private set; }
+    /// <summary>
+    /// 资源下载链接
+    /// </summary>
+    public IReadOnlyList<AssetDownloadUrl> AssetDownloadUrls { get; private set; }
 }
