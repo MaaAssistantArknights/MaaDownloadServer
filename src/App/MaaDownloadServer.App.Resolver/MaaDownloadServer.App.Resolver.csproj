@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MaaDownloadServer.App.Operator\MaaDownloadServer.App.Operator.csproj" />
+      <ProjectReference Include="..\MaaDownloadServer.App.Core\MaaDownloadServer.App.Core.csproj" />
     </ItemGroup>
 
 </Project>

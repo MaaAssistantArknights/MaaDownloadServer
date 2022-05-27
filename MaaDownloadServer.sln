@@ -20,7 +20,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Core.Abst
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "App", "App", "{0591E50C-7C90-4567-810F-8678021B3979}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.App.Operator", "src\App\MaaDownloadServer.App.Operator\MaaDownloadServer.App.Operator.csproj", "{A1F872C7-D160-4568-B3E3-387EDFC62852}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.App.Core", "src\App\MaaDownloadServer.App.Core\MaaDownloadServer.App.Core.csproj", "{A1F872C7-D160-4568-B3E3-387EDFC62852}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.App.Resolver", "src\App\MaaDownloadServer.App.Resolver\MaaDownloadServer.App.Resolver.csproj", "{E64463B3-969C-4637-8B94-3E92C98AF15E}"
 EndProject
