@@ -512,3 +512,6 @@ $RECYCLE.BIN/
 
 # Nuke build tool temp file
 .nuke/temp
+
+# Dev Config
+*.Development.json
