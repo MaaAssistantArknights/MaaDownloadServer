@@ -16,6 +16,6 @@
         </None>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\App\MaaDownloadServer.App.Resolver\MaaDownloadServer.App.Resolver.csproj" />
+      <ProjectReference Include="..\..\App\MaaDownloadServer.App.Core\MaaDownloadServer.App.Core.csproj" />
     </ItemGroup>
 </Project>

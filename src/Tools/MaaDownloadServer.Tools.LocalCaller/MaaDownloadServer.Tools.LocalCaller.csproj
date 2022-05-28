@@ -12,7 +12,6 @@
       <ProjectReference Include="..\..\Api\MaaDownloadServer.Api.AspNetCore\MaaDownloadServer.Api.AspNetCore.csproj" />
       <ProjectReference Include="..\..\Api\MaaDownloadServer.Api.AzureFunctions\MaaDownloadServer.Api.AzureFunctions.csproj" />
       <ProjectReference Include="..\..\App\MaaDownloadServer.App.Core\MaaDownloadServer.App.Core.csproj" />
-      <ProjectReference Include="..\..\App\MaaDownloadServer.App.Resolver\MaaDownloadServer.App.Resolver.csproj" />
       <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Abstractions\MaaDownloadServer.Core.Abstractions.csproj" />
       <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Domain\MaaDownloadServer.Core.Domain.csproj" />
       <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Base\MaaDownloadServer.Data.Base.csproj" />
