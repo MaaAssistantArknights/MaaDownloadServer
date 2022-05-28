@@ -38,9 +38,7 @@ MaaDbContext dbContext;
 switch (dbType!.ToLower())
 {
     case "postgres":
-        var optionsBuilder = new DbContextOptionsBuilder<MaaDbContext>();
-        optionsBuilder.UseNpgsql(connectionString!);
-        dbContext = new MaaPgSqlDbContext(optionsBuilder.Options);
+        dbContext = new MaaPgSqlDbContext(connectionString);
         break;
     default:
         Console.Error.WriteLine($"未知的数据库类型: {dbType}");

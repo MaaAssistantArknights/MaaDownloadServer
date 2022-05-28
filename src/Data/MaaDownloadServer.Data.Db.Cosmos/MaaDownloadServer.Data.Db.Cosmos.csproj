@@ -10,4 +10,8 @@
       <ProjectReference Include="..\MaaDownloadServer.Data.Base\MaaDownloadServer.Data.Base.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.5" />
+    </ItemGroup>
+
 </Project>

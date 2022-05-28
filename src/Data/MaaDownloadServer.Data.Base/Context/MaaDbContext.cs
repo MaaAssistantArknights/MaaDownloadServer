@@ -25,8 +25,6 @@ public abstract class MaaDbContext : DbContext
     public DbSet<MaaUpdatePackage>? MaaUpdatePackages { get; set; }
     public DbSet<MaaVersion>? MaaVersions { get; set; }
 
-    protected MaaDbContext(DbContextOptions<MaaDbContext> options) : base(options) { }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyCommonConfigurations();
