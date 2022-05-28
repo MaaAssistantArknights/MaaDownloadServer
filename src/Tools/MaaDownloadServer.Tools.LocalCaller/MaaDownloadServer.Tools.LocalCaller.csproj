@@ -16,7 +16,7 @@
       <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Abstractions\MaaDownloadServer.Core.Abstractions.csproj" />
       <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Domain\MaaDownloadServer.Core.Domain.csproj" />
       <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Base\MaaDownloadServer.Data.Base.csproj" />
-      <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Context\MaaDownloadServer.Data.Context.csproj" />
+      <ProjectReference Include="..\..\Data\MaaDownloadServer.Data\MaaDownloadServer.Data.csproj" />
       <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Db.Cosmos\MaaDownloadServer.Data.Db.Cosmos.csproj" />
       <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Db.Postgres\MaaDownloadServer.Data.Db.Postgres.csproj" />
       <ProjectReference Include="..\..\Shared\MaaDownloadServer.Shared.Services\MaaDownloadServer.Shared.Services.csproj" />

@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\MaaDownloadServer.Core.Abstractions\MaaDownloadServer.Core.Abstractions.csproj" />
-      <ProjectReference Include="..\..\Data\MaaDownloadServer.Data.Context\MaaDownloadServer.Data.Context.csproj" />
+      <ProjectReference Include="..\..\Data\MaaDownloadServer.Data\MaaDownloadServer.Data.csproj" />
       <ProjectReference Include="..\..\Shared\MaaDownloadServer.Shared.Services\MaaDownloadServer.Shared.Services.csproj" />
     </ItemGroup>
 

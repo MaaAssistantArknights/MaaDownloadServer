@@ -30,7 +30,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Data.Db.P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Data.Db.Cosmos", "src\Data\MaaDownloadServer.Data.Db.Cosmos\MaaDownloadServer.Data.Db.Cosmos.csproj", "{BBD08A9D-A6EA-45BB-9051-2B009D821BC8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Data.Context", "src\Data\MaaDownloadServer.Data.Context\MaaDownloadServer.Data.Context.csproj", "{96B61B37-3B10-423A-B166-16FCDE5AA586}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaaDownloadServer.Data", "src\Data\MaaDownloadServer.Data\MaaDownloadServer.Data.csproj", "{96B61B37-3B10-423A-B166-16FCDE5AA586}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{AEEFC09B-5230-4101-9119-613C597CDD34}"
 EndProject
