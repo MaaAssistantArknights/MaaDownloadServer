@@ -12,6 +12,6 @@ namespace MaaDownloadServer.Core.Domain.Dto.Resource;
 /// </summary>
 public class GetModuleVersionInfoDto : MaaModuleResource
 {
-    public GetModuleVersionInfoDto(string id, string name, string version, string updateTime, string changeLog, Asset package, ICollection<MaaModuleUpdateResource> updates)
-        : base(id, name, version, updateTime, changeLog, package, updates) { }
+    public GetModuleVersionInfoDto(MaaModuleResource r)
+        : base(r.Id, r.Name, r.Version, r.UpdateTime, r.ChangeLog, r.Package, r.Updates) { }
 }

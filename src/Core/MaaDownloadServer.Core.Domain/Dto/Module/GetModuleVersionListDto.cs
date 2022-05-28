@@ -11,6 +11,6 @@ namespace MaaDownloadServer.Core.Domain.Dto.Module;
 /// </summary>
 public class GetModuleVersionListDto : MaaModuleVersionList
 {
-    public GetModuleVersionListDto(string id, string name, int total, ICollection<MaaModuleVersion> versions)
-        : base(id, name, total, versions) { }
+    public GetModuleVersionListDto(MaaModuleVersionList v)
+        : base(v.Id, v.Name, v.Total, v.Versions) { }
 }

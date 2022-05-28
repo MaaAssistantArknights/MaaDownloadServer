@@ -11,6 +11,6 @@ namespace MaaDownloadServer.Core.Domain.Dto.Module;
 /// </summary>
 public class GetModuleInfoDto : MaaModuleInfo
 {
-    public GetModuleInfoDto(string id, string name, string description, string url, string lastSync, MaaModuleVersion latestVersion)
-        : base(id, name, description, url, lastSync, latestVersion) { }
+    public GetModuleInfoDto(MaaModuleInfo info)
+        : base(info.Id, info.Name, info.Description, info.Url, info.LastSync, info.LatestVersion) { }
 }

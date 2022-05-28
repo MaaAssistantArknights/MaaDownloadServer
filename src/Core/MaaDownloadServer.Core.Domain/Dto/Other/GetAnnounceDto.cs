@@ -11,6 +11,6 @@ namespace MaaDownloadServer.Core.Domain.Dto.Other;
 /// </summary>
 public class GetAnnounceDto : Announce
 {
-    public GetAnnounceDto(string publishTime, string publisher, string message)
-        : base(publishTime, publisher, message) { }
+    public GetAnnounceDto(Announce announce)
+        : base(announce.PublishTime, announce.Publisher, announce.Message) { }
 }
