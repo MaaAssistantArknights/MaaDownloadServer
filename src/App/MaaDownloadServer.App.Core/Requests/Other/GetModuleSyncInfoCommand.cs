@@ -10,12 +10,12 @@ namespace MaaDownloadServer.App.Core.Requests.Other;
 /// <summary>
 /// 获取组件同步信息
 /// </summary>
-public class GetModuleSyncInfoCommand : MaaDomainRequest<GetModuleSyncInfoDto>
+public class GetAnnounceCommand : MaaDomainRequest<GetAnnounceDto>
 {
-    public GetModuleSyncInfoCommand(HttpContext context, string moduleId) : base(context)
+    public GetAnnounceCommand(HttpContext context, string publisher) : base(context)
     {
-        ModuleId = moduleId;
+        Publisher = publisher;
     }
 
-    public string ModuleId { get; }
+    public string Publisher { get; }
 }

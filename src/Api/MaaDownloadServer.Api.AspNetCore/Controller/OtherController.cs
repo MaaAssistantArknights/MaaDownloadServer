@@ -19,10 +19,10 @@ public class OtherController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("announce/{id}")]
-    public async Task<OkObjectResult> GetModuleSyncInfo(string id)
+    [HttpGet("announce/{publisher}")]
+    public async Task<OkObjectResult> GetAnnounce(string publisher)
     {
-        var response = await _mediator.Send(new GetModuleSyncInfoCommand(HttpContext, id));
+        var response = await _mediator.Send(new GetAnnounceCommand(HttpContext, publisher));
         return response;
     }
 }

@@ -6,6 +6,7 @@ using MaaDownloadServer.Data.Base.Entities.Assets;
 using MaaDownloadServer.Data.Base.Entities.Base;
 using MaaDownloadServer.Data.Base.Entities.External;
 using MaaDownloadServer.Data.Base.Entities.Modules;
+using MaaDownloadServer.Data.Base.Entities.Other;
 using MaaDownloadServer.Data.Base.Mappings;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,17 +14,19 @@ namespace MaaDownloadServer.Data.Base.Context;
 
 public abstract class MaaDbContext : DbContext
 {
-    public DbSet<Asset>? Assets { get; set; }
-    public DbSet<Blob>? Blobs { get; set; }
+    public DbSet<Asset> Assets { get; set; } = null!;
+    public DbSet<Blob> Blobs { get; set; } = null!;
 
-    public DbSet<ExternalModule>? ExternalModules { get; set; }
-    public DbSet<ExternalSyncStatus>? ExternalSyncStatus { get; set; }
+    public DbSet<ExternalModule> ExternalModules { get; set; } = null!;
+    public DbSet<ExternalSyncStatus> ExternalSyncStatus { get; set; } = null!;
 
-    public DbSet<MaaModule>? MaaModules { get; set; }
-    public DbSet<MaaPackage>? MaaPackages { get; set; }
-    public DbSet<MaaSyncStatus>? MaaSyncStatus { get; set; }
-    public DbSet<MaaUpdatePackage>? MaaUpdatePackages { get; set; }
-    public DbSet<MaaVersion>? MaaVersions { get; set; }
+    public DbSet<MaaModule> MaaModules { get; set; } = null!;
+    public DbSet<MaaPackage> MaaPackages { get; set; } = null!;
+    public DbSet<MaaSyncStatus> MaaSyncStatus { get; set; } = null!;
+    public DbSet<MaaUpdatePackage> MaaUpdatePackages { get; set; } = null!;
+    public DbSet<MaaVersion> MaaVersions { get; set; } = null!;
+
+    public DbSet<Announce> Announces { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

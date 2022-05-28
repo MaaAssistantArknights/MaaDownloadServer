@@ -9,8 +9,8 @@ namespace MaaDownloadServer.Core.Domain.Dto.Other;
 /// <summary>
 /// 获取组件同步信息
 /// </summary>
-public class GetModuleSyncInfoDto : AnnounceModuleSyncStatus
+public class GetAnnounceDto : Announce
 {
-    public GetModuleSyncInfoDto(string id, string name, string lastSync, string announceTime, string latestVersion, string message)
-        : base(id, name, lastSync, announceTime, latestVersion, message) { }
+    public GetAnnounceDto(string publishTime, string publisher, string message)
+        : base(publishTime, publisher, message) { }
 }
