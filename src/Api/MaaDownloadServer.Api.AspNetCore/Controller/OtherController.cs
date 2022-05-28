@@ -3,8 +3,6 @@
 // Licensed under the AGPL-3.0 license.
 
 using MaaDownloadServer.App.Core.Requests.Other;
-using MaaDownloadServer.Core.Domain.Dto.Other;
-using MaaDownloadServer.Shared.Utils.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,9 +20,9 @@ public class OtherController : ControllerBase
     }
 
     [HttpGet("announce/{id}")]
-    public async Task<ActionResult<GetModuleSyncInfoDto>> GetModuleSyncInfo(string id)
+    public async Task<OkObjectResult> GetModuleSyncInfo(string id)
     {
-        var response = await _mediator.Send(new GetModuleSyncInfoCommand(id));
-        return response.GetOkOrNotFound();
+        var response = await _mediator.Send(new GetModuleSyncInfoCommand(HttpContext, id));
+        return response;
     }
 }

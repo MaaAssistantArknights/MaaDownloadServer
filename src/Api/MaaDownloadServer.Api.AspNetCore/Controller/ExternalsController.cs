@@ -3,8 +3,6 @@
 // Licensed under the AGPL-3.0 license.
 
 using MaaDownloadServer.App.Core.Requests.External;
-using MaaDownloadServer.Core.Domain.Dto.External;
-using MaaDownloadServer.Shared.Utils.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,15 +14,15 @@ public class ExternalsController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    private ExternalsController(IMediator mediator)
+    public ExternalsController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     [HttpGet]
-    public async Task<ActionResult<GetThirdPartyResourceListDto>> GetThirdPartyResource([FromQuery] int? page)
+    public async Task<OkObjectResult> GetThirdPartyResource([FromQuery] int? page)
     {
-        var response = await _mediator.Send(new GetThirdPartyResourceListCommand(page ?? 1));
-        return response.GetOkOrNotFound();
+        var response = await _mediator.Send(new GetThirdPartyResourceListCommand(HttpContext, page ?? 1));
+        return response;
     }
 }

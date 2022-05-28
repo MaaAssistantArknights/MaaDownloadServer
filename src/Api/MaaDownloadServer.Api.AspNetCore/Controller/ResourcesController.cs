@@ -3,8 +3,6 @@
 // Licensed under the AGPL-3.0 license.
 
 using MaaDownloadServer.App.Core.Requests.Resource;
-using MaaDownloadServer.Core.Domain.Dto.Resource;
-using MaaDownloadServer.Shared.Utils.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,9 +20,9 @@ public class ResourcesController : ControllerBase
     }
 
     [HttpGet("{module}/{version}")]
-    public async Task<ActionResult<GetModuleVersionInfoDto>> GetModuleVersionInfo(string module, string version)
+    public async Task<OkObjectResult> GetModuleVersionInfo(string module, string version)
     {
-        var response = await _mediator.Send(new GetModuleVersionInfoCommand(module, version));
-        return response.GetOkOrNotFound();
+        var response = await _mediator.Send(new GetModuleVersionInfoCommand(HttpContext, module, version));
+        return response;
     }
 }

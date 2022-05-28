@@ -4,8 +4,6 @@
 
 using MaaDownloadServer.App.Core.Requests.Module;
 using Microsoft.AspNetCore.Mvc;
-using MaaDownloadServer.Core.Domain.Dto.Module;
-using MaaDownloadServer.Shared.Utils.Extensions;
 using MediatR;
 
 namespace MaaDownloadServer.Api.AspNetCore.Controller;
@@ -22,23 +20,23 @@ public class ModulesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<GetModuleListDto>> GetModuleList([FromQuery] int? page)
+    public async Task<OkObjectResult> GetModuleList([FromQuery] int? page)
     {
-        var response = await _mediator.Send(new GetModuleListCommand(page ?? 1));
-        return response.GetOkOrNotFound();
+        var response = await _mediator.Send(new GetModuleListCommand(HttpContext, page ?? 1));
+        return response;
     }
 
     [HttpGet("{module}")]
-    public async Task<ActionResult<GetModuleInfoDto>> GetModuleInfo(string module)
+    public async Task<OkObjectResult> GetModuleInfo(string module)
     {
-        var response = await _mediator.Send(new GetModuleInfoCommand(module));
-        return response.GetOkOrNotFound();
+        var response = await _mediator.Send(new GetModuleInfoCommand(HttpContext, module));
+        return response;
     }
 
     [HttpGet("{module}/versions")]
-    public async Task<ActionResult<GetModuleVersionListDto>> GetModuleVersionList(string module, [FromQuery] int? page)
+    public async Task<OkObjectResult> GetModuleVersionList(string module, [FromQuery] int? page)
     {
-        var response = await _mediator.Send(new GetModuleVersionListCommand(module, page ?? 1));
-        return response.GetOkOrNotFound();
+        var response = await _mediator.Send(new GetModuleVersionListCommand(HttpContext, module, page ?? 1));
+        return response;
     }
 }
