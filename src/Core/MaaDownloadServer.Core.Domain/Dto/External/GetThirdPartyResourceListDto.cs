@@ -10,4 +10,7 @@ namespace MaaDownloadServer.Core.Domain.Dto.External;
 /// <summary>
 /// 获取第三方资源列表
 /// </summary>
-public class GetThirdPartyResourceListDto : Collection<ExternalModuleInfo> { }
+public class GetThirdPartyResourceListDto : List<ExternalModuleInfo>
+{
+    public GetThirdPartyResourceListDto(IEnumerable<ExternalModuleInfo> infos) : base(infos) { }
+}

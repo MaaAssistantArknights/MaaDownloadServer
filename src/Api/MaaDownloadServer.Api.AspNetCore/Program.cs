@@ -2,7 +2,8 @@
 // MaaDownloadServer belongs to the MAA organization.
 // Licensed under the AGPL-3.0 license.
 
-using System.Reflection;
+using MaaDownloadServer.App.Core;
+using MaaDownloadServer.Data;
 using MaaDownloadServer.Shared.Utils.Helper;
 using MediatR;
 
@@ -13,7 +14,8 @@ var builder = WebApplication.CreateBuilder();
 builder.Configuration.AddConfiguration(configuration);
 
 builder.Services.AddControllers();
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
+builder.Services.AddMaaDbContext(configuration);
+builder.Services.AddMediatR(typeof(AppCoreAssemblyMarker));
 
 var app = builder.Build();
 

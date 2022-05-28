@@ -12,7 +12,7 @@ namespace MaaDownloadServer.Core.Domain.Models.External;
 /// </summary>
 public class ExternalModuleInfo
 {
-    public ExternalModuleInfo(string id, string name, string description, string url, string lastSync, Asset asset)
+    public ExternalModuleInfo(string id, string name, string description, string url, string lastSync, Asset? asset)
     {
         Id = id;
         Name = name;
@@ -56,5 +56,5 @@ public class ExternalModuleInfo
     /// 组件资源
     /// </summary>
     [JsonPropertyName("asset")]
-    public Asset Asset { get; }
+    public Asset? Asset { get; }
 }

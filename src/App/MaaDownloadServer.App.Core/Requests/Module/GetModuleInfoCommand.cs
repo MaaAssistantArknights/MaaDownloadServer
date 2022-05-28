@@ -3,16 +3,16 @@
 // Licensed under the AGPL-3.0 license.
 
 using MaaDownloadServer.Core.Domain.Dto.Module;
-using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace MaaDownloadServer.App.Core.Requests.Module;
 
 /// <summary>
 /// 获取组件信息 Mediator 指令
 /// </summary>
-public class GetModuleInfoCommand : IRequest<GetModuleInfoDto?>
+public class GetModuleInfoCommand : MaaDomainRequest<GetModuleInfoDto>
 {
-    public GetModuleInfoCommand(string moduleId)
+    public GetModuleInfoCommand(HttpContext context, string moduleId) : base(context)
     {
         ModuleId = moduleId;
     }

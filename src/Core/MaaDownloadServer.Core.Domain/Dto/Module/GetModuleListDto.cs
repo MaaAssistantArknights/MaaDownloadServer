@@ -10,4 +10,7 @@ namespace MaaDownloadServer.Core.Domain.Dto.Module;
 /// <summary>
 /// 获取组件列表
 /// </summary>
-public class GetModuleListDto : Collection<MaaModuleInfo> { }
+public class GetModuleListDto : List<MaaModuleInfo>
+{
+    public GetModuleListDto(IEnumerable<MaaModuleInfo> infos) : base(infos) { }
+}
