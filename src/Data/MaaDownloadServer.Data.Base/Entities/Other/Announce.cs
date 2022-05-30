@@ -33,7 +33,7 @@ public class Announce : EditableEntity
     /// 发布者
     /// </summary>
     [JsonPropertyName("publisher")]
-    public string Publisher { get; }
+    public string Publisher { get; private set; }
 
     /// <summary>
     /// 公告消息

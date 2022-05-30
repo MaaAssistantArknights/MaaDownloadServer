@@ -5,6 +5,7 @@
 using MaaDownloadServer.Data.Base.Context;
 using MaaDownloadServer.Data.Db.Postgres;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 var dbType = "";
 var connectionString = "";
@@ -42,7 +43,11 @@ switch (dbType!.ToLower())
         break;
     default:
         Console.Error.WriteLine($"未知的数据库类型: {dbType}");
-        return -1;
+        Console.WriteLine("尝试为可能的 Migration 创建操作构建 IHost");
+        var host = Host.CreateDefaultBuilder();
+        var app = host.Build();
+        app.Run();
+        return 0;
 }
 
 var migrations = dbContext.Database.GetPendingMigrations().ToList();
