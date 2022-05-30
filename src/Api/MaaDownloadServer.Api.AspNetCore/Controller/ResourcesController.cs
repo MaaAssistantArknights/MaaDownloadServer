@@ -22,7 +22,7 @@ public class ResourcesController : ControllerBase
     [HttpGet("{module}/{version}")]
     public async Task<OkObjectResult> GetModuleVersionInfo(string module, string version)
     {
-        var response = await _mediator.Send(new GetModuleVersionInfoCommand(HttpContext, module, version));
+        var response = await _mediator.Send(new GetModuleVersionInfoCommand(HttpContext.TraceIdentifier, module, version));
         return response;
     }
 }

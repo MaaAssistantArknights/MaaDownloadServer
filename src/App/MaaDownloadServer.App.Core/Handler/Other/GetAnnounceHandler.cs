@@ -21,10 +21,10 @@ public class GetAnnounceHandler : IRequestHandler<GetAnnounceCommand, MaaActionR
             .FirstOrDefaultAsync(x => x.Publisher == request.Publisher, cancellationToken);
         if (announce is null)
         {
-            return MaaApiResponse.NotFound("Announce", request.HttpContext.TraceIdentifier);
+            return MaaApiResponse.NotFound("Announce", request.TraceId);
         }
 
         var dto = new MaaDownloadServer.Core.Domain.Models.Other.Announce(announce.UpdateAt.ToStringZhHans(), announce.Publisher, announce.Message);
-        return MaaApiResponse.Ok(new GetAnnounceDto(dto), request.HttpContext.TraceIdentifier);
+        return MaaApiResponse.Ok(new GetAnnounceDto(dto), request.TraceId);
     }
 }

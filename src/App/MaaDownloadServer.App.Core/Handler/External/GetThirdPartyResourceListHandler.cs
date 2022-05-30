@@ -26,7 +26,7 @@ public class GetThirdPartyResourceListHandler : IRequestHandler<GetThirdPartyRes
             .ToListAsync(cancellationToken);
 
         var dto = new GetThirdPartyResourceListDto(externalModuleEntities.Select(Map).ToList());
-        return MaaApiResponse.Ok(dto, request.HttpContext.TraceIdentifier);
+        return MaaApiResponse.Ok(dto, request.TraceId);
     }
 
     private static ExternalModuleInfo Map(ExternalSyncStatus source)

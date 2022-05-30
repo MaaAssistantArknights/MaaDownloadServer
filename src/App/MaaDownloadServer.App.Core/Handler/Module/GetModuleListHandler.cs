@@ -42,6 +42,6 @@ public class GetModuleListHandler : IRequestHandler<GetModuleListCommand, MaaAct
             dtos.Add(dto);
         }
 
-        return MaaApiResponse.Ok(new GetModuleListDto(dtos), request.HttpContext.TraceIdentifier);
+        return MaaApiResponse.Ok(new GetModuleListDto(dtos), request.TraceId);
     }
 }

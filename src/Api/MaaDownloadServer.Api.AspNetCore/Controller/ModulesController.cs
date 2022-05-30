@@ -22,21 +22,21 @@ public class ModulesController : ControllerBase
     [HttpGet]
     public async Task<OkObjectResult> GetModuleList([FromQuery] int? page)
     {
-        var response = await _mediator.Send(new GetModuleListCommand(HttpContext, page ?? 1));
+        var response = await _mediator.Send(new GetModuleListCommand(HttpContext.TraceIdentifier, page ?? 1));
         return response;
     }
 
     [HttpGet("{module}")]
     public async Task<OkObjectResult> GetModuleInfo(string module)
     {
-        var response = await _mediator.Send(new GetModuleInfoCommand(HttpContext, module));
+        var response = await _mediator.Send(new GetModuleInfoCommand(HttpContext.TraceIdentifier, module));
         return response;
     }
 
     [HttpGet("{module}/versions")]
     public async Task<OkObjectResult> GetModuleVersionList(string module, [FromQuery] int? page)
     {
-        var response = await _mediator.Send(new GetModuleVersionListCommand(HttpContext, module, page ?? 1));
+        var response = await _mediator.Send(new GetModuleVersionListCommand(HttpContext.TraceIdentifier, module, page ?? 1));
         return response;
     }
 }

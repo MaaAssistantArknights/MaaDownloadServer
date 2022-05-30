@@ -21,7 +21,7 @@ public class GetModuleInfoHandler : IRequestHandler<GetModuleInfoCommand, MaaAct
             .FirstOrDefaultAsync(x => x.Id == request.ModuleId, cancellationToken: cancellationToken);
         if (moduleInfo is null)
         {
-            return MaaApiResponse.NotFound($"MaaModule {request.ModuleId}", request.HttpContext.TraceIdentifier);
+            return MaaApiResponse.NotFound($"MaaModule {request.ModuleId}", request.TraceId);
         }
 
         var syncStatus = await _dbContext.MaaSyncStatus
@@ -36,6 +36,6 @@ public class GetModuleInfoHandler : IRequestHandler<GetModuleInfoCommand, MaaAct
             version is null ? null
                 : new MaaModuleVersion(version.Version, version.UpdateTime.ToStringZhHans(), version.ChangeLog));
 
-        return MaaApiResponse.Ok(new GetModuleInfoDto(dto), request.HttpContext.TraceIdentifier);
+        return MaaApiResponse.Ok(new GetModuleInfoDto(dto), request.TraceId);
     }
 }

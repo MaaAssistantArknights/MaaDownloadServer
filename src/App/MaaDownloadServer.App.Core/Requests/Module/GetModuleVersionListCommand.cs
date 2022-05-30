@@ -11,7 +11,7 @@ namespace MaaDownloadServer.App.Core.Requests.Module;
 /// </summary>
 public class GetModuleVersionListCommand : MaaDomainRequest<GetModuleVersionListDto>
 {
-    public GetModuleVersionListCommand(HttpContext context, string moduleId, int page) : base(context)
+    public GetModuleVersionListCommand(string traceId, string moduleId, int page) : base(traceId)
     {
         ModuleId = moduleId;
         Page = page;

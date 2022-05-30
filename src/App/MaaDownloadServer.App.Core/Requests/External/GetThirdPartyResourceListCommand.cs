@@ -11,7 +11,7 @@ namespace MaaDownloadServer.App.Core.Requests.External;
 /// </summary>
 public class GetThirdPartyResourceListCommand : MaaDomainRequest<GetThirdPartyResourceListDto>
 {
-    public GetThirdPartyResourceListCommand(HttpContext context, int page) : base(context)
+    public GetThirdPartyResourceListCommand(string traceId, int page) : base(traceId)
     {
         Page = page;
     }

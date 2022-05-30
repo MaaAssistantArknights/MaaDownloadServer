@@ -34,7 +34,7 @@ public class GetModuleVersionInfoHandler : IRequestHandler<GetModuleVersionInfoC
 
         if (resource is null)
         {
-            return MaaApiResponse.NotFound("MaaPackage", request.HttpContext.TraceIdentifier);
+            return MaaApiResponse.NotFound("MaaPackage", request.TraceId);
         }
 
         var dto = new MaaModuleResource(
@@ -49,6 +49,6 @@ public class GetModuleVersionInfoHandler : IRequestHandler<GetModuleVersionInfoC
                     x.Asset.MapAsset())
                 ).ToList());
 
-        return MaaApiResponse.Ok(new GetModuleVersionInfoDto(dto), request.HttpContext.TraceIdentifier);
+        return MaaApiResponse.Ok(new GetModuleVersionInfoDto(dto), request.TraceId);
     }
 }

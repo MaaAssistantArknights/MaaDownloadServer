@@ -11,7 +11,7 @@ namespace MaaDownloadServer.App.Core.Requests.Other;
 /// </summary>
 public class GetAnnounceCommand : MaaDomainRequest<GetAnnounceDto>
 {
-    public GetAnnounceCommand(HttpContext context, string publisher) : base(context)
+    public GetAnnounceCommand(string traceId, string publisher) : base(traceId)
     {
         Publisher = publisher;
     }

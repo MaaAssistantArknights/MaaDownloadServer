@@ -21,7 +21,7 @@ public class GetModuleVersionListHandler : IRequestHandler<GetModuleVersionListC
             .FirstOrDefaultAsync(x => x.Id == request.ModuleId, cancellationToken: cancellationToken);
         if (moduleInfo is null)
         {
-            return MaaApiResponse.NotFound($"MaaModule {request.ModuleId}", request.HttpContext.TraceIdentifier);
+            return MaaApiResponse.NotFound($"MaaModule {request.ModuleId}", request.TraceId);
         }
 
         var maaVersionsQueryable = _dbContext.MaaVersions
@@ -39,6 +39,6 @@ public class GetModuleVersionListHandler : IRequestHandler<GetModuleVersionListC
             maaVersions.Select(x =>
                     new MaaModuleVersion(x.Version, x.UpdateTime.ToStringZhHans(), x.ChangeLog))
                 .ToList());
-        return MaaApiResponse.Ok(new GetModuleVersionListDto(dto), request.HttpContext.TraceIdentifier);
+        return MaaApiResponse.Ok(new GetModuleVersionListDto(dto), request.TraceId);
     }
 }

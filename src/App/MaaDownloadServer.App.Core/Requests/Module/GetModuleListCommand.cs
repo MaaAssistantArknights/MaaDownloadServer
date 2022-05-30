@@ -11,7 +11,7 @@ namespace MaaDownloadServer.App.Core.Requests.Module;
 /// </summary>
 public class GetModuleListCommand : MaaDomainRequest<GetModuleListDto>
 {
-    public GetModuleListCommand(HttpContext context, int page) : base(context)
+    public GetModuleListCommand(string traceId, int page) : base(traceId)
     {
         Page = page;
     }

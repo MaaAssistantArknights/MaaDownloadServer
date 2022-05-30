@@ -22,7 +22,7 @@ public class OtherController : ControllerBase
     [HttpGet("announce/{publisher}")]
     public async Task<OkObjectResult> GetAnnounce(string publisher)
     {
-        var response = await _mediator.Send(new GetAnnounceCommand(HttpContext, publisher));
+        var response = await _mediator.Send(new GetAnnounceCommand(HttpContext.TraceIdentifier, publisher));
         return response;
     }
 }

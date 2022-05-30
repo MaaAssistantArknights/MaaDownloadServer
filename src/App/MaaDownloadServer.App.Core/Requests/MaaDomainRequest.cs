@@ -8,10 +8,10 @@ namespace MaaDownloadServer.App.Core.Requests;
 
 public abstract class MaaDomainRequest<T> : IRequest<MaaActionResult<T>>
 {
-    public HttpContext HttpContext { get; }
+    public string TraceId { get; }
 
-    protected MaaDomainRequest(HttpContext httpContext)
+    protected MaaDomainRequest(string traceId)
     {
-        HttpContext = httpContext;
+        TraceId = traceId;
     }
 }

@@ -22,7 +22,7 @@ public class ExternalsController : ControllerBase
     [HttpGet]
     public async Task<OkObjectResult> GetThirdPartyResource([FromQuery] int? page)
     {
-        var response = await _mediator.Send(new GetThirdPartyResourceListCommand(HttpContext, page ?? 1));
+        var response = await _mediator.Send(new GetThirdPartyResourceListCommand(HttpContext.TraceIdentifier, page ?? 1));
         return response;
     }
 }
