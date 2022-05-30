@@ -2,8 +2,6 @@
 // MaaDownloadServer belongs to the MAA organization.
 // Licensed under the AGPL-3.0 license.
 
-using MaaDownloadServer.Shared.Utils.Api;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 
 namespace MaaDownloadServer.App.Core.Requests;

@@ -2,7 +2,6 @@
 // MaaDownloadServer belongs to the MAA organization.
 // Licensed under the AGPL-3.0 license.
 
-using MaaDownloadServer.Core.Domain.Dto.External;
 using Microsoft.AspNetCore.Http;
 
 namespace MaaDownloadServer.App.Core.Requests.External;

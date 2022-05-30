@@ -11,7 +11,7 @@ namespace MaaDownloadServer.Core.Domain.Models.Module;
 /// </summary>
 public class MaaModuleInfo
 {
-    public MaaModuleInfo(string id, string name, string description, string url, string lastSync, MaaModuleVersion latestVersion)
+    public MaaModuleInfo(string id, string name, string description, string url, string lastSync, MaaModuleVersion? latestVersion)
     {
         Id = id;
         Name = name;
@@ -55,5 +55,5 @@ public class MaaModuleInfo
     /// 最新版本
     /// </summary>
     [JsonPropertyName("latest_version")]
-    public MaaModuleVersion LatestVersion { get; }
+    public MaaModuleVersion? LatestVersion { get; }
 }
