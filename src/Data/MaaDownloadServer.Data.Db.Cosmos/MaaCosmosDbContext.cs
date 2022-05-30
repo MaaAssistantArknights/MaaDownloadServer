@@ -3,6 +3,7 @@
 // Licensed under the AGPL-3.0 license.
 
 using MaaDownloadServer.Data.Base.Context;
+using MaaDownloadServer.Shared.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -10,8 +11,8 @@ namespace MaaDownloadServer.Data.Db.Cosmos;
 
 public class MaaCosmosDbContext : MaaDbContext
 {
-    private readonly string _connectionString;
-    private readonly string _databaseName;
+    private string? _connectionString;
+    private string? _databaseName;
 
     public MaaCosmosDbContext(string connectionString, string databaseName)
     {
@@ -27,7 +28,11 @@ public class MaaCosmosDbContext : MaaDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseCosmos(_connectionString, _databaseName);
+        _connectionString ??= Environment.GetEnvironmentVariable("Database_Cosmos_ConnectionString");
+        _databaseName ??= Environment.GetEnvironmentVariable("Database_Cosmos_DatabaseName");
+        var connectionString = _connectionString.NotNull();
+        var databaseName = _databaseName.NotNull();
+        optionsBuilder.UseCosmos(connectionString, databaseName);
         base.OnConfiguring(optionsBuilder);
     }
 }

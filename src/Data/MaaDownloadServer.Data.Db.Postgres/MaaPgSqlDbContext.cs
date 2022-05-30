@@ -4,6 +4,7 @@
 
 using MaaDownloadServer.Data.Base.Context;
 using MaaDownloadServer.Data.Db.Postgres.Mappings;
+using MaaDownloadServer.Shared.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -11,7 +12,7 @@ namespace MaaDownloadServer.Data.Db.Postgres;
 
 public class MaaPgSqlDbContext : MaaDbContext
 {
-    private readonly string _connectionString;
+    private string? _connectionString;
 
     public MaaPgSqlDbContext(string connectionString)
     {
@@ -24,7 +25,9 @@ public class MaaPgSqlDbContext : MaaDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseNpgsql(_connectionString);
+        _connectionString ??= Environment.GetEnvironmentVariable("Database_Postgres_ConnectionString");
+        var connectionString = _connectionString.NotNull();
+        optionsBuilder.UseNpgsql(connectionString);
         base.OnConfiguring(optionsBuilder);
     }
 

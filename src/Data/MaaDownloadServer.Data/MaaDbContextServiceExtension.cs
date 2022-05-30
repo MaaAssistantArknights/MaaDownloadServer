@@ -13,9 +13,10 @@ namespace MaaDownloadServer.Data;
 
 public static class MaaDbContextServiceExtension
 {
-    public static IServiceCollection AddMaaDbContext(this IServiceCollection serviceCollection, IConfiguration configuration)
+    public static IServiceCollection AddMaaDbContext(this IServiceCollection serviceCollection, IConfiguration? configuration = null)
     {
-        var dbType = configuration.GetValue<string>("Database:Type").NotNull();
+        var dbType = (configuration?.GetValue<string>("Database:Type") ??
+                      Environment.GetEnvironmentVariable("Database_Type")).NotNull();
         switch (dbType)
         {
             case "Postgres":
